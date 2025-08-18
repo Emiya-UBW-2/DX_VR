@@ -4,36 +4,76 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		void			TitleScene::SetSelectOnSlot() noexcept {
+			auto& slot = this->m_GunPtr.at(GetNowEditWeaponID())->GetModifySlot();
+			auto& slotdata = slot->GetMyData();
+			auto& List = slotdata->GetSlotInfo(this->m_SlotSel)->CanAttachItemsUniqueID;
+			if (slot->IsAttachedParts(this->m_SlotSel)) {
+				int Now = slot->GetParts(this->m_SlotSel)->GetModifySlot()->GetMyData()->GetUniqueID();
+				for (auto& l : List) {
+					int index = static_cast<int>(&l - &List.front());
+					if (l == Now) {
+						this->m_GunCustomSel = index;
+						break;
+					}
+				}
+			}
+			else {
+				if (!slotdata->GetSlotInfo(this->m_SlotSel)->IsNeed) {
+					this->m_GunCustomSel = static_cast<int>(List.size());
+				}
+				else {
+					this->m_GunCustomSel = 0;
+				}
+			}
+		}
+		void			TitleScene::ChangeSelectOnSlot(bool IsAdd) noexcept {
+			auto& guns = this->m_GunPtr.at(GetNowEditWeaponID());
+			auto& mod = guns->GetGunsModify();
+			auto& slot = guns->GetModifySlot();
+			auto& slotdata = slot->GetMyData();
+
+			int size = static_cast<int>(slotdata->GetSlotInfo(this->m_SlotSel)->CanAttachItemsUniqueID.size());
+			if (!slotdata->GetSlotInfo(this->m_SlotSel)->IsNeed) {
+				size++;
+			}
+			if (IsAdd) {
+				++this->m_GunCustomSel;
+				if (this->m_GunCustomSel > size - 1) {
+					this->m_GunCustomSel = 0;
+				}
+			}
+			else {
+				--this->m_GunCustomSel;
+				if (this->m_GunCustomSel < 0) {
+					this->m_GunCustomSel = size - 1;
+				}
+			}
+			mod->ChangeSelectData(*mod->GetSlotData(this->m_SlotSel), this->m_GunCustomSel);
+			guns->SetupGun();
+		}
+		//
 		void			TitleScene::Load_Sub(void) noexcept {
+			BackGround::BackGroundControlTitle::Create();
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->LoadModelBefore("data/Charactor/Main_Movie/");
-			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
-
 			//
-			for (auto& name : Guns::GunPartsDataManager::Instance()->m_GunList) {
-				std::string ChildPath = "data/gun/";
-				ChildPath += name;
-				ChildPath += "/";
-				ObjMngr->LoadModelBefore(ChildPath);
+			for (const auto& Path : Guns::GunPartsDataManager::Instance()->GetGunPathList()) {
+				ObjMngr->LoadModelBefore(Path);
 			}
-			for (auto& Path : Guns::GunPartsDataManager::Instance()->m_ModPathList) {
+			for (const auto& Path : Guns::GunPartsDataManager::Instance()->GetModPathList()) {
 				ObjMngr->LoadModelBefore(Path);
 			}
 			this->m_TitleImage.Load("data/UI/Title.png");
 		}
 		void			TitleScene::LoadEnd_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
-			//
 			this->m_GunPtr.clear();
-			this->m_GunPtr.reserve(12);
-			for (auto& name : Guns::GunPartsDataManager::Instance()->m_GunList) {
-				std::string ChildPath = "data/gun/";
-				ChildPath += name;
-				ChildPath += "/";
+			this->m_GunPtr.reserve(Guns::GunPartsDataManager::Instance()->GetGunPathList().size());
+			for (auto& Path : Guns::GunPartsDataManager::Instance()->GetGunPathList()) {
 				this->m_GunPtr.emplace_back(std::make_shared<Guns::GunObj>());
-				ObjMngr->InitObject(this->m_GunPtr.back(), ChildPath);
+				ObjMngr->InitObject(this->m_GunPtr.back(), Path);
 				this->m_GunPtr.back()->SetPlayerID(InvalidID);
-
 				std::string PresetPath = "Save/";
 				PresetPath += this->m_GunPtr.back()->GetModifySlot()->GetMyData()->GetName();
 				PresetPath += ".dat";
@@ -49,59 +89,63 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* SideLogParts = SideLog::Instance();
 			auto* SaveDataParts = SaveData::Instance();
-			//空
-			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
-			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
-				//this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
-				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.0f));
-				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
-			}
-			int X1 = 0;
-			int X2 = 0;
-			int X3 = 0;
 
-			int HighScore = static_cast<int>(SaveDataParts->GetParam("HighScore"));
-
-			this->m_GunPoint.resize(this->m_GunPtr.size());
-			for (auto& guns : this->m_GunPtr) {
-				int index = static_cast<int>(&guns - &this->m_GunPtr.front());
-				auto& slot = guns->GetModifySlot();
-				auto& slotdata = slot->GetMyData();
-				auto& GP = this->m_GunPoint.at(index);
-				int NeedScore = slotdata->GetUnlockScore();
-				GP.IsActive = ((slotdata->IsPlayableWeapon() != InvalidID) && (HighScore >= NeedScore));
-				if (GP.IsActive) {
-					if (this->m_PrevHighScore != InvalidID && NeedScore > this->m_PrevHighScore) {
-						SideLogParts->Add(5.0f, 0.0f, Green, ("Unlock : " + slotdata->GetName()).c_str());
+			BackGround::BackGroundControlTitle::Instance()->Init();
+			//
+			{
+				std::array<int, 3> Xofs = { 0,0,0 };
+				int HighScore = static_cast<int>(SaveDataParts->GetParam("HighScore"));
+				this->m_GunPoint.resize(this->m_GunPtr.size());
+				for (auto& guns : this->m_GunPtr) {
+					int index = static_cast<int>(&guns - &this->m_GunPtr.front());
+					auto& slot = guns->GetModifySlot();
+					auto& slotdata = slot->GetMyData();
+					auto& GP = this->m_GunPoint.at(index);
+					int NeedScore = slotdata->GetUnlockScore();
+					GP.IsActive = ((slotdata->IsPlayableWeapon() != InvalidID) && (HighScore >= NeedScore));
+					if (GP.IsActive) {
+						if (this->m_PrevHighScore != InvalidID && NeedScore > this->m_PrevHighScore) {
+							SideLogParts->Add(5.0f, 0.0f, Green, ("Unlock : " + slotdata->GetName()).c_str());
+						}
+						GP.GunType = slotdata->IsPlayableWeapon();
+						if (0 <= GP.GunType && GP.GunType <= 3 - 1) {
+							GP.Xofs = Xofs.at(GP.GunType);
+							Xofs.at(GP.GunType)++;
+						}
+						guns->SetGunMat(Matrix3x3DX::identity(), Vector3DX::vget(2.45f + 0.15f * GP.Xofs, 1.f, 1.5f * GP.GunType) * Scale3DRate);
 					}
-					GP.GunType = slotdata->IsPlayableWeapon();
-					switch (GP.GunType) {
-					case 0:
-						GP.Xofs = X1;
-						X1++;
-						break;
-					case 1:
-						GP.Xofs = X2;
-						X2++;
-						break;
-					case 2:
-						GP.Xofs = X3;
-						X3++;
-						break;
-					default:
-						break;
+					else {
+						guns->SetActive(false);
 					}
-					guns->SetGunMat(Matrix3x3DX::identity(), Vector3DX::vget(2.45f + 0.15f * GP.Xofs, 1.f, 1.5f * GP.GunType) * Scale3DRate);
 				}
-				else {
-					guns->SetActive(false);
-				}
+				this->m_PrevHighScore = HighScore;
 			}
 			for (auto& guns : this->m_GunPtr) {
 				guns->SetupGun();
 			}
-
-			this->m_PrevHighScore = HighScore;
+			// 
+			ButtonParts->ResetSelect();
+			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 3, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Customize", 48, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Tutorial", 48, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			// クレジット
+			this->m_CreditControl = std::make_unique<UIs::CreditControl>();
+			//
+			this->m_MovieCharacter = std::make_shared<Charas::MovieCharacter>();
+			ObjectManager::Instance()->InitObject(this->m_MovieCharacter, "data/Charactor/Main_Movie/");
+			//
+			for (auto& sel : this->m_GunSelect) {
+				int index = static_cast<int>(&sel - &this->m_GunSelect.front());
+				for (const auto& guns : Guns::GunPartsDataManager::Instance()->GetGunNameList()) {
+					int index2 = static_cast<int>(&guns - &Guns::GunPartsDataManager::Instance()->GetGunNameList().front());
+					if (SaveDataParts->GetParam(guns) == (index + 1)) {
+						sel = index2;
+						break;
+					}
+				}
+			}
 			// 
 			PostPassParts->SetShadowScale(0.5f);
 			//
@@ -120,46 +164,17 @@ namespace FPS_n2 {
 			SetFogEnable(false);
 
 			FadeControl::Instance()->Init();
-			this->m_IsEnd = false;
-			// 
-			ButtonParts->ResetSelect();
-			// 
-			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 3, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton("Customize", 48, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton("Tutorial", 48, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
-			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
-			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
-			// クレジット
-			this->m_CreditControl = std::make_unique<UIs::CreditControl>();
-			// 
-			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, true);
-			//
-			this->m_MovieCharacter = std::make_shared<Charas::MovieCharacter>();
-			ObjectManager::Instance()->InitObject(this->m_MovieCharacter, "data/Charactor/Main_Movie/");
-
+			//Cam
 			Vector3DX BaseCamPos = this->m_MovieCharacter->GetMove().GetPos() + Vector3DX::vget(0.5f, 0.8f, 0.f) * Scale3DRate;
 			this->m_CamPos = BaseCamPos + Vector3DX::vget(0.8f, -0.25f, 2.f) * Scale3DRate;
 			this->m_CamVec = BaseCamPos;
 			this->m_CamFov = deg2rad(35);
-			//Cam
 			CameraParts->SetMainCamera().SetCamPos(this->m_CamPos, this->m_CamVec, Vector3DX::up());
 			CameraParts->SetMainCamera().SetCamInfo(this->m_CamFov, Scale3DRate * 0.03f, Scale3DRate * 100.0f);
 			//
-			for (auto& sel : this->m_GunSelect) {
-				int index = static_cast<int>(&sel - &this->m_GunSelect.front());
-				for (auto& guns : Guns::GunPartsDataManager::Instance()->m_GunList) {
-					int index2 = static_cast<int>(&guns - &Guns::GunPartsDataManager::Instance()->m_GunList.front());
-					if (SaveDataParts->GetParam(guns) == (index + 1)) {
-						sel = index2;
-						break;
-					}
-				}
-			}
+			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, true);
+			this->m_IsEnd = false;
 			this->m_TitleWindow = TitleWindow::Main;
-
-			//死んだと判断した時(スコアが1以上から0になったら)
-			this->m_EndScoreDisp = Player::ResultData::Instance()->m_SetData;
-			Player::ResultData::Instance()->m_SetData = false;
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -215,8 +230,8 @@ namespace FPS_n2 {
 			switch (this->m_TitleWindow) {
 			case TitleWindow::Main:
 			{
-				if (this->m_EndScoreDisp && FadeControl::Instance()->IsClear()) {
-					this->m_EndScoreDisp = false;
+				if (Player::ResultData::Instance()->m_SetData && FadeControl::Instance()->IsClear()) {
+					Player::ResultData::Instance()->m_SetData = false;
 					PopUpParts->Add(LocalizeParts->Get(130), (720), (720 * 3 / 4),
 						[&](int xmin, int ymin, int xmax, int, bool) {
 							auto* DrawCtrls = WindowSystem::DrawControl::Instance();
@@ -422,16 +437,7 @@ namespace FPS_n2 {
 					if (slotdata->GetIsCustomize()) {
 						this->m_TitleWindow = TitleWindow::CustomizeGun;
 						KeyGuideParts->SetGuideFlip();
-
-						this->m_SlotSel = Guns::GunSlot::Magazine;
-						auto& List = slotdata->GetSlotInfo(this->m_SlotSel)->CanAttachItemsUniqueID;
-						int Now = slot->GetParts(this->m_SlotSel)->GetModifySlot()->GetMyData()->GetUniqueID();
-						for (auto& l : List) {
-							int index = static_cast<int>(&l - &List.front());
-							if (l == Now) {
-								this->m_GunCustomSel = index;
-							}
-						}
+						SetSelectOnSlot();
 						this->m_SelAlpha = 2.f;
 					}
 				}
@@ -456,55 +462,27 @@ namespace FPS_n2 {
 
 				if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-					switch (this->m_SlotSel) {
-					case Guns::GunSlot::Magazine:
-						this->m_SlotSel = Guns::GunSlot::Sight;
-						break;
-					case Guns::GunSlot::Sight:
-						this->m_SlotSel = Guns::GunSlot::Magazine;
-						break;
-					default:
-						break;
-					}
+					this->m_SlotSel = (this->m_SlotSel == Guns::GunSlot::Magazine) ? Guns::GunSlot::Sight : Guns::GunSlot::Magazine;
+					SetSelectOnSlot();
 					this->m_SelAlpha = 2.f;
 				}
 				if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-					switch (this->m_SlotSel) {
-					case Guns::GunSlot::Magazine:
-						this->m_SlotSel = Guns::GunSlot::Sight;
-						break;
-					case Guns::GunSlot::Sight:
-						this->m_SlotSel = Guns::GunSlot::Magazine;
-						break;
-					default:
-						break;
-					}
+					this->m_SlotSel = (this->m_SlotSel == Guns::GunSlot::Magazine) ? Guns::GunSlot::Sight : Guns::GunSlot::Magazine;
+					SetSelectOnSlot();
 					this->m_SelAlpha = 2.f;
 				}
-				if (slotdata->GetSlotInfo(this->m_SlotSel)) {
-					int size = static_cast<int>(slotdata->GetSlotInfo(this->m_SlotSel)->CanAttachItemsUniqueID.size());
-					if (!slotdata->GetSlotInfo(this->m_SlotSel)->IsNeed) {
-						size++;
-					}
-					if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+					if (slotdata->GetSlotInfo(this->m_SlotSel)) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-						--this->m_GunCustomSel;
-						if (this->m_GunCustomSel < 0) {
-							this->m_GunCustomSel = size - 1;
-						}
-						mod->ChangeSelectData(*mod->GetSlotData(this->m_SlotSel), this->m_GunCustomSel);
-						guns->SetupGun();
+						ChangeSelectOnSlot(false);
 						this->m_SelAlpha = 2.f;
 					}
-					if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+				}
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+					if (slotdata->GetSlotInfo(this->m_SlotSel)) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-						++this->m_GunCustomSel;
-						if (this->m_GunCustomSel > size - 1) {
-							this->m_GunCustomSel = 0;
-						}
-						mod->ChangeSelectData(*mod->GetSlotData(this->m_SlotSel), this->m_GunCustomSel);
-						guns->SetupGun();
+						ChangeSelectOnSlot(true);
 						this->m_SelAlpha = 2.f;
 					}
 				}
@@ -576,9 +554,9 @@ namespace FPS_n2 {
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			auto* SE = SoundPool::Instance();
 			// セーブ
-			for (auto& guns : Guns::GunPartsDataManager::Instance()->m_GunList) {
+			for (const auto& guns : Guns::GunPartsDataManager::Instance()->GetGunNameList()) {
 				SaveDataParts->SetParam(guns, 0);
-				int index = static_cast<int>(&guns - &Guns::GunPartsDataManager::Instance()->m_GunList.front());
+				int index = static_cast<int>(&guns - &Guns::GunPartsDataManager::Instance()->GetGunNameList().front());
 				for (auto& sel : this->m_GunSelect) {
 					int index2 = static_cast<int>(&sel - &this->m_GunSelect.front());
 					if (sel == index) {
@@ -606,15 +584,12 @@ namespace FPS_n2 {
 			}
 		}
 		void			TitleScene::Dispose_Load_Sub(void) noexcept {
+			BackGround::BackGroundControlTitle::Release();
 			this->m_GunPtr.clear();
 			ObjectManager::Instance()->DeleteAll();
-			this->m_ObjSky.Dispose();
 		}
 		void			TitleScene::BG_Draw_Sub(void) const noexcept {
-			FillGraph(GetDrawScreen(), 0, 0, 0);
-			SetUseLighting(false);
-			this->m_ObjSky.DrawModel();
-			SetUseLighting(true);
+			BackGround::BackGroundControlTitle::Instance()->BG_Draw();
 		}
 		void			TitleScene::MainDraw_Sub(int Range) const noexcept {
 			ObjectManager::Instance()->Draw(true, Range);
@@ -717,7 +692,7 @@ namespace FPS_n2 {
 					int xp = 1920 - 48;
 					int yp = 128;
 
-					bool IsRoundHigh = SaveDataParts->GetParam("round") == SaveDataParts->GetParam("HighRound");
+					bool IsRoundHigh = SaveDataParts->GetParam("round") == SaveDataParts->GetParam("HighRound") && (SaveDataParts->GetParam("round") > 0);
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 						xp - 200, yp, Green, Black, "Round : ");
@@ -731,7 +706,7 @@ namespace FPS_n2 {
 						xp, yp, IsRoundHigh ? Red : Green, Black, "/ %05d", std::max(static_cast<int>(SaveDataParts->GetParam("HighRound")), 0));
 					yp += 12 + 4;
 
-					bool IsScoreHigh = SaveDataParts->GetParam("score") == SaveDataParts->GetParam("HighScore");
+					bool IsScoreHigh = SaveDataParts->GetParam("score") == SaveDataParts->GetParam("HighScore") && (SaveDataParts->GetParam("score") > 0);
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 						xp - 200, yp, Green, Black, "Score : ");
@@ -830,7 +805,7 @@ namespace FPS_n2 {
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 						XPos, (48), Green, Black, "Equip Customize");
 					int Len = FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, (48), 3)->GetStringWidth("Equip Customize");
-					if (!(this->m_TitleWindow == TitleWindow::CustomizeGun)) {
+					if (this->m_TitleWindow == TitleWindow::Custom) {
 						std::string CustomPoint = "";
 						switch (this->m_GunTypeSel) {
 						case 0:
@@ -851,7 +826,7 @@ namespace FPS_n2 {
 					}
 					XPos += Len;
 				}
-				if ((this->m_TitleWindow == TitleWindow::CustomizeGun)) {
+				if (this->m_TitleWindow == TitleWindow::CustomizeGun) {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 						XPos, (48), Green, Black, " > Gun Setup");
@@ -893,7 +868,7 @@ namespace FPS_n2 {
 						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 							Ptr, (xp1 + xp2) / 2, yp1 + 120, 0.5f, 0.f, true);
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-						if (!(this->m_TitleWindow == TitleWindow::CustomizeGun)) {
+						if (this->m_TitleWindow == TitleWindow::Custom) {
 							int xp3 = xp1 - 64;
 							int yp3 = yp1 + 120;
 							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3 - 10, xp3, yp3 + 10, Green, 2);

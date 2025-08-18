@@ -108,7 +108,6 @@ namespace FPS_n2 {
 			friend class SingletonBase<ItemObjDataManager>;
 		private:
 			std::vector<std::unique_ptr<ItemObjData>>	m_Data;
-		public:
 			std::vector<std::string>					m_ItemPathList;
 		private:
 			ItemObjDataManager(void) noexcept {
@@ -129,6 +128,7 @@ namespace FPS_n2 {
 		public:
 			const auto& GetList(void) const noexcept { return this->m_Data; }
 			const auto& Get(int index) const noexcept { return this->m_Data[index]; }
+			const auto& GetPathList(void) const noexcept { return this->m_ItemPathList; }
 			const int Add(const std::string& filepath) noexcept {
 				auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const std::unique_ptr<ItemObjData>& tgt) {return tgt->GetPath() == filepath; });
 				if (Find != this->m_Data.end()) {
@@ -163,7 +163,7 @@ namespace FPS_n2 {
 			virtual ~ItemObj(void) noexcept {}
 		public:
 			void				SetUniqueID(int ID) noexcept { this->m_ItemObjDataID = ID; }
-			const auto& GetUniqueID(void) const noexcept { return this->m_ItemObjDataID; }
+			const auto&			GetUniqueID(void) const noexcept { return this->m_ItemObjDataID; }
 
 			const auto			CanPick(void) const noexcept { return this->m_Timer > 3.f; }
 			//接地

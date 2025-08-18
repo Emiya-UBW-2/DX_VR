@@ -191,20 +191,24 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<GunPartsDataManager>;
 		public:
-			std::vector<std::string>					m_GunList;
-			std::vector<std::string>					m_ModPathList;
 		private:
 			std::list<std::unique_ptr<GunPartsData>>	m_Data;
 			int											m_LastUniqueID{ 0 };
+			std::vector<std::string>					m_GunList;
+			std::vector<std::string>					m_GunPathList;
+			std::vector<std::string>					m_ModPathList;
 		private:
 			GunPartsDataManager(void) noexcept {
 				//銃オブジェ文字列リストの生成
 				{
 					this->m_GunList.clear();
+					this->m_GunPathList.clear();
+					std::string Path = "data/gun/";
 					std::vector<WIN32_FIND_DATA> pData;
-					GetFileNamesInDirectory("data/gun/*", &pData);
+					GetFileNamesInDirectory((Path + "*").c_str(), &pData);
 					for (auto& data : pData) {
 						this->m_GunList.emplace_back(data.cFileName);
+						this->m_GunPathList.emplace_back(Path + data.cFileName + "/");
 					}
 				}
 				{
@@ -236,23 +240,18 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
+			const auto& GetGunNameList(void) const noexcept { return this->m_GunList; }
+			const auto& GetGunPathList(void) const noexcept { return this->m_GunPathList; }
+			const auto& GetModPathList(void) const noexcept { return this->m_ModPathList; }
 			const int Add(const std::string& filepath) noexcept;
 		public:
 			void Init() noexcept {
 				//銃オブジェ文字列リストの生成
-				{
-					for (auto& Path : this->m_ModPathList) {
-						this->Add(Path);
-					}
+				for (auto& Path : this->m_ModPathList) {
+					this->Add(Path);
 				}
-				{
-					std::string Path = "data/gun/";
-					for (auto& name : this->m_GunList) {
-						std::string ChildPath = Path;
-						ChildPath += name;
-						ChildPath += "/";
-						this->Add(ChildPath);
-					}
+				for (auto& Path : this->m_GunPathList) {
+					this->Add(Path);
 				}
 			}
 		};

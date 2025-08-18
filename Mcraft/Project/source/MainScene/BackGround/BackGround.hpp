@@ -929,5 +929,26 @@ namespace FPS_n2 {
 			void			Dispose(void) noexcept;
 			void			Dispose_Load(void) noexcept;
 		};
+		class BackGroundControlTitle : public SingletonBase<BackGroundControlTitle> {
+		private:
+			friend class SingletonBase<BackGroundControlTitle>;
+		private:
+			MV1										m_ObjSky{};
+		private:
+			BackGroundControlTitle(void) noexcept { Load(); }
+			BackGroundControlTitle(const BackGroundControlTitle&) = delete;
+			BackGroundControlTitle(BackGroundControlTitle&&) = delete;
+			BackGroundControlTitle& operator=(const BackGroundControlTitle&) = delete;
+			BackGroundControlTitle& operator=(BackGroundControlTitle&&) = delete;
+
+			virtual ~BackGroundControlTitle(void) noexcept { Dispose_Load(); }
+		public://
+			void			Load(void) noexcept;
+
+			void			Init(void) noexcept;
+			void			BG_Draw(void) const noexcept;
+
+			void			Dispose_Load(void) noexcept;
+		};
 	}
 }

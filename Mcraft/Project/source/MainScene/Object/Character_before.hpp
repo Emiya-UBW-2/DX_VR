@@ -347,7 +347,7 @@ namespace FPS_n2 {
 		private:
 		private:
 			bool												m_IsChange{ false };
-			int													m_GunSelect{ 0 };
+			int													m_Select{ 0 };
 			int													m_ReserveGunSelect{ 0 };
 			std::array<std::shared_ptr<Guns::GunObj>, 3>		m_GunPtr{};			//銃
 		public://ゲッター
@@ -364,7 +364,7 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
-			const auto			GetNowGunSelect(void) const noexcept { return this->m_GunSelect; }
+			const auto			GetNowGunSelect(void) const noexcept { return this->m_Select; }
 		public://セッター
 			//次の武器に切り替え
 			void				GunChangeNext(bool IsUpDown) noexcept {
@@ -405,7 +405,7 @@ namespace FPS_n2 {
 			}
 			//武器を外す
 			void				SetOnOff(bool IsOn) noexcept {
-				if (this->m_GunSelect != this->m_ReserveGunSelect) { return; }
+				if (this->m_Select != this->m_ReserveGunSelect) { return; }
 				if (!IsOn) {
 					this->m_ReserveGunSelect = InvalidID;
 					this->m_IsChange = true;
@@ -418,11 +418,11 @@ namespace FPS_n2 {
 
 			const auto			IsChangeGunSelect(void) const noexcept { return this->m_IsChange; }
 			void				InvokeReserveGunSelect(void) noexcept {
-				this->m_GunSelect = this->m_ReserveGunSelect;
+				this->m_Select = this->m_ReserveGunSelect;
 				this->m_IsChange = false;
 			}
 			void				SelectGun(int ID) noexcept {
-				this->m_GunSelect = this->m_ReserveGunSelect = ID;
+				this->m_Select = this->m_ReserveGunSelect = ID;
 				this->m_IsChange = false;
 			}
 			void				SetGunPtr(int ID, const std::shared_ptr<Guns::GunObj>& pGunPtr0) noexcept { this->m_GunPtr[ID] = pGunPtr0; }

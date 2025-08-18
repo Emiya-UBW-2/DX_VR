@@ -84,7 +84,6 @@ namespace FPS_n2 {
 			friend class SingletonBase<AmmoDataManager>;
 		private:
 			std::vector<std::unique_ptr<AmmoData>>	m_Data;
-		public:
 			std::vector<std::string>					m_AmmoPathList;
 		private:
 			AmmoDataManager(void) noexcept {
@@ -104,6 +103,7 @@ namespace FPS_n2 {
 			}
 		public:
 			const auto& Get(int index) const noexcept { return this->m_Data[index]; }
+			const auto& GetPathList(void) const noexcept { return this->m_AmmoPathList; }
 			const int Add(const std::string& filepath) noexcept {
 				auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const std::unique_ptr<AmmoData>& tgt) {return tgt->GetPath() == filepath; });
 				if (Find != this->m_Data.end()) {

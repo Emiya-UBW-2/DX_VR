@@ -17,14 +17,20 @@ namespace FPS_n2 {
 			CustomizeGun,
 		};
 
+		struct Point {
+			int Xofs{};
+			int GunType{};
+			bool IsActive{ false };
+			float AnimTimer{ 0.f };
+		};
+
 		class TitleScene : public TEMPSCENE {
 			bool									m_IsEnd{ false };//シーン全体の終了フラグ
 			GraphHandle								m_TitleImage{};
 			std::unique_ptr<UIs::CreditControl>		m_CreditControl{};
 
 			std::shared_ptr<Charas::MovieCharacter>	m_MovieCharacter{};
-			MV1										m_ObjSky{};
-			std::vector<std::shared_ptr<Guns::GunObj>>m_GunPtr{};			//銃
+			std::vector<std::shared_ptr<Guns::GunObj>>m_GunPtr{};
 
 			TitleWindow								m_TitleWindow{ TitleWindow::Main };
 
@@ -34,26 +40,20 @@ namespace FPS_n2 {
 
 			float									m_CamYrad = deg2rad(0);
 			float									m_CamYradR = deg2rad(0);
-
-			struct Point {
-				int Xofs{};
-				int GunType{};
-				bool IsActive{ false };
-				float AnimTimer{ 0.f };
-			};
+			float									m_CamTimer = 0.f;
 
 			std::vector<Point>						m_GunPoint{};
 			std::array<int, 3>						m_GunSelect{};
 			int										m_GunTypeSel = 0;
 			int										m_GunSel = 0;
 			int										m_GunCustomSel = 0;
-			float									m_CamTimer = 0.f;
 			Guns::GunSlot							m_SlotSel = Guns::GunSlot::Magazine;
 			float									m_SelAlpha{ 0.f };
-			int										m_PrevHighScore{ InvalidID };
 
-			bool									m_EndScoreDisp{ false };
+			int										m_PrevHighScore{ InvalidID };
 		private:
+			void		SetSelectOnSlot() noexcept;
+			void		ChangeSelectOnSlot(bool IsAdd) noexcept;
 			const auto& GetNowEditWeaponID() const noexcept { return this->m_GunSelect.at(this->m_GunTypeSel); }
 		public:
 			TitleScene(void) noexcept {}

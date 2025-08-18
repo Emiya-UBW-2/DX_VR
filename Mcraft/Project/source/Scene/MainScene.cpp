@@ -8,24 +8,26 @@ namespace FPS_n2 {
 		constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 
 		void			MainGameScene::Load_Sub(void) noexcept {
+			auto* WindowSizeParts = WindowSizeControl::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+
 			BackGround::BackGroundControl::Create();
 			CommonBattleResource::Load();
 			HitMarkerPool::Create();
 			this->m_UIclass.Load();
 			this->m_PauseMenuControl.Load();
 			//
-			for (auto& Path : Objects::ItemObjDataManager::Instance()->m_ItemPathList) {
-				ObjectManager::Instance()->LoadModelBefore(Path);
+			for (const auto& Path : Objects::ItemObjDataManager::Instance()->GetPathList()) {
+				ObjMngr->LoadModelBefore(Path);
 			}
-			//
-			for (auto& name : Guns::GunPartsDataManager::Instance()->m_GunList) {
-				std::string ChildPath = "data/gun/";
-				ChildPath += name;
-				ChildPath += "/";
-				ObjectManager::Instance()->LoadModelBefore(ChildPath);
+			for (const auto& Path : Guns::GunPartsDataManager::Instance()->GetGunPathList()) {
+				ObjMngr->LoadModelBefore(Path);
 			}
-			for (auto& Path : Guns::GunPartsDataManager::Instance()->m_ModPathList) {
-				ObjectManager::Instance()->LoadModelBefore(Path);
+			for (const auto& Path : Guns::GunPartsDataManager::Instance()->GetModPathList()) {
+				ObjMngr->LoadModelBefore(Path);
+			}
+			for (const auto& Path : Objects::AmmoDataManager::Instance()->GetPathList()) {
+				ObjMngr->LoadModelBefore(Path);
 			}
 			//
 			{
@@ -36,34 +38,31 @@ namespace FPS_n2 {
 					std::string ChildPath = Path;
 					ChildPath += data.cFileName;
 					ChildPath += "/";
-					ObjectManager::Instance()->LoadModelBefore(ChildPath);
+					ObjMngr->LoadModelBefore(ChildPath);
 				}
-			}
-			for (auto& Path : Objects::AmmoDataManager::Instance()->m_AmmoPathList) {
-				ObjectManager::Instance()->LoadModelBefore(Path);
 			}
 			//
 			MV1::Load("data/Charactor/Main/model_Rag.mv1", &m_MainRagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 
-			ObjectManager::Instance()->LoadModelBefore("data/model/hindD/");
-			ObjectManager::Instance()->LoadModelBefore("data/model/UH60/");
-			ObjectManager::Instance()->LoadModelBefore("data/model/BMP3/");
+			ObjMngr->LoadModelBefore("data/model/hindD/");
+			ObjMngr->LoadModelBefore("data/model/UH60/");
+			ObjMngr->LoadModelBefore("data/model/BMP3/");
 
-			ObjectManager::Instance()->LoadModelBefore("data/model/PlateCarrler/");
-			ObjectManager::Instance()->LoadModelBefore("data/model/Helmet/");
-			ObjectManager::Instance()->LoadModelBefore("data/model/container/");
-			ObjectManager::Instance()->LoadModelBefore("data/model/circle/");
+			ObjMngr->LoadModelBefore("data/model/PlateCarrler/");
+			ObjMngr->LoadModelBefore("data/model/Helmet/");
+			ObjMngr->LoadModelBefore("data/model/container/");
+			ObjMngr->LoadModelBefore("data/model/circle/");
 
-			ObjectManager::Instance()->LoadModelBefore("data/model/UH60_Movie/");
+			ObjMngr->LoadModelBefore("data/model/UH60_Movie/");
 
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
 
 			m_ResultGraph.Load("data/UI/result.png");
 			m_KillGraph.Load("data/UI/kill.png");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
 			Objects::AmmoPool::Create();
 			Objects::AmmoLinePool::Create();
 			Objects::ItemObjPool::Create();
@@ -81,7 +80,7 @@ namespace FPS_n2 {
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);
 					//GUN
-					for (auto& guns : Guns::GunPartsDataManager::Instance()->m_GunList) {
+					for (const auto& guns : Guns::GunPartsDataManager::Instance()->GetGunNameList()) {
 						int ID = static_cast<int>(SaveData::Instance()->GetParam(guns));
 						if (ID >= 1) {
 							chara->LoadCharaGun(guns, ID - 1);
@@ -122,28 +121,28 @@ namespace FPS_n2 {
 			}
 			if (!this->m_IsTutorial) {
 				PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());
-				ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
+				ObjMngr->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
 			}
 
 			PlayerMngr->SetTeamHelicopter(std::make_shared<Objects::TeamHelicopterObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetTeamHelicopter(), "data/model/UH60/");
+			ObjMngr->InitObject(PlayerMngr->GetTeamHelicopter(), "data/model/UH60/");
 			PlayerMngr->GetTeamHelicopter()->SetIsIntercept(!this->m_IsTutorial);
 
 			//PlayerMngr->SetVehicle(std::make_shared<Objects::VehicleObj>());
-			//ObjectManager::Instance()->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
+			//ObjMngr->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
 
 			PlayerMngr->SetArmor(std::make_shared<Objects::ArmorObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetArmor(), "data/model/PlateCarrler/");
+			ObjMngr->InitObject(PlayerMngr->GetArmor(), "data/model/PlateCarrler/");
 
 			PlayerMngr->SetHelmet(std::make_shared<Objects::ArmorObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelmet(), "data/model/Helmet/");
+			ObjMngr->InitObject(PlayerMngr->GetHelmet(), "data/model/Helmet/");
 
 			//ItemContainerObj
 			PlayerMngr->SetItemContainerObj(std::make_shared<Objects::ItemContainerObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetItemContainerObj(), "data/model/container/");
+			ObjMngr->InitObject(PlayerMngr->GetItemContainerObj(), "data/model/container/");
 
 			m_MovieHeli = std::make_shared<Charas::MovieObject>();
-			ObjectManager::Instance()->InitObject(this->m_MovieHeli, "data/model/UH60_Movie/");
+			ObjMngr->InitObject(this->m_MovieHeli, "data/model/UH60_Movie/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();

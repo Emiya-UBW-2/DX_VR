@@ -81,7 +81,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//初期セーブ
 	{
 		bool isEquiped = false;
-		for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
+		for (const auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->GetGunNameList()) {
 			if (SaveData::Instance()->GetParam(guns) <= 0) {
 				SaveData::Instance()->SetParam(guns, 0);
 			}

@@ -4,6 +4,8 @@
 #include"../Player/Player.hpp"
 
 const FPS_n2::BackGround::BackGroundControl* SingletonBase<FPS_n2::BackGround::BackGroundControl>::m_Singleton = nullptr;
+const FPS_n2::BackGround::BackGroundControlTitle* SingletonBase<FPS_n2::BackGround::BackGroundControlTitle>::m_Singleton = nullptr;
+
 namespace FPS_n2 {
 	namespace BackGround {
 		//迷路生成
@@ -715,7 +717,7 @@ namespace FPS_n2 {
 			SceneParts->SetIsUpdateFarShadowActive();
 		}
 		//
-		int		BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
+		int			BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			int HitCount = 0;
 
 			{
@@ -1638,6 +1640,29 @@ namespace FPS_n2 {
 		void		BackGroundControl::Dispose_Load(void) noexcept {
 			this->m_ObjSky.Dispose();
 			this->m_tex.Dispose();
+		}
+
+
+		//
+		void		BackGroundControlTitle::Load(void) noexcept {
+			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
+		}
+		void		BackGroundControlTitle::Init(void) noexcept {
+			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
+			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
+				//this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
+				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.0f));
+				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
+			}
+		}
+		void		BackGroundControlTitle::BG_Draw(void) const noexcept {
+			FillGraph(GetDrawScreen(), 0, 0, 0);
+			SetUseLighting(false);
+			this->m_ObjSky.DrawModel();
+			SetUseLighting(true);
+		}
+		void		BackGroundControlTitle::Dispose_Load(void) noexcept {
+			this->m_ObjSky.Dispose();
 		}
 	}
 }
