@@ -13,6 +13,8 @@
 
 0120=Credit
 
+0130=Game Over
+
 0109=initial settings. Please check gamepad input system or graphics.
 
 2000=Check PC
@@ -32,7 +34,7 @@
 2024=Not Good
 2025=GPU Not Found
 
-2035=使用中のDirectX
+2035=Using DirectX
 
 2040=You can get enough FPS.
 2041=Have to Set Middle Graphics Preset.
@@ -44,7 +46,7 @@
 2047=Have to Set Low Graphics Preset.
 2048=If DirectX11 is not available, screen effects cannot be used.
 
-2050=グラフィック タブの プリセットを左に設定することで画質を犠牲にFPSを向上できます。ゲーム起動後、プリセット最低の状態でも60FPSを切ってしまう場合はレンダリングスケールを落としてください。コントローラーはリアルタイムの抜き差しに対応しています。キーボードで操作する際にはInputTypeを指定してください。
+2050=GraphicタブのPresetを左に設定することで画質を犠牲にFPSを向上できます。ゲーム起動後、プリセット最低の状態でも60FPSを切ってしまう場合はRender Scaleを落としてください。　　　　　　　　　コントローラーはリアルタイムの抜き差しに対応しています。キーボードで操作する際にはElseタブのGamePadTypeを指定してください。　　　　　　　　　　　　　ゲームはこのウィンドウが閉じられた後メインディスプレイのサイズで再度開かれます。
 
 0110=Option
 1110=Change BGM volume
@@ -125,11 +127,12 @@
 9993=Select
 9994=Change Tab
 9995=Pause
-9980=武器選択
-9981=武器種切り替え
-9982=パーツ選択に進む
-9983=パーツ選択
-9984=部位切り替え
+9980=Equip Select
+9981=Weapon Change
+9982=Go to Parts Select
+9983=Parts Select
+9984=Point Change
+
 
 9900=Move
 9902=Lean
@@ -157,40 +160,41 @@
 4002=Get into the container and wait for the helicopter to arrive.
 
 5000=Runner
-5100=[d]秒間走ることができる
+5100=Can Run [d] second
 5001=Guts
-5101=[d]のダメージに対して踏ん張る
+5101=Regist [d] Damage to Death
 5002=AP
-5102=弾の貫通力を上げる(ダメージ[d])
+5102=Ammo Penetration Armor(Damage Down [d]%%)
 5003=ItemEater
-5103=Fキーを押すと[d]m以内のアイテムを吸い寄せる
+5103=Fill Item In [d]m when Press Interact Button
 5004=Peace Maker
-5104=%m以内の対面している敵が撃ってこなくなる
+5104=Enemy Not Shoot In [d]m
 5005=Teiji Taisha
-5105=帰還要請と援護射撃までの時間を[d]%%を早める
+5105=Less [d] %% Time when Request for return
 5006=Adrenaline
-5106=物を拾って[d]秒だけ重さデバフを無視できる
+5106=Can Move Faster When Get Item After [d] second
 5007=DamageCut
-5107=アーマーを含め被ダメージを[d] %%カット
+5107=[d] %% Damage Cut
 5008=ScoreUp
-5108=次の出撃時のスコアに+[d]
+5108=Get [d] Score When Next Round
 
-6000=ヘリによるコンテナ展開完了、状況を開始せよ。
-6001=コンテナを探せ。
-6002=敵をかわしつつ、コンテナに物資を集めろ。
-6003=ヘリの支援限界だ、撤退せよ。コンテナにつかまれ!
-6004=オペレーターの回収を確認。よくやった。
-6005=残り30秒、急げ!
+6000=helicopter deployment of the container is complete, Roll Out!
+6001=Find the container.
+6002=Dodge enemies and collect supplies in containers.
+6003=Helicopter support is at its limit. retreat! Hold on to the container!
+6004=Well done.
+6005=30 seconds left, hurry!
 
-6010=よし。
-6011=いいぞ。
+6010=Good
+6011=Nice
 
-6100=今から訓練を始める。
-6101=前方にいる敵を倒せ。最初のタスクだ。
-6102=敵は倒すとアーマーを落とす。それに着替えろ。アーマーを着ることで被弾による負傷を防ぐことができる。
-6103=壁は回り道することもできるが、手榴弾や銃撃で吹き飛ばすこともできる。壁に向かって手榴弾を投げてみろ。
-6104=壁の向こうにコンテナと敵が見えるだろう、まずは敵を排除し安全を確保しろ。
-6105=一定以上の成果を上げれば、コンテナごと引き上げてやる。コンテナにアーマーを納品し、タスクをクリアするんだ。
-6106=左にはほかにもアイテムがある。納品すればポイントになるだろう。納品してみろ。
-6107=よし。コンテナの近くでインタラクトボタンを長押しして帰還しろ。
-6108=これで訓練終了だ、今回の経験を選べ。そしてそれを活かして実戦へ進むんだ。いったん戻って準備を整えるのもよいだろう。
+6100=Let's start training.
+6101=Kill the enemies ahead. That's your first task.
+6102=Killing enemies will drop armor, which when put on will make you immune to bullet damage.
+6103=You can also blow them up with grenades or gunfire. Try throwing a grenade at a wall.
+6104=There are containers and enemies on the other side of the wall, so first eliminate the enemies to ensure safety.
+6105=Once you reach a certain level of success, the container will be collected and you can deliver the armor inside to complete the mission.
+
+6106=There are other items on the left. Deliver them to earn points.
+6107=press the interact button near the container to return.
+6108=This concludes your training. Take what you've learned from this experience and apply it to the real world. Now, go back and prepare for battle. Good luck.
