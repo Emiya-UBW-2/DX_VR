@@ -13,6 +13,8 @@
 
 0120=Credit
 
+0130=Game Over
+
 0109=initial settings. Please check gamepad input system or graphics.
 
 2000=Check PC

@@ -31,6 +31,37 @@ namespace FPS_n2 {
 			int			m_Level{ 1 };
 		};
 
+		class ResultData : public SingletonBase<ResultData> {
+		private:
+			friend class SingletonBase<ResultData>;
+		public:
+			bool										m_SetData{ false };
+			int											m_Score{ 0 };
+			int											m_Round{ 0 };
+			std::vector<SkillInfo>						m_SkillInfo;
+		public:
+			void SetData() noexcept {
+				m_Score = std::max(static_cast<int>(SaveData::Instance()->GetParam("score")), 0);
+				m_Round = std::max(static_cast<int>(SaveData::Instance()->GetParam("round")), 0);
+				m_SkillInfo.clear();
+				for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+					int LV = static_cast<int>(SaveData::Instance()->GetParam("skill" + std::to_string(loop)));
+					if (LV > 0) {
+						m_SkillInfo.emplace_back();
+						m_SkillInfo.back().m_SkillType = static_cast<Player::SkillType>(loop);
+						m_SkillInfo.back().m_Level = LV;
+					}
+				}
+				m_SetData = true;
+			}
+		private:
+			ResultData() noexcept {
+			}
+			virtual ~ResultData() noexcept {
+
+			}
+		};
+
 		class SkillList : public SingletonBase<SkillList> {
 		private:
 			friend class SingletonBase<SkillList>;

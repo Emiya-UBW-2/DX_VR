@@ -1453,6 +1453,7 @@ namespace FPS_n2 {
 					if (!this->m_IsEnd) {
 						FadeControl::Instance()->SetBlackOut(true, 3.f);
 						if (!this->m_IsTutorial) {
+							Player::ResultData::Instance()->SetData();
 							for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
 								SaveData::Instance()->SetParam("skill" + std::to_string(loop), 0);
 							}

@@ -60,7 +60,7 @@ namespace FPS_n2 {
 			int X2 = 0;
 			int X3 = 0;
 
-			int NowScore = static_cast<int>(SaveDataParts->GetParam("HighScore"));
+			int HighScore = static_cast<int>(SaveDataParts->GetParam("HighScore"));
 
 			this->m_GunPoint.resize(this->m_GunPtr.size());
 			for (auto& guns : this->m_GunPtr) {
@@ -69,9 +69,9 @@ namespace FPS_n2 {
 				auto& slotdata = slot->GetMyData();
 				auto& GP = this->m_GunPoint.at(index);
 				int NeedScore = slotdata->GetUnlockScore();
-				GP.IsActive = ((slotdata->IsPlayableWeapon() != InvalidID) && (NowScore >= NeedScore));
+				GP.IsActive = ((slotdata->IsPlayableWeapon() != InvalidID) && (HighScore >= NeedScore));
 				if (GP.IsActive) {
-					if (this->m_PrevScore != InvalidID && NeedScore > this->m_PrevScore) {
+					if (this->m_PrevHighScore != InvalidID && NeedScore > this->m_PrevHighScore) {
 						SideLogParts->Add(5.0f, 0.0f, Green, ("Unlock : " + slotdata->GetName()).c_str());
 					}
 					GP.GunType = slotdata->IsPlayableWeapon();
@@ -101,7 +101,7 @@ namespace FPS_n2 {
 				guns->SetupGun();
 			}
 
-			this->m_PrevScore = NowScore;
+			this->m_PrevHighScore = HighScore;
 			// 
 			PostPassParts->SetShadowScale(0.5f);
 			//
@@ -157,9 +157,9 @@ namespace FPS_n2 {
 			}
 			this->m_TitleWindow = TitleWindow::Main;
 
-			//死んだと判断した時
-			this->m_EndScoreDisp = true;
-			this->m_EndScoreDisp = false;
+			//死んだと判断した時(スコアが1以上から0になったら)
+			this->m_EndScoreDisp = Player::ResultData::Instance()->m_SetData;
+			Player::ResultData::Instance()->m_SetData = false;
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -217,9 +217,70 @@ namespace FPS_n2 {
 			{
 				if (this->m_EndScoreDisp && FadeControl::Instance()->IsClear()) {
 					this->m_EndScoreDisp = false;
-					PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
+					PopUpParts->Add(LocalizeParts->Get(130), (720), (720 * 3 / 4),
 						[&](int xmin, int ymin, int xmax, int, bool) {
-							//this->m_CreditControl->Draw(xmin, ymin, xmax);
+							auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+							auto* SaveDataParts = SaveData::Instance();
+							auto* LocalizeParts = LocalizePool::Instance();
+							int yp1 = ymin + LineHeight + LineHeight / 2;
+
+
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, 48,
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xmin + 24 + 6, yp1, White, Black, "Result");
+							yp1 += 48 + 24;
+
+							int HighRound = static_cast<int>(SaveDataParts->GetParam("HighRound"));
+							bool IsRoundHigh = (Player::ResultData::Instance()->m_Round >= HighRound);
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, 32,
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xmin + 24 + 6, yp1, White, Black, "Round : ");
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, 32,
+								FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xmax - 24 - 6, yp1, IsRoundHigh ? Red : White, Black, "%s %05d",
+								IsRoundHigh ? "High Record!" : "",
+								Player::ResultData::Instance()->m_Round);
+							yp1 += 32;
+
+							int HighScore = static_cast<int>(SaveDataParts->GetParam("HighScore"));
+							bool IsScoreHigh = (Player::ResultData::Instance()->m_Score >= HighScore);
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, 32,
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xmin + 24 + 6, yp1, White, Black, "Score : ");
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, 32,
+								FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xmax - 24 - 6, yp1, IsScoreHigh ? Red : White, Black, "%s %05d",
+								IsScoreHigh ? "High Record!" : "",
+								Player::ResultData::Instance()->m_Score);
+							yp1 += 32;
+
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, 32,
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xmin + 24 + 6, yp1, White, Black, "Skill : ");
+
+							bool Complete = true;
+							for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+								int Level = 0;
+								for (auto& sk : Player::ResultData::Instance()->m_SkillInfo) {
+									if (loop == static_cast<int>(sk.m_SkillType)) {
+										Level = sk.m_Level;
+										break;
+									}
+								}
+								if (Level != 3) {
+									Complete = false;
+									break;
+								}
+							}
+							if (Complete) {
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 32,
+									FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+									xmax - 24 - 6, yp1, Red, Black, "Complete!");
+							}
+							yp1 += 32;
+							for (auto& sk : Player::ResultData::Instance()->m_SkillInfo) {
+								std::string Title = LocalizeParts->Get(5000 + static_cast<int>(sk.m_SkillType));
+								Title += " Lv.";
+								Title += std::to_string(sk.m_Level);
+
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 32,
+									FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xmax - 24 - 6, yp1, White, Black, Title.c_str());
+								yp1 += 32;
+							}
 						},
 						[]() {},
 						[]() {},
@@ -656,31 +717,34 @@ namespace FPS_n2 {
 					int xp = 1920 - 48;
 					int yp = 128;
 
+					bool IsRoundHigh = SaveDataParts->GetParam("round") == SaveDataParts->GetParam("HighRound");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 						xp - 200, yp, Green, Black, "Round : ");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-						xp, yp, Green, Black, "%03d", std::max(static_cast<int>(SaveDataParts->GetParam("round")), 0));
+						xp, yp, IsRoundHigh ? Red : Green, Black, "%05d", std::max(static_cast<int>(SaveDataParts->GetParam("round")), 0));
 					yp += 32;
 
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (12),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						xp, yp, IsRoundHigh ? Red : Green, Black, "/ %05d", std::max(static_cast<int>(SaveDataParts->GetParam("HighRound")), 0));
+					yp += 12 + 4;
+
+					bool IsScoreHigh = SaveDataParts->GetParam("score") == SaveDataParts->GetParam("HighScore");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 						xp - 200, yp, Green, Black, "Score : ");
 
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-						xp, yp, Green, Black, "%05d", std::max(static_cast<int>(SaveDataParts->GetParam("score")), 0));
+						xp, yp, IsScoreHigh ? Red : Green, Black, "%05d", std::max(static_cast<int>(SaveDataParts->GetParam("score")), 0));
 					yp += 32;
 
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (12),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-						xp - 200, yp, Green, Black, "HighScore : ");
-
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-						xp, yp, Green, Black, "%05d", std::max(static_cast<int>(SaveDataParts->GetParam("HighScore")), 0));
-					yp += 32;
+						xp, yp, IsScoreHigh ? Red : Green, Black, "/ %05d", std::max(static_cast<int>(SaveDataParts->GetParam("HighScore")), 0));
+					yp += 12 + 4;
 
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,

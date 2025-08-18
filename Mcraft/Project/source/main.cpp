@@ -77,6 +77,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Guns::GunPartsDataManager::Instance()->Init();
 	FPS_n2::Objects::ItemObjDataManager::Instance()->Init();
 	FPS_n2::Charas::GunAnimManager::Instance()->Load("data/CharaAnime/");
+	FPS_n2::Player::ResultData::Create();
 	//初期セーブ
 	{
 		bool isEquiped = false;

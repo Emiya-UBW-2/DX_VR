@@ -7,6 +7,8 @@
 #include	"../MainScene/Object/MovieCharacter.hpp"
 #include	"../MainScene/Object/Gun.hpp"
 
+#include	"../MainScene/Player/Player.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class TitleWindow {
@@ -48,7 +50,7 @@ namespace FPS_n2 {
 			float									m_CamTimer = 0.f;
 			Guns::GunSlot							m_SlotSel = Guns::GunSlot::Magazine;
 			float									m_SelAlpha{ 0.f };
-			int										m_PrevScore{ InvalidID };
+			int										m_PrevHighScore{ InvalidID };
 
 			bool									m_EndScoreDisp{ false };
 		private:
