@@ -20,23 +20,12 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-
-		enum class TaskType {
-			Obtain,
-			KillEnemy,
-		};
-
-		class TaskInfo {
-		public:
-			TaskType	m_TaskType{};
-			int		m_ItemID{ InvalidID };
-			int		m_Count{ 1 };
-		};
-
 		class MainGameScene : public TEMPSCENE {
-			PauseMenuControl							m_PauseMenuControl;
-			MainSceneUI									m_UIclass;			//UI関連
-			MainSceneResultUI							m_UIresult;
+			std::unique_ptr<PauseMenuControl>			m_PauseMenuControl;
+			std::unique_ptr<MainSceneUI>				m_UIclass;			//UI関連
+			std::unique_ptr<MainSceneResultUI>			m_UIresult;
+			std::unique_ptr<TransceiverUI>				m_TransceiverUI;
+			std::unique_ptr<TaskOperator>				m_TaskOperator;
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };			//NetWork
 			NetWork::PlayerSendData						m_LocalSend;
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
@@ -46,41 +35,25 @@ namespace FPS_n2 {
 			bool										m_IsFindContainer{ false };
 			float										m_FindContainerTimer{ 0.0f };
 			float										m_AnnounceTimer{ 0.0f };
-
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
-
 			float										m_GameClearCount2 = 0.f;
 			float										m_FadeoutEndTimer = 0.f;
-			GraphHandle									m_KillGraph;
-
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
 			MV1											m_MainRagDoll;
 			MV1											m_RagDoll;
 			float										AberrationPower{ 1.f };
 			bool										m_IsAddScoreArea = false;
-
 			int											m_LimitAlarmCount{};
 			float										m_LimitAlarmTimer{ 0.0f };
-
 			bool										m_IsGameReady = false;
 			float										m_StartAnimTimer{ 0.0f };
-
 			std::shared_ptr<Charas::MovieObject>		m_MovieHeli;
-
-
-			std::vector<std::pair<TaskInfo, int>>		m_TaskInfoList;
 			bool										m_TaskClearOnce{ false };
-
 			bool										m_IsSkipMovie{ false };
 			float										m_MovieEndTimer{ 0.0f };
-
 			bool										m_IsTutorial{ false };
-			int m_TextID = InvalidID;
-
-			int m_PrevTextSoundID = InvalidID;
-			float m_TextTimer{ 0.f };
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {
@@ -139,7 +112,7 @@ namespace FPS_n2 {
 			void			DrawUI_In_Sub(void) const noexcept override {
 				auto* SceneParts = SceneControl::Instance();
 				if (SceneParts->IsPause()) {
-					this->m_PauseMenuControl.Draw();
+					this->m_PauseMenuControl->Draw();
 				}
 			}
 		};

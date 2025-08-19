@@ -7,10 +7,20 @@
 
 #include	"../MainScene/Player/Player.hpp"
 
+#include <random>
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class PauseMenuControl {
 			bool			m_IsRetire{ false };
+		public:
+			PauseMenuControl(void) noexcept { Load(); }
+			PauseMenuControl(const PauseMenuControl&) = delete;
+			PauseMenuControl(PauseMenuControl&&) = delete;
+			PauseMenuControl& operator=(const PauseMenuControl&) = delete;
+			PauseMenuControl& operator=(PauseMenuControl&&) = delete;
+
+			virtual ~PauseMenuControl(void) noexcept { Dispose(); }
 		public:
 			const auto& IsRetire(void) const noexcept { return this->m_IsRetire; }
 		public:
@@ -72,13 +82,13 @@ namespace FPS_n2 {
 
 			float						m_Score{};
 		public:
-			MainSceneUI(void) noexcept {}
+			MainSceneUI(void) noexcept { Load(); }
 			MainSceneUI(const MainSceneUI&) = delete;
 			MainSceneUI(MainSceneUI&&) = delete;
 			MainSceneUI& operator=(const MainSceneUI&) = delete;
 			MainSceneUI& operator=(MainSceneUI&&) = delete;
 
-			virtual ~MainSceneUI(void) noexcept {}
+			virtual ~MainSceneUI(void) noexcept { Dispose(); }
 		public:
 			void			Load(void) noexcept {}
 			void			Set(void) noexcept;
@@ -118,13 +128,13 @@ namespace FPS_n2 {
 			GraphHandle									m_ResultGraph;
 			float										m_BattleTimer{};
 		public:
-			MainSceneResultUI(void) noexcept {}
+			MainSceneResultUI(void) noexcept { Load(); }
 			MainSceneResultUI(const MainSceneResultUI&) = delete;
 			MainSceneResultUI(MainSceneResultUI&&) = delete;
 			MainSceneResultUI& operator=(const MainSceneResultUI&) = delete;
 			MainSceneResultUI& operator=(MainSceneResultUI&&) = delete;
 
-			virtual ~MainSceneResultUI(void) noexcept {}
+			virtual ~MainSceneResultUI(void) noexcept { Dispose(); }
 		public:
 			const auto GetSkillSelect() const noexcept { return static_cast<int>(this->m_SkillSelect.at(this->m_SkillSelectNow)); }
 			const auto GetTimer() const noexcept { return this->m_GameClearTimer; }
@@ -147,5 +157,93 @@ namespace FPS_n2 {
 				this->m_ResultGraph.Dispose();
 			}
 		};
+
+		class TransceiverUI {
+			int											m_TextID = InvalidID;
+			int											m_PrevTextSoundID = InvalidID;
+			float										m_TextTimer{ 0.f };
+			float										m_TextTimerMax{ -1.f };
+		public:
+			TransceiverUI(void) noexcept {}
+			TransceiverUI(const TransceiverUI&) = delete;
+			TransceiverUI(TransceiverUI&&) = delete;
+			TransceiverUI& operator=(const TransceiverUI&) = delete;
+			TransceiverUI& operator=(TransceiverUI&&) = delete;
+
+			virtual ~TransceiverUI(void) noexcept {}
+		public:
+			void			Put(int ID, float Sec = -1.f) noexcept;
+			const auto&		GetID(void) const noexcept { return this->m_TextID; }
+		public:
+			void			Set(void) noexcept;
+			void			Update(void) noexcept;
+			void			Draw(void) const noexcept;
+		};
+
+
+		enum class TaskType {
+			Obtain,
+			KillEnemy,
+		};
+
+		class TaskOperator {
+			class TaskInfo {
+			public:
+				TaskType	m_TaskType{};
+				int		m_ItemID{ InvalidID };
+				int		m_Count{ 1 };
+			};
+		private:
+			GraphHandle									m_KillGraph;
+			std::vector<std::pair<TaskInfo, int>>		m_TaskInfoList;
+		public:
+			TaskOperator(void) noexcept { Load(); }
+			TaskOperator(const TaskOperator&) = delete;
+			TaskOperator(TaskOperator&&) = delete;
+			TaskOperator& operator=(const TaskOperator&) = delete;
+			TaskOperator& operator=(TaskOperator&&) = delete;
+
+			virtual ~TaskOperator(void) noexcept { Dispose(); }
+		public:
+			const auto HaveTask() const noexcept {
+				return (this->m_TaskInfoList.size() > 0);
+			}
+			const auto IsActiveTask(TaskType Type) const noexcept {
+				return HaveTask() && (m_TaskInfoList.begin()->first.m_TaskType == Type);
+			}
+			const auto GetNowTaskItemID() const noexcept {
+				return this->m_TaskInfoList.begin()->first.m_ItemID;
+			}
+			
+			void			AddObtain(int ItemID, int Count) noexcept {
+				std::pair<TaskInfo, int> Tmp;
+				Tmp.first.m_TaskType = TaskType::Obtain;
+				Tmp.first.m_ItemID = ItemID;
+				Tmp.first.m_Count = Count;
+				Tmp.second = 0;
+				m_TaskInfoList.emplace_back(Tmp);
+			}
+			void			AddKillEnemy(int Count) noexcept {
+				std::pair<TaskInfo, int> Tmp;
+				Tmp.first.m_TaskType = TaskType::KillEnemy;
+				Tmp.first.m_Count = Count;
+				Tmp.second = 0;
+				m_TaskInfoList.emplace_back(Tmp);
+			}
+			void			Shuffle() noexcept {
+				std::random_device seed_gen;
+				std::mt19937 engine(seed_gen());
+				std::shuffle(this->m_TaskInfoList.begin(), m_TaskInfoList.end(), engine);
+			}
+			void			StartNextTask() noexcept;
+		public:
+			void			Load(void) noexcept;
+			void			Set(void) noexcept;
+			bool			CheckItem(int ItemID) noexcept;
+			bool			CheckKill(void) noexcept;
+			void			Draw(void) const noexcept;
+			void			Dispose(void) noexcept;
+		};
+
 	}
 }

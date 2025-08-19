@@ -1202,5 +1202,157 @@ namespace FPS_n2 {
 				}
 			}
 		}
+		//
+		void			TransceiverUI::Put(int ID, float Sec) noexcept {
+			this->m_TextID = ID;
+			this->m_TextTimerMax = Sec;
+		}
+		void			TransceiverUI::Set(void) noexcept {
+			this->m_TextID = InvalidID;
+			this->m_PrevTextSoundID = InvalidID;
+			this->m_TextTimer =0.f;
+		}
+		void			TransceiverUI::Update(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
+
+			int SoundID = InvalidID;
+			if (this->m_TextID == InvalidID) {
+			}
+			else if (this->m_TextID < 10) {
+				SoundID = static_cast<int>(VoiceEnum::V000) + this->m_TextID;
+			}
+			else if (this->m_TextID < 20) {
+				SoundID = static_cast<int>(VoiceEnum::V010) + (this->m_TextID - 10);
+			}
+			else if (this->m_TextID < 100) {
+			}
+			else if (this->m_TextID < 110) {
+				SoundID = static_cast<int>(VoiceEnum::V100) + (this->m_TextID - 100);
+			}
+			if (this->m_PrevTextSoundID != SoundID) {
+				if (SoundID != InvalidID) {
+					if (SE->Get(SoundType::VOICE, this->m_PrevTextSoundID)->CheckPlay()) {
+						SE->Get(SoundType::VOICE, this->m_PrevTextSoundID)->StopAll();
+					}
+					SE->Get(SoundType::VOICE, SoundID)->Play(DX_PLAYTYPE_BACK, true);
+					this->m_TextTimer = static_cast<float>(SE->Get(SoundType::VOICE, SoundID)->GetTotalTIme()) / 1000.f;
+				}
+				else {
+					this->m_TextTimer = 3.f;
+				}
+				if (this->m_TextTimer <= this->m_TextTimerMax) {
+					this->m_TextTimer = this->m_TextTimerMax;
+				}
+				this->m_PrevTextSoundID = SoundID;
+			}
+			if (this->m_TextTimer > 0.f) {
+				this->m_TextTimer = std::max(this->m_TextTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+				if (this->m_TextTimer == 0.f) {
+					this->m_TextID = InvalidID;
+				}
+			}
+		}
+		void			TransceiverUI::Draw(void) const noexcept{
+			if (this->m_TextID == InvalidID) { return; }
+			auto* LocalizeParts = LocalizePool::Instance();
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+
+			std::string Str = "";
+			Str += "[ ";
+			Str += LocalizeParts->Get(6000 + this->m_TextID);
+			Str += " ]";
+			DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 18,
+				(1920 / 2 - 520), (1080 - 128),
+				(1920 / 2 + 520), (1080 - 128 + 18 * 3),
+				White, Black, Str);
+		}
+		//
+		void			TaskOperator::StartNextTask() noexcept {
+			auto* LocalizeParts = LocalizePool::Instance();
+			auto* SE = SoundPool::Instance();
+			auto* SideLogParts = SideLog::Instance();
+			if (HaveTask()) {
+				SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(this->m_TaskInfoList.begin()->first.m_TaskType)));
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
+			}
+		}
+		void			TaskOperator::Load(void) noexcept {
+			m_KillGraph.Load("data/UI/kill.png");
+		}
+		void			TaskOperator::Set(void) noexcept {
+			m_TaskInfoList.clear();
+		}
+		bool			TaskOperator::CheckItem(int ItemID) noexcept {
+			auto* SideLogParts = SideLog::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			if (IsActiveTask(TaskType::Obtain) && m_TaskInfoList.begin()->first.m_ItemID == ItemID) {
+				++m_TaskInfoList.begin()->second;
+				if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
+					m_TaskInfoList.erase(this->m_TaskInfoList.begin());
+					PlayerMngr->GetPlayer(0)->AddScore(200);
+					SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
+					StartNextTask();
+					return true;
+				}
+			}
+			return false;
+		}
+		bool			TaskOperator::CheckKill(void) noexcept {
+			auto* SideLogParts = SideLog::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			if (IsActiveTask(TaskType::KillEnemy)) {
+				++m_TaskInfoList.begin()->second;
+				if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
+					m_TaskInfoList.erase(this->m_TaskInfoList.begin());
+					PlayerMngr->GetPlayer(0)->AddScore(200);
+					SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
+					StartNextTask();
+					return true;
+				}
+			}
+			return false;
+		}
+		void			TaskOperator::Draw(void) const noexcept {
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+			if (HaveTask()) {
+				int xp1 = 400;
+				int yp1 = 1080 * 3 / 4 - 64;
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Black, true);
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Green, false, 3);
+				switch (this->m_TaskInfoList.begin()->first.m_TaskType) {
+				case TaskType::Obtain:
+				{
+					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+						&Objects::ItemObjDataManager::Instance()->GetList().at(this->m_TaskInfoList.begin()->first.m_ItemID)->GetIconGraph(),
+						xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
+				}
+				break;
+				case TaskType::KillEnemy:
+				{
+					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_KillGraph, xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
+				}
+				break;
+				default:
+					break;
+				}
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "%d / %d",
+					m_TaskInfoList.begin()->second, m_TaskInfoList.begin()->first.m_Count);
+			}
+			else {
+				int xp1 = 400;
+				int yp1 = 1080 * 3 / 4 - 64;
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Black, true);
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Green, false, 3);
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "ALL CLEAR");
+			}
+		}
+		void			TaskOperator::Dispose(void) noexcept {
+			m_KillGraph.Dispose();
+		}
 	}
 }

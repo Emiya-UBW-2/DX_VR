@@ -1,7 +1,6 @@
 ﻿#pragma warning(disable:4464)
 #include	"../MainScene/NetworkBrowser.hpp"
 #include	"MainScene.hpp"
-#include <random>
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -13,9 +12,12 @@ namespace FPS_n2 {
 			BackGround::BackGroundControl::Create();
 			CommonBattleResource::Load();
 			HitMarkerPool::Create();
-			this->m_UIclass.Load();
-			this->m_UIresult.Load();
-			this->m_PauseMenuControl.Load();
+
+			this->m_PauseMenuControl = std::make_unique<PauseMenuControl>();
+			this->m_UIclass = std::make_unique<MainSceneUI>();
+			this->m_UIresult = std::make_unique<MainSceneResultUI>();
+			this->m_TransceiverUI = std::make_unique<TransceiverUI>();
+			this->m_TaskOperator = std::make_unique<TaskOperator>();
 			//
 			for (const auto& Path : Objects::ItemObjDataManager::Instance()->GetPathList()) {
 				ObjMngr->LoadModelBefore(Path);
@@ -55,8 +57,6 @@ namespace FPS_n2 {
 			ObjMngr->LoadModelBefore("data/model/circle/");
 
 			ObjMngr->LoadModelBefore("data/model/UH60_Movie/");
-
-			m_KillGraph.Load("data/UI/kill.png");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -305,56 +305,23 @@ namespace FPS_n2 {
 					);
 				}
 			}
+			this->m_TaskOperator->Set();
 			if (this->m_IsTutorial) {
-				m_TaskInfoList.clear();
-				{
-					std::pair<TaskInfo, int> Tmp;
-					Tmp.first.m_TaskType = TaskType::KillEnemy;
-					Tmp.first.m_Count = 1;
-					Tmp.second = 0;
-					m_TaskInfoList.emplace_back(Tmp);
-				}
-				{
-					std::pair<TaskInfo, int> Tmp;
-					Tmp.first.m_TaskType = TaskType::KillEnemy;
-					Tmp.first.m_Count = 3;
-					Tmp.second = 0;
-					m_TaskInfoList.emplace_back(Tmp);
-				}
-				{
-					std::pair<TaskInfo, int> Tmp;
-					Tmp.first.m_TaskType = TaskType::Obtain;
-					for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
-						if (Objects::ItemObjDataManager::Instance()->Get(loop)->EnableSpawnBySoldier()) {
-							Tmp.first.m_ItemID = loop;
-							break;
-						}
+				this->m_TaskOperator->AddKillEnemy(1);
+				this->m_TaskOperator->AddKillEnemy(3);
+				for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+					if (Objects::ItemObjDataManager::Instance()->Get(loop)->EnableSpawnBySoldier()) {
+						this->m_TaskOperator->AddObtain(loop, 1);
+						break;
 					}
-					Tmp.first.m_Count = 1;
-					Tmp.second = 0;
-					m_TaskInfoList.emplace_back(Tmp);
 				}
 			}
 			else{
-				m_TaskInfoList.clear();
-				{
-					std::pair<TaskInfo, int> Tmp;
-					Tmp.first.m_TaskType = TaskType::KillEnemy;
-					Tmp.first.m_Count = 2 + GetRand(2);//1～3
-					Tmp.second = 0;
-					m_TaskInfoList.emplace_back(Tmp);
-				}
+				this->m_TaskOperator->AddKillEnemy(2 + GetRand(2));
 				for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
-					std::pair<TaskInfo, int> Tmp;
-					Tmp.first.m_TaskType = TaskType::Obtain;
-					Tmp.first.m_ItemID = loop;
-					Tmp.first.m_Count = 1 + GetRand(2);//1～3
-					Tmp.second = 0;
-					m_TaskInfoList.emplace_back(Tmp);
+					this->m_TaskOperator->AddObtain(loop, 1 + GetRand(2));
 				}
-				std::random_device seed_gen;
-				std::mt19937 engine(seed_gen());
-				std::shuffle(this->m_TaskInfoList.begin(), m_TaskInfoList.end(), engine);
+				this->m_TaskOperator->Shuffle();
 			}
 			{
 				Vector3DX TargetPos = Vector3DX::zero();
@@ -407,10 +374,11 @@ namespace FPS_n2 {
 				}
 			}
 			//UI
-			this->m_UIclass.Set();
-			this->m_UIresult.Set();
+			this->m_UIclass->Set();
+			this->m_UIresult->Set();
+			this->m_TransceiverUI->Set();
 			//
-			this->m_PauseMenuControl.Init();
+			this->m_PauseMenuControl->Init();
 			FadeControl::Instance()->Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.0f;
@@ -449,7 +417,7 @@ namespace FPS_n2 {
 				}
 			}
 			if (this->m_IsTutorial) {
-				m_TextID = 100;
+				this->m_TransceiverUI->Put(100, 180.f);
 			}
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
@@ -470,8 +438,8 @@ namespace FPS_n2 {
 
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 			PostPassParts->SetLevelFilter(38, 154, 1.0f);
-			this->m_PauseMenuControl.Update();
-			if (this->m_PauseMenuControl.IsRetire()) {
+			this->m_PauseMenuControl->Update();
+			if (this->m_PauseMenuControl->IsRetire()) {
 				if (!this->m_IsEnd) {
 					FadeControl::Instance()->SetBlackOut(true);
 				}
@@ -559,54 +527,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			{
-				int SoundID = InvalidID;
-				if (this->m_TextID < 10) {
-					SoundID = static_cast<int>(VoiceEnum::V000) + m_TextID;
-				}
-				else if (this->m_TextID < 20) {
-					SoundID = static_cast<int>(VoiceEnum::V010) + (this->m_TextID - 10);
-				}
-				else if (this->m_TextID < 100) {
-				}
-				else if (this->m_TextID < 110) {
-					SoundID = static_cast<int>(VoiceEnum::V100) + (this->m_TextID - 100);
-				}
-				if (!this->m_IsTutorial) {
-					if (this->m_TextID != InvalidID) {
-						if (this->m_PrevTextSoundID != SoundID) {
-							if (SoundID != InvalidID) {
-								if (SE->Get(SoundType::VOICE, m_PrevTextSoundID)->CheckPlay()) {
-									SE->Get(SoundType::VOICE, m_PrevTextSoundID)->StopAll();
-								}
-								SE->Get(SoundType::VOICE, SoundID)->Play(DX_PLAYTYPE_BACK, true);
-								m_TextTimer = static_cast<float>(SE->Get(SoundType::VOICE, SoundID)->GetTotalTIme()) / 1000.f;
-							}
-							else {
-								m_TextTimer = 3.f;
-							}
-							m_PrevTextSoundID = SoundID;
-						}
-						if (this->m_TextTimer > 0.f) {
-							m_TextTimer = std::max(this->m_TextTimer - DXLib_refParts->GetDeltaTime(), 0.f);
-							if (this->m_TextTimer == 0.f) {
-								m_TextID = InvalidID;
-							}
-						}
-					}
-				}
-				else {
-					if (this->m_PrevTextSoundID != SoundID) {
-						if (SoundID != InvalidID) {
-							if (SE->Get(SoundType::VOICE, m_PrevTextSoundID)->CheckPlay()) {
-								SE->Get(SoundType::VOICE, m_PrevTextSoundID)->StopAll();
-							}
-							SE->Get(SoundType::VOICE, SoundID)->Play(DX_PLAYTYPE_BACK, true);
-						}
-						m_PrevTextSoundID = SoundID;
-					}
-				}
-			}
+			this->m_TransceiverUI->Update();
 
 			if (!this->m_IsGameReady) {
 				//OPムービー制御
@@ -615,7 +536,7 @@ namespace FPS_n2 {
 					if (this->m_StartAnimTimer == 0.f) {
 						SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, true);
 						if (!this->m_IsTutorial) {
-							m_TextID = 0;
+							this->m_TransceiverUI->Put(0);
 						}
 					}
 					m_StartAnimTimer += DXLib_refParts->GetDeltaTime();
@@ -661,7 +582,7 @@ namespace FPS_n2 {
 							Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
 						}
 
-						if (this->m_StartAnimTimer >= 4.5f + 3.f && !this->m_PauseMenuControl.IsRetire()) {
+						if (this->m_StartAnimTimer >= 4.5f + 3.f && !this->m_PauseMenuControl->IsRetire()) {
 							if (FadeControl::Instance()->IsClear() && !m_IsSkipMovie) {
 								FadeControl::Instance()->SetBlackOut(true);
 							}
@@ -684,7 +605,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					if (this->m_StartAnimTimer < 4.5f + 3.f && !this->m_PauseMenuControl.IsRetire()) {
+					if (this->m_StartAnimTimer < 4.5f + 3.f && !this->m_PauseMenuControl->IsRetire()) {
 						if (!m_IsSkipMovie) {
 							if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 								m_IsSkipMovie = true;
@@ -723,16 +644,16 @@ namespace FPS_n2 {
 				return true;
 			}
 
-			if (this->m_IsGameClear && !this->m_PauseMenuControl.IsRetire()) {
+			if (this->m_IsGameClear && !this->m_PauseMenuControl->IsRetire()) {
 				SceneParts->SetPauseEnable(false);
-				int EndCode = this->m_UIresult.Update();
+				int EndCode = this->m_UIresult->Update();
 				if (EndCode != InvalidID) {
 					if (!this->m_IsEnd) {
 						this->m_IsEnd = true;
 
 						FadeControl::Instance()->SetBlackOut(true);
 						//セーブデータにIDを追加
-						int ID = this->m_UIresult.GetSkillSelect();
+						int ID = this->m_UIresult->GetSkillSelect();
 
 						if (!this->m_IsTutorial) {
 							if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
@@ -785,7 +706,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				float FadeTimer = this->m_UIresult.GetTimer();
+				float FadeTimer = this->m_UIresult->GetTimer();
 				if (FadeTimer >= 2.f) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(FadeTimer / 2.f, 0.f, 1.f))));
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli2))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(FadeTimer / 2.f, 0.f, 1.f))));
@@ -808,8 +729,8 @@ namespace FPS_n2 {
 							KeyGuideParts->SetGuideFlip();
 							SceneParts->SetPauseEnable(true);
 							if (this->m_IsTutorial) {
-								if (this->m_TextID == 100) {
-									m_TextID = 101;
+								if (this->m_TransceiverUI->GetID() == 100) {
+									this->m_TransceiverUI->Put(101, 180.f);
 								}
 							}
 						}
@@ -841,7 +762,7 @@ namespace FPS_n2 {
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 									m_AnnounceTimer = 1.f;
 									if (!this->m_IsTutorial) {
-										m_TextID = 2;
+										this->m_TransceiverUI->Put(2);
 									}
 								}
 								else {
@@ -851,7 +772,7 @@ namespace FPS_n2 {
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 											m_AnnounceTimer = 1.f;
 											if (!this->m_IsTutorial) {
-												m_TextID = 3;
+												this->m_TransceiverUI->Put(3);
 											}
 										}
 									}
@@ -865,23 +786,20 @@ namespace FPS_n2 {
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 										m_AnnounceTimer = 1.f;
 										if (!this->m_IsTutorial) {
-											m_TextID = 1;
+											this->m_TransceiverUI->Put(1);
 										}
 									}
 								}
 							}
 							if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
 								if (static_cast<int>(this->m_BattleTimer) == 174) {
-									if (this->m_TaskInfoList.size() > 0) {
-										SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(this->m_TaskInfoList.begin()->first.m_TaskType)));
-										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
-									}
+									this->m_TaskOperator->StartNextTask();
 								}
 							}
 							if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
 								if (static_cast<int>(this->m_BattleTimer) == 30) {
 									if (!this->m_IsTutorial) {
-										m_TextID = 5;
+										this->m_TransceiverUI->Put(5);
 									}
 								}
 							}
@@ -987,10 +905,10 @@ namespace FPS_n2 {
 					bool isArmerHealing = true;
 					bool isPressed = false;
 					int TaskItemID = InvalidID;
-					if (this->m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain) {
+					if (this->m_TaskOperator->IsActiveTask(TaskType::Obtain)) {
 						for (auto& ID : ViewPlayer->GetInventory()) {
 							if (!ID.HasItem()) { continue; }
-							if (this->m_TaskInfoList.begin()->first.m_ItemID == ID.m_ItemID) {
+							if (this->m_TaskOperator->GetNowTaskItemID() == ID.m_ItemID) {
 								TaskItemID = ID.m_ItemID;
 								break;
 							}
@@ -1057,8 +975,8 @@ namespace FPS_n2 {
 										case Objects::ItemType::Armor:
 											ViewChara->HealArmor();
 											if (this->m_IsTutorial) {
-												if (this->m_TextID == 102) {
-													m_TextID = 103;
+												if (this->m_TransceiverUI->GetID() == 102) {
+													this->m_TransceiverUI->Put(103, 180.f);
 												}
 											}
 											break;
@@ -1074,29 +992,22 @@ namespace FPS_n2 {
 											SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(Score)).c_str());
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
 											//タスク
-											if (this->m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain && m_TaskInfoList.begin()->first.m_ItemID == ID.m_ItemID) {
-												++m_TaskInfoList.begin()->second;
-												if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
-													m_TaskInfoList.erase(this->m_TaskInfoList.begin());
-													PlayerMngr->GetPlayer(0)->AddScore(200);
-													SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
-													SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(this->m_TaskInfoList.begin()->first.m_TaskType)));
-													SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
-													this->m_TaskClearOnce = true;
-													if (!this->m_IsTutorial) {
-														m_TextID = 11;
-													}
-													if (this->m_IsTutorial) {
-														if (this->m_TextID == 105) {
-															m_TextID = 106;
-														}
+
+											if (this->m_TaskOperator->CheckItem(ID.m_ItemID)) {
+												this->m_TaskClearOnce = true;
+												if (!this->m_IsTutorial) {
+													this->m_TransceiverUI->Put(11);
+												}
+												if (this->m_IsTutorial) {
+													if (this->m_TransceiverUI->GetID() == 105) {
+														this->m_TransceiverUI->Put(106, 180.f);
 													}
 												}
 											}
 											else {
 												if (this->m_IsTutorial) {
-													if (this->m_TextID == 106) {
-														m_TextID = 107;
+													if (this->m_TransceiverUI->GetID() == 106) {
+														this->m_TransceiverUI->Put(107, 180.f);
 													}
 												}
 											}
@@ -1150,15 +1061,15 @@ namespace FPS_n2 {
 					}
 					if (isEnd) {
 						if (this->m_IsTutorial) {
-							m_TextID = 108;
+							this->m_TransceiverUI->Put(108, 180.f);
 						}
 						m_IsGameClear = true;
 						KeyGuideParts->SetGuideFlip();
-						this->m_UIresult.Start(180.f - m_BattleTimer);
+						this->m_UIresult->Start(180.f - m_BattleTimer);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 						SE->Get(SoundType::BGM, 2)->Play(DX_PLAYTYPE_BACK, true);
 						if (!this->m_IsTutorial) {
-							m_TextID = 4;
+							this->m_TransceiverUI->Put(4);
 						}
 						//納品
 						for (auto& ID : ViewPlayer->GetInventory()) {
@@ -1267,27 +1178,18 @@ namespace FPS_n2 {
 					}
 				}
 				DamageEvents.clear();
-				{
-					if (this->m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::KillEnemy && (PrevKill != PlayerMngr->GetWatchPlayer()->GetKill())) {
-						++m_TaskInfoList.begin()->second;
-						if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
-							m_TaskInfoList.erase(this->m_TaskInfoList.begin());
-							PlayerMngr->GetPlayer(0)->AddScore(200);
-							SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
-							SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(this->m_TaskInfoList.begin()->first.m_TaskType)));
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
-							this->m_TaskClearOnce = true;
-							if (!this->m_IsTutorial) {
-								m_TextID = 10;
-							}
-							if (this->m_IsTutorial) {
-								if (this->m_TextID == 101) {
-									m_TextID = 102;
-								}
-								else if (this->m_TextID <= 104) {
-									m_TextID = 105;
-								}
-							}
+				//
+				if ((PrevKill != PlayerMngr->GetWatchPlayer()->GetKill()) && this->m_TaskOperator->CheckKill()) {
+					this->m_TaskClearOnce = true;
+					if (!this->m_IsTutorial) {
+						this->m_TransceiverUI->Put(10);
+					}
+					if (this->m_IsTutorial) {
+						if (this->m_TransceiverUI->GetID() == 101) {
+							this->m_TransceiverUI->Put(102, 180.f);
+						}
+						else if (this->m_TransceiverUI->GetID() != InvalidID && this->m_TransceiverUI->GetID() <= 104) {
+							this->m_TransceiverUI->Put(105, 180.f);
 						}
 					}
 				}
@@ -1327,35 +1229,7 @@ namespace FPS_n2 {
 						auto& chara = player->GetChara();
 						if (!chara->IsAlive()) { continue; }
 						if (chara->GetIsRappelling()) { continue; }
-						auto Dir = chara->GetEyeRotationCache().zvec() * -1.f;
-						auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
-
-						//自分が当たったら押し出す
-						for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
-							if (!g->IsActive()) { continue; }
-							Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
-							float Len = Vec.magnitude();
-							if ((loop == GetViewPlayerID()) && Len < EatLength) {
-							}
-							if (Len < Radius) {
-								Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
-								if (
-									g->CanPick() &&
-									(player->HasEmptyInventory() != 0) &&
-									((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
-									(BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
-									) {
-									player->AddInventory(g->GetUniqueID());
-									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
-									g->SetActive(false);
-									continue;
-								}
-								else {
-									g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
-									g->SetMove().Update(0.f, 0.f);
-								}
-							}
-						}
+						//TODO
 					}
 				}
 				else {
@@ -1414,8 +1288,8 @@ namespace FPS_n2 {
 			//
 			if (BackGroundParts->PopGrenadeBomb()) {
 				if (this->m_IsTutorial) {
-					if (this->m_TextID <= 103) {
-						m_TextID = 104;
+					if (this->m_TransceiverUI->GetID() != InvalidID && this->m_TransceiverUI->GetID() <= 103) {
+						this->m_TransceiverUI->Put(104, 180.f);
 					}
 				}
 			}
@@ -1565,11 +1439,11 @@ namespace FPS_n2 {
 				}
 				this->m_AnnounceTimer = std::clamp(this->m_AnnounceTimer - DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				//タイマー
-				this->m_UIclass.SetfloatParam(0, this->m_BattleTimer);
-				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
-				this->m_UIclass.SetfloatParam(2, this->m_ReturnPer);
-				this->m_UIclass.SetfloatParam(3, this->m_AnnounceTimer);
-				this->m_UIclass.SetIntParam(0, this->m_IsAddScoreArea);
+				this->m_UIclass->SetfloatParam(0, this->m_BattleTimer);
+				this->m_UIclass->SetfloatParam(1, this->m_StartTimer);
+				this->m_UIclass->SetfloatParam(2, this->m_ReturnPer);
+				this->m_UIclass->SetfloatParam(3, this->m_AnnounceTimer);
+				this->m_UIclass->SetIntParam(0, this->m_IsAddScoreArea);
 				{
 					int select = 1;
 					if (this->m_BattleTimer < 60.f) {
@@ -1578,17 +1452,17 @@ namespace FPS_n2 {
 					if (!this->m_IsFindContainer) {
 						select = 0;
 					}
-					this->m_UIclass.SetIntParam(1, select);
+					this->m_UIclass->SetIntParam(1, select);
 				}
-				this->m_UIclass.SetIntParam(2, CanReturn);
-				this->m_UIclass.Update();
+				this->m_UIclass->SetIntParam(2, CanReturn);
+				this->m_UIclass->Update();
 			}
 			HitMarkerPool::Instance()->Update();
 			EffectSingleton::Instance()->Update();
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
-			if (!(this->m_IsGameClear && !this->m_PauseMenuControl.IsRetire())) {
+			if (!(this->m_IsGameClear && !this->m_PauseMenuControl->IsRetire())) {
 				SetNextSelect(0);
 			}
 			m_MovieHeli.reset();
@@ -1617,21 +1491,23 @@ namespace FPS_n2 {
 			NetWorkBrowser::Release();
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
-			m_KillGraph.Dispose();
 			Objects::AmmoPool::Release();
 			Objects::AmmoLinePool::Release();
 			Objects::ItemObjPool::Release();
 			BackGround::BackGroundControl::Release();
 			CommonBattleResource::Dispose();
-			this->m_UIclass.Dispose();
-			this->m_UIresult.Dispose();
 			Player::PlayerManager::Release();
 			Player::SkillList::Release();
 			ObjectManager::Instance()->DeleteAll();
-			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();
 			m_MainRagDoll.Dispose();
 			m_RagDoll.Dispose();
+
+			this->m_PauseMenuControl.reset();
+			this->m_UIclass.reset();
+			this->m_UIresult.reset();
+			this->m_TransceiverUI.reset();
+			this->m_TaskOperator.reset();
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(int Range) const noexcept {
@@ -1650,7 +1526,6 @@ namespace FPS_n2 {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
-			auto* LocalizeParts = LocalizePool::Instance();
 
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 			if (this->m_IsGameReady) {
@@ -1702,43 +1577,9 @@ namespace FPS_n2 {
 							}
 						}
 						//UI
-						this->m_UIclass.Draw();
+						this->m_UIclass->Draw();
 						//タスク
-						{
-							if (this->m_TaskInfoList.size() > 0) {
-								int xp1 = 400;
-								int yp1 = 1080 * 3 / 4 - 64;
-								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Black, true);
-								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Green, false, 3);
-								switch (this->m_TaskInfoList.begin()->first.m_TaskType) {
-								case TaskType::Obtain:
-								{
-									DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
-										&Objects::ItemObjDataManager::Instance()->GetList().at(this->m_TaskInfoList.begin()->first.m_ItemID)->GetIconGraph(),
-										xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
-								}
-								break;
-								case TaskType::KillEnemy:
-								{
-									DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_KillGraph, xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
-								}
-								break;
-								default:
-									break;
-								}
-								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-									FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "%d / %d",
-									m_TaskInfoList.begin()->second, m_TaskInfoList.begin()->first.m_Count);
-							}
-							else {
-								int xp1 = 400;
-								int yp1 = 1080 * 3 / 4 - 64;
-								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Black, true);
-								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Green, false, 3);
-								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-									FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "ALL CLEAR");
-							}
-						}
+						this->m_TaskOperator->Draw();
 					}
 #if DEBUG_NET
 					NetWorkBrowser::Instance()->Draw();						//通信設定
@@ -1766,25 +1607,16 @@ namespace FPS_n2 {
 				}
 
 				if (this->m_IsGameClear) {
-					this->m_UIresult.Draw();
+					this->m_UIresult->Draw();
 				}
 			}
 			//セリフ
-			if (this->m_TextID != InvalidID) {
-				std::string Str = "";
-				Str += "[ ";
-				Str += LocalizeParts->Get(6000 + m_TextID);
-				Str += " ]";
-				bool IsDraw = false;
-				IsDraw |= (this->m_IsGameReady && !this->m_IsGameClear && ViewChara->IsAlive() && !SceneParts->IsPause());
-				IsDraw |= (this->m_IsGameReady && this->m_IsGameClear);
-				IsDraw |= (!this->m_IsGameReady);
-				if (IsDraw) {
-					DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 18,
-						(1920 / 2 - 520), (1080 - 128),
-						(1920 / 2 + 520), (1080 - 128 + 18 * 3),
-						White, Black, Str);
-				}
+			bool IsDraw = false;
+			IsDraw |= (this->m_IsGameReady && !this->m_IsGameClear && ViewChara->IsAlive() && !SceneParts->IsPause());
+			IsDraw |= (this->m_IsGameReady && this->m_IsGameClear);
+			IsDraw |= (!this->m_IsGameReady);
+			if (IsDraw) {
+				this->m_TransceiverUI->Draw();
 			}
 			//
 			FadeControl::Instance()->Draw();
