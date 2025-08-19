@@ -1354,5 +1354,136 @@ namespace FPS_n2 {
 		void			TaskOperator::Dispose(void) noexcept {
 			m_KillGraph.Dispose();
 		}
+		//
+		void			StartMovie::Load(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			ObjMngr->LoadModelBefore("data/model/UH60_Movie/");
+		}
+		void			StartMovie::Set(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			m_MovieHeli = std::make_shared<Charas::MovieObject>();
+			ObjMngr->InitObject(this->m_MovieHeli, "data/model/UH60_Movie/");
+			this->m_StartAnimTimer = 0.f;
+			this->m_MovieEndTimer = 1.5f;
+			this->m_IsSkipMovie = false;
+		}
+		bool			StartMovie::Update(void) noexcept {
+			bool										IsEnd = false;
+			auto* SE = SoundPool::Instance();
+			auto* Pad = PadControl::Instance();
+			auto* CameraParts = Camera3D::Instance();
+			auto* SceneParts = SceneControl::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
+			auto* OptionParts = OptionManager::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+
+			SetFogEnable(false);
+			if (this->m_StartAnimTimer == 0.f) {
+				SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, true);
+			}
+			m_StartAnimTimer += DXLib_refParts->GetDeltaTime();
+
+			if (PlayerMngr->GetHelicopter()) {
+				PlayerMngr->GetHelicopter()->SetActive(false);
+			}
+			if (PlayerMngr->GetTeamHelicopter()) {
+				PlayerMngr->GetTeamHelicopter()->SetActive(false);
+			}
+
+			Vector3DX Pos = PlayerMngr->GetItemContainerObj()->GetMove().GetPos(); Pos.y = -20.f * Scale3DRate;
+			m_MovieHeli->SetMove().SetPos(Pos);
+
+			m_MovieHeli->UpdateLocal();
+
+			//カメラ
+			Vector3DX CamPos = CameraParts->GetMainCamera().GetCamPos();
+			Vector3DX CamVec = CameraParts->GetMainCamera().GetCamVec();
+			auto fovBuf = CameraParts->GetMainCamera().GetCamFov();
+			float fovTarget = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
+
+			if (this->m_StartAnimTimer < 2.f) {
+				CamPos = Vector3DX::vget(3.f, -26.5f, 10.f) * Scale3DRate;
+				CamVec = m_MovieHeli->GetObj().GetFrameLocalWorldMatrix(this->m_MovieHeli->GetFrame(static_cast<int>(Charas::MovieHeliFrame::Center))).pos();
+				Easing(&fovBuf, deg2rad(70), 0.9f, EasingType::OutExpo);
+			}
+			else if (this->m_StartAnimTimer < 4.5f) {
+				CamPos = m_MovieHeli->GetObj().GetFrameLocalWorldMatrix(this->m_MovieHeli->GetFrame(static_cast<int>(Charas::MovieHeliFrame::Center))).pos() + Vector3DX::vget(0.f, 2.5f, 0.1f) * Scale3DRate;
+				CamVec = m_MovieHeli->GetObj().GetFrameLocalWorldMatrix(this->m_MovieHeli->GetFrame(static_cast<int>(Charas::MovieHeliFrame::Center))).pos();
+				Camera3D::Instance()->SetCamShake(0.5f, 0.1f * Scale3DRate);
+				Easing(&fovBuf, deg2rad(140), 0.9f, EasingType::OutExpo);
+			}
+			else {
+				CamPos = Vector3DX::vget(0.f, -24.0f, 0.f) * Scale3DRate;
+				if (this->m_StartAnimTimer < 4.5f + 1.5f) {
+					CamVec = Pos;
+					Camera3D::Instance()->SetCamShake(0.5f, 0.5f * Scale3DRate);
+					fovBuf = deg2rad(70);
+				}
+				else {
+					Easing(&CamVec, PlayerMngr->GetItemContainerObj()->GetMove().GetPos(), 0.95f, EasingType::OutExpo);
+					Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
+				}
+
+				if (this->m_StartAnimTimer >= 4.5f + 3.f) {
+					if (FadeControl::Instance()->IsClear() && !m_IsSkipMovie) {
+						FadeControl::Instance()->SetBlackOut(true);
+					}
+					else {
+						m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+						if (this->m_MovieEndTimer == 0.f) {
+							m_MovieHeli->SetActive(false);
+							FadeControl::Instance()->SetBlackOut(false);
+							IsEnd = true;
+							fovBuf = fovTarget;
+							SceneParts->SetPauseEnable(false);
+							SetFogEnable(true);
+							if (PlayerMngr->GetHelicopter()) {
+								PlayerMngr->GetHelicopter()->SetActive(true);
+							}
+							if (PlayerMngr->GetTeamHelicopter()) {
+								PlayerMngr->GetTeamHelicopter()->SetActive(true);
+							}
+						}
+					}
+				}
+			}
+			if (this->m_StartAnimTimer < 4.5f + 3.f) {
+				if (!m_IsSkipMovie) {
+					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+						m_IsSkipMovie = true;
+						FadeControl::Instance()->SetBlackOut(true);
+					}
+				}
+				else {
+					m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+					if (this->m_MovieEndTimer == 0.f) {
+						m_MovieHeli->SetActive(false);
+						FadeControl::Instance()->SetBlackOut(false);
+						IsEnd = true;
+						fovBuf = fovTarget;
+						SceneParts->SetPauseEnable(false);
+						SetFogEnable(true);
+						if (PlayerMngr->GetHelicopter()) {
+							PlayerMngr->GetHelicopter()->SetActive(true);
+						}
+						if (PlayerMngr->GetTeamHelicopter()) {
+							PlayerMngr->GetTeamHelicopter()->SetActive(true);
+						}
+					}
+				}
+			}
+
+			CameraParts->SetMainCamera().SetCamPos(
+				CamPos + Camera3D::Instance()->GetCamShake(),
+				CamVec + Camera3D::Instance()->GetCamShake(),
+				Vector3DX::up());
+			CameraParts->SetMainCamera().SetCamInfo(fovBuf, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
+
+
+			//背景
+			BackGroundParts->Update();
+			return IsEnd;
+		}
 	}
 }

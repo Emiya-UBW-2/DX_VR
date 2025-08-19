@@ -26,6 +26,7 @@ namespace FPS_n2 {
 			std::unique_ptr<MainSceneResultUI>			m_UIresult;
 			std::unique_ptr<TransceiverUI>				m_TransceiverUI;
 			std::unique_ptr<TaskOperator>				m_TaskOperator;
+			std::unique_ptr<StartMovie>					m_StartMovie;
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };			//NetWork
 			NetWork::PlayerSendData						m_LocalSend;
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
@@ -37,22 +38,15 @@ namespace FPS_n2 {
 			float										m_AnnounceTimer{ 0.0f };
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
-			float										m_GameClearCount2 = 0.f;
 			float										m_FadeoutEndTimer = 0.f;
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
-			MV1											m_MainRagDoll;
-			MV1											m_RagDoll;
 			float										AberrationPower{ 1.f };
 			bool										m_IsAddScoreArea = false;
 			int											m_LimitAlarmCount{};
 			float										m_LimitAlarmTimer{ 0.0f };
-			bool										m_IsGameReady = false;
-			float										m_StartAnimTimer{ 0.0f };
-			std::shared_ptr<Charas::MovieObject>		m_MovieHeli;
+			bool										m_IsStartMoviePlay = true;
 			bool										m_TaskClearOnce{ false };
-			bool										m_IsSkipMovie{ false };
-			float										m_MovieEndTimer{ 0.0f };
 			bool										m_IsTutorial{ false };
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
@@ -61,7 +55,6 @@ namespace FPS_n2 {
 				}
 				return (PlayerID)0;
 			}
-
 			bool		IsStartedBattle(void) const noexcept { return this->m_StartTimer <= 0.0f; }
 		public:
 			void		SetTutorial(bool value) noexcept { this->m_IsTutorial = value; }
@@ -82,7 +75,7 @@ namespace FPS_n2 {
 			void			Dispose_Load_Sub(void) noexcept override;
 			//
 			void			BG_Draw_Sub(void) const noexcept override {
-				if (!this->m_IsGameReady) {
+				if (this->m_IsStartMoviePlay) {
 					FillGraph(GetDrawScreen(), 0, 0, 0);
 				}
 				BackGround::BackGroundControl::Instance()->BG_Draw();

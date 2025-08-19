@@ -6,6 +6,7 @@
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 
 #include	"../MainScene/Player/Player.hpp"
+#include	"../MainScene/Object/MovieCharacter.hpp"
 
 #include <random>
 
@@ -245,5 +246,26 @@ namespace FPS_n2 {
 			void			Dispose(void) noexcept;
 		};
 
+		class StartMovie {
+			std::shared_ptr<Charas::MovieObject>		m_MovieHeli;
+			float										m_StartAnimTimer{ 0.0f };
+			float										m_MovieEndTimer{ 0.0f };
+			bool										m_IsSkipMovie{ false };
+		public:
+			StartMovie(void) noexcept { Load(); }
+			StartMovie(const StartMovie&) = delete;
+			StartMovie(StartMovie&&) = delete;
+			StartMovie& operator=(const StartMovie&) = delete;
+			StartMovie& operator=(StartMovie&&) = delete;
+
+			virtual ~StartMovie(void) noexcept { Dispose(); }
+		public:
+			void			Load(void) noexcept;
+			void			Set(void) noexcept;
+			bool			Update(void) noexcept;
+			void			Dispose(void) noexcept {
+				m_MovieHeli.reset();
+			}
+		};
 	}
 }

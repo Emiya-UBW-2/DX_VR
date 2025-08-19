@@ -410,6 +410,8 @@ namespace FPS_n2 {
 			std::shared_ptr<Objects::ArmorObj>			m_ArmorObj;
 			std::shared_ptr<Objects::ArmorObj>			m_HelmetObj;
 			std::shared_ptr<Objects::ItemContainerObj>	m_ItemContainerObj;
+			MV1											m_MainRagDoll;
+			MV1											m_RagDoll;
 		public:
 			float										m_FindCount{};
 		private:
@@ -419,8 +421,12 @@ namespace FPS_n2 {
 			PlayerManager& operator=(const PlayerManager&) = delete;
 			PlayerManager& operator=(PlayerManager&&) = delete;
 
-			virtual ~PlayerManager(void) noexcept {}
+			virtual ~PlayerManager(void) noexcept { Dispose(); }
 		public:
+			const auto& GetTeamRagDoll(void) const noexcept { return this->m_MainRagDoll; }
+			const auto& GetEnemyRagDoll(void) const noexcept { return this->m_RagDoll; }
+
+
 			const auto& GetWatchPlayerID(void) const noexcept { return this->m_WatchPlayer; }
 
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
@@ -448,6 +454,10 @@ namespace FPS_n2 {
 			void		SetItemContainerObj(const std::shared_ptr<Objects::ItemContainerObj>& pObj) noexcept { this->m_ItemContainerObj = pObj; }
 			auto&		GetItemContainerObj(void) noexcept { return this->m_ItemContainerObj; }
 		public:
+			void Load() noexcept {
+				MV1::Load("data/Charactor/Main/model_Rag.mv1", &m_MainRagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+				MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+			}
 			void Init(int playerNum) noexcept {
 				if (playerNum > 0) {
 					this->m_PlayerNum = playerNum;
@@ -468,6 +478,8 @@ namespace FPS_n2 {
 					player.reset();
 				}
 				this->m_Player.clear();
+				m_MainRagDoll.Dispose();
+				m_RagDoll.Dispose();
 			}
 		};
 	}

@@ -12,12 +12,14 @@ namespace FPS_n2 {
 			BackGround::BackGroundControl::Create();
 			CommonBattleResource::Load();
 			HitMarkerPool::Create();
+			Player::PlayerManager::Create();
 
 			this->m_PauseMenuControl = std::make_unique<PauseMenuControl>();
 			this->m_UIclass = std::make_unique<MainSceneUI>();
 			this->m_UIresult = std::make_unique<MainSceneResultUI>();
 			this->m_TransceiverUI = std::make_unique<TransceiverUI>();
 			this->m_TaskOperator = std::make_unique<TaskOperator>();
+			this->m_StartMovie = std::make_unique<StartMovie >();
 			//
 			for (const auto& Path : Objects::ItemObjDataManager::Instance()->GetPathList()) {
 				ObjMngr->LoadModelBefore(Path);
@@ -44,9 +46,6 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			MV1::Load("data/Charactor/Main/model_Rag.mv1", &m_MainRagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
-			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
-
 			ObjMngr->LoadModelBefore("data/model/hindD/");
 			ObjMngr->LoadModelBefore("data/model/UH60/");
 			ObjMngr->LoadModelBefore("data/model/BMP3/");
@@ -55,15 +54,12 @@ namespace FPS_n2 {
 			ObjMngr->LoadModelBefore("data/model/Helmet/");
 			ObjMngr->LoadModelBefore("data/model/container/");
 			ObjMngr->LoadModelBefore("data/model/circle/");
-
-			ObjMngr->LoadModelBefore("data/model/UH60_Movie/");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			Objects::AmmoPool::Create();
 			Objects::AmmoLinePool::Create();
 			Objects::ItemObjPool::Create();
-			Player::PlayerManager::Create();
 
 			//スキルをセーブから読み取り
 			Player::SkillList::Create();
@@ -84,7 +80,7 @@ namespace FPS_n2 {
 						}
 					}
 					//ラグドール
-					chara->SetupRagDoll(this->m_MainRagDoll);
+					chara->SetupRagDoll(PlayerMngr->GetTeamRagDoll());
 				}
 				else {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
@@ -93,7 +89,7 @@ namespace FPS_n2 {
 					//chara->LoadCharaGun("MP443", 1);
 					//chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
-					chara->SetupRagDoll(this->m_RagDoll);
+					chara->SetupRagDoll(PlayerMngr->GetEnemyRagDoll());
 				}
 				//
 				chara->SetPlayerID((PlayerID)loop);
@@ -138,8 +134,7 @@ namespace FPS_n2 {
 			PlayerMngr->SetItemContainerObj(std::make_shared<Objects::ItemContainerObj>());
 			ObjMngr->InitObject(PlayerMngr->GetItemContainerObj(), "data/model/container/");
 
-			m_MovieHeli = std::make_shared<Charas::MovieObject>();
-			ObjMngr->InitObject(this->m_MovieHeli, "data/model/UH60_Movie/");
+			this->m_StartMovie->Set();
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -388,7 +383,6 @@ namespace FPS_n2 {
 			this->m_FindContainerTimer = 0.f;
 			this->m_AnnounceTimer = 0.f;
 			this->m_IsGameOver = false;
-			this->m_GameClearCount2 = 0.f;
 			this->m_FadeoutEndTimer = 0.f;
 			this->AberrationPower = 1.f;
 			this->m_IsAddScoreArea = false;
@@ -397,13 +391,7 @@ namespace FPS_n2 {
 			this->m_TaskClearOnce = false;
 			this->m_IsGameClear = false;
 
-			this->m_IsGameReady = false;
-			if (this->m_IsTutorial) {
-				this->m_IsGameReady = true;
-			}
-			this->m_StartAnimTimer = 0.f;
-			this->m_IsSkipMovie = false;
-			this->m_MovieEndTimer = 1.5f;
+			this->m_IsStartMoviePlay = !this->m_IsTutorial;
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
 			//Vector3DX posBuf = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
@@ -421,23 +409,27 @@ namespace FPS_n2 {
 			}
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
-			auto* CameraParts = Camera3D::Instance();
-			auto* DXLib_refParts = DXLib_ref::Instance();
-			auto* PostPassParts = PostPassEffect::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* SceneParts = SceneControl::Instance();
+			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
+			auto* SideLogParts = SideLog::Instance();
+			auto* CameraParts = Camera3D::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
 			auto* KeyGuideParts = KeyGuide::Instance();
+			auto* SceneParts = SceneControl::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			auto* OptionParts = OptionManager::Instance();
-			auto* SideLogParts = SideLog::Instance();
-			auto* SE = SoundPool::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
+
 			PostPassParts->SetLevelFilter(38, 154, 1.0f);
+
 			this->m_PauseMenuControl->Update();
 			if (this->m_PauseMenuControl->IsRetire()) {
 				if (!this->m_IsEnd) {
@@ -460,24 +452,7 @@ namespace FPS_n2 {
 
 			FadeControl::Instance()->Update();
 
-			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
-			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
-			if (!this->m_IsGameReady) {
-				Pad->SetMouseMoveEnable(false);
-				SceneParts->SetPauseEnable(true);
-			}
-			else {
-				if (!m_IsGameClear) {
-					Pad->SetMouseMoveEnable(true);
-#if DEBUG_NET
-					Pad->SetMouseMoveEnable(false);
-#endif
-				}
-				else {
-					Pad->SetMouseMoveEnable(false);
-				}
-			}
 			KeyGuideParts->ChangeGuide(
 				[this]() {
 					auto* SceneParts = SceneControl::Instance();
@@ -529,119 +504,32 @@ namespace FPS_n2 {
 
 			this->m_TransceiverUI->Update();
 
-			if (!this->m_IsGameReady) {
+			if (this->m_IsStartMoviePlay) {
+				Pad->SetMouseMoveEnable(false);
+				SceneParts->SetPauseEnable(true);
 				//OPムービー制御
-				{
-					SetFogEnable(false);
-					if (this->m_StartAnimTimer == 0.f) {
-						SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, true);
+				if (!this->m_PauseMenuControl->IsRetire()) {
+					if (GetIsFirstLoop()) {
 						if (!this->m_IsTutorial) {
 							this->m_TransceiverUI->Put(0);
 						}
 					}
-					m_StartAnimTimer += DXLib_refParts->GetDeltaTime();
-
-					if (PlayerMngr->GetHelicopter()) {
-						PlayerMngr->GetHelicopter()->SetActive(false);
+					if (this->m_StartMovie->Update()) {
+						this->m_IsStartMoviePlay = false;
 					}
-					if (PlayerMngr->GetTeamHelicopter()) {
-						PlayerMngr->GetTeamHelicopter()->SetActive(false);
-					}
-
-					Vector3DX Pos = PlayerMngr->GetItemContainerObj()->GetMove().GetPos(); Pos.y = -20.f * Scale3DRate;
-					m_MovieHeli->SetMove().SetPos(Pos);
-
-					m_MovieHeli->UpdateLocal();
-
-					//カメラ
-					Vector3DX CamPos = CameraParts->GetMainCamera().GetCamPos();
-					Vector3DX CamVec = CameraParts->GetMainCamera().GetCamVec();
-					auto fovBuf = CameraParts->GetMainCamera().GetCamFov();
-					float fovTarget = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
-
-					if (this->m_StartAnimTimer < 2.f) {
-						CamPos = Vector3DX::vget(3.f, -26.5f, 10.f) * Scale3DRate;
-						CamVec = m_MovieHeli->GetObj().GetFrameLocalWorldMatrix(this->m_MovieHeli->GetFrame(static_cast<int>(Charas::MovieHeliFrame::Center))).pos();
-						Easing(&fovBuf, deg2rad(70), 0.9f, EasingType::OutExpo);
-					}
-					else if (this->m_StartAnimTimer < 4.5f) {
-						CamPos = m_MovieHeli->GetObj().GetFrameLocalWorldMatrix(this->m_MovieHeli->GetFrame(static_cast<int>(Charas::MovieHeliFrame::Center))).pos() + Vector3DX::vget(0.f, 2.5f, 0.1f) * Scale3DRate;
-						CamVec = m_MovieHeli->GetObj().GetFrameLocalWorldMatrix(this->m_MovieHeli->GetFrame(static_cast<int>(Charas::MovieHeliFrame::Center))).pos();
-						Camera3D::Instance()->SetCamShake(0.5f, 0.1f * Scale3DRate);
-						Easing(&fovBuf, deg2rad(140), 0.9f, EasingType::OutExpo);
-					}
-					else {
-						CamPos = Vector3DX::vget(0.f, -24.0f, 0.f) * Scale3DRate;
-						if (this->m_StartAnimTimer < 4.5f + 1.5f) {
-							CamVec = Pos;
-							Camera3D::Instance()->SetCamShake(0.5f, 0.5f * Scale3DRate);
-							fovBuf = deg2rad(70);
-						}
-						else {
-							Easing(&CamVec, PlayerMngr->GetItemContainerObj()->GetMove().GetPos(), 0.95f, EasingType::OutExpo);
-							Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
-						}
-
-						if (this->m_StartAnimTimer >= 4.5f + 3.f && !this->m_PauseMenuControl->IsRetire()) {
-							if (FadeControl::Instance()->IsClear() && !m_IsSkipMovie) {
-								FadeControl::Instance()->SetBlackOut(true);
-							}
-							else {
-								m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
-								if (this->m_MovieEndTimer == 0.f) {
-									m_MovieHeli->SetActive(false);
-									FadeControl::Instance()->SetBlackOut(false);
-									this->m_IsGameReady = true;
-									fovBuf = fovTarget;
-									SceneParts->SetPauseEnable(false);
-									SetFogEnable(true);
-									if (PlayerMngr->GetHelicopter()) {
-										PlayerMngr->GetHelicopter()->SetActive(true);
-									}
-									if (PlayerMngr->GetTeamHelicopter()) {
-										PlayerMngr->GetTeamHelicopter()->SetActive(true);
-									}
-								}
-							}
-						}
-					}
-					if (this->m_StartAnimTimer < 4.5f + 3.f && !this->m_PauseMenuControl->IsRetire()) {
-						if (!m_IsSkipMovie) {
-							if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
-								m_IsSkipMovie = true;
-								FadeControl::Instance()->SetBlackOut(true);
-							}
-						}
-						else {
-							m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
-							if (this->m_MovieEndTimer == 0.f) {
-								m_MovieHeli->SetActive(false);
-								FadeControl::Instance()->SetBlackOut(false);
-								this->m_IsGameReady = true;
-								fovBuf = fovTarget;
-								SceneParts->SetPauseEnable(false);
-								SetFogEnable(true);
-								if (PlayerMngr->GetHelicopter()) {
-									PlayerMngr->GetHelicopter()->SetActive(true);
-								}
-								if (PlayerMngr->GetTeamHelicopter()) {
-									PlayerMngr->GetTeamHelicopter()->SetActive(true);
-								}
-							}
-						}
-					}
-
-					CameraParts->SetMainCamera().SetCamPos(
-						CamPos + Camera3D::Instance()->GetCamShake(),
-						CamVec + Camera3D::Instance()->GetCamShake(),
-						Vector3DX::up());
-					CameraParts->SetMainCamera().SetCamInfo(fovBuf, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
-
-
-					//背景
-					BackGroundParts->Update();
 				}
 				return true;
+			}
+			else {
+				if (!m_IsGameClear) {
+					Pad->SetMouseMoveEnable(true);
+#if DEBUG_NET
+					Pad->SetMouseMoveEnable(false);
+#endif
+				}
+				else {
+					Pad->SetMouseMoveEnable(false);
+				}
 			}
 
 			if (this->m_IsGameClear && !this->m_PauseMenuControl->IsRetire()) {
@@ -1388,7 +1276,6 @@ namespace FPS_n2 {
 			}
 			//PlayerMngr->GetVehicle()->SetCam(CameraParts->SetMainCamera());
 
-
 #if defined(DEBUG) && FALSE
 			auto Put = CameraParts->GetMainCamera().GetCamPos() / Scale3DRate;
 			printfDx("%f,%f,%f\n", Put.x, Put.y, Put.z);
@@ -1465,7 +1352,6 @@ namespace FPS_n2 {
 			if (!(this->m_IsGameClear && !this->m_PauseMenuControl->IsRetire())) {
 				SetNextSelect(0);
 			}
-			m_MovieHeli.reset();
 			auto* SceneParts = SceneControl::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -1491,6 +1377,12 @@ namespace FPS_n2 {
 			NetWorkBrowser::Release();
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
+			this->m_StartMovie.reset();
+			this->m_PauseMenuControl.reset();
+			this->m_UIclass.reset();
+			this->m_UIresult.reset();
+			this->m_TransceiverUI.reset();
+			this->m_TaskOperator.reset();
 			Objects::AmmoPool::Release();
 			Objects::AmmoLinePool::Release();
 			Objects::ItemObjPool::Release();
@@ -1500,14 +1392,6 @@ namespace FPS_n2 {
 			Player::SkillList::Release();
 			ObjectManager::Instance()->DeleteAll();
 			HitMarkerPool::Release();
-			m_MainRagDoll.Dispose();
-			m_RagDoll.Dispose();
-
-			this->m_PauseMenuControl.reset();
-			this->m_UIclass.reset();
-			this->m_UIresult.reset();
-			this->m_TransceiverUI.reset();
-			this->m_TaskOperator.reset();
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(int Range) const noexcept {
@@ -1528,7 +1412,11 @@ namespace FPS_n2 {
 			auto* SceneParts = SceneControl::Instance();
 
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
-			if (this->m_IsGameReady) {
+
+			if (this->m_IsStartMoviePlay) {
+				this->m_TransceiverUI->Draw();
+			}
+			else {
 				if (ViewChara->IsAlive() && !m_IsGameClear) {
 					//レティクル表示
 					if (ViewChara->GetGunPtrNow()) {
@@ -1580,6 +1468,8 @@ namespace FPS_n2 {
 						this->m_UIclass->Draw();
 						//タスク
 						this->m_TaskOperator->Draw();
+						//
+						this->m_TransceiverUI->Draw();
 					}
 #if DEBUG_NET
 					NetWorkBrowser::Instance()->Draw();						//通信設定
@@ -1605,18 +1495,11 @@ namespace FPS_n2 {
 							PingMes);
 					}
 				}
-
+				//クリア時表示
 				if (this->m_IsGameClear) {
 					this->m_UIresult->Draw();
+					this->m_TransceiverUI->Draw();
 				}
-			}
-			//セリフ
-			bool IsDraw = false;
-			IsDraw |= (this->m_IsGameReady && !this->m_IsGameClear && ViewChara->IsAlive() && !SceneParts->IsPause());
-			IsDraw |= (this->m_IsGameReady && this->m_IsGameClear);
-			IsDraw |= (!this->m_IsGameReady);
-			if (IsDraw) {
-				this->m_TransceiverUI->Draw();
 			}
 			//
 			FadeControl::Instance()->Draw();
