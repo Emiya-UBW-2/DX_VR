@@ -36,6 +36,7 @@ namespace FPS_n2 {
 		class MainGameScene : public TEMPSCENE {
 			PauseMenuControl							m_PauseMenuControl;
 			MainSceneUI									m_UIclass;			//UI関連
+			MainSceneResultUI							m_UIresult;
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };			//NetWork
 			NetWork::PlayerSendData						m_LocalSend;
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
@@ -48,18 +49,9 @@ namespace FPS_n2 {
 
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
-			bool										m_IsGameClearEnd = false;
-			std::array<Player::SkillType, 3>			m_SkillSelect{};
-			bool										m_IsSkillSelect = false;
-			float										m_SkillSelectTimer = 0.f;
 
-			int											m_SkillSelectNow = 0;
-			float										m_GameClearCount = 0.f;
 			float										m_GameClearCount2 = 0.f;
-			float										m_GameClearTimer = 0.f;
 			float										m_FadeoutEndTimer = 0.f;
-			GraphHandle									m_GameEndScreen;
-			GraphHandle									m_ResultGraph;
 			GraphHandle									m_KillGraph;
 
 			Vector3DX									m_EffectPos;

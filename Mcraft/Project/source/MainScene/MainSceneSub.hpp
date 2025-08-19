@@ -5,6 +5,8 @@
 
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 
+#include	"../MainScene/Player/Player.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class PauseMenuControl {
@@ -101,6 +103,49 @@ namespace FPS_n2 {
 			void			SetIntParam(size_t ID, int value) noexcept { intParam[ID] = value; }
 			void			SetfloatParam(size_t ID, float value) noexcept { floatParam[ID] = value; }
 			void			SetStrParam(size_t ID, std::string_view value) noexcept { strParam[ID] = value; }
+		};
+
+		class MainSceneResultUI {
+			std::array<Player::SkillType, 3>			m_SkillSelect{};
+			float										m_GameClearTimer = 0.f;
+			int											m_SkillSelectNow = 0;
+			float										m_GameClearCount = 0.f;
+			float										m_SkillSelectTimer = 0.f;
+			bool										m_IsSkillSelect = false;
+			bool										m_IsSkillSelectEnd = false;
+			bool										m_IsGameClearEnd = false;
+			GraphHandle									m_GameEndScreen;
+			GraphHandle									m_ResultGraph;
+			float										m_BattleTimer{};
+		public:
+			MainSceneResultUI(void) noexcept {}
+			MainSceneResultUI(const MainSceneResultUI&) = delete;
+			MainSceneResultUI(MainSceneResultUI&&) = delete;
+			MainSceneResultUI& operator=(const MainSceneResultUI&) = delete;
+			MainSceneResultUI& operator=(MainSceneResultUI&&) = delete;
+
+			virtual ~MainSceneResultUI(void) noexcept {}
+		public:
+			const auto GetSkillSelect() const noexcept { return static_cast<int>(this->m_SkillSelect.at(this->m_SkillSelectNow)); }
+			const auto GetTimer() const noexcept { return this->m_GameClearTimer; }
+		public:
+			void			Load(void) noexcept;
+			void			Set(void) noexcept {
+				this->m_SkillSelectNow = 0;
+				this->m_GameClearCount = 0.6f;
+				this->m_GameClearTimer = 0.f;
+				this->m_IsSkillSelect = false;
+				this->m_IsSkillSelectEnd = false;
+				this->m_IsGameClearEnd = false;
+				this->m_SkillSelectTimer = 0.f;
+			}
+			void			Start(float Time) noexcept;
+			int				Update(void) noexcept;
+			void			Draw(void) const noexcept;
+			void			Dispose(void) noexcept {
+				this->m_GameEndScreen.Dispose();
+				this->m_ResultGraph.Dispose();
+			}
 		};
 	}
 }

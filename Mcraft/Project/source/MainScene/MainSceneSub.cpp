@@ -106,7 +106,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::taskstart), 2, "data/Sound/SE/taskstart.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::alarm), 2, "data/Sound/SE/alarm.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::returnButton), 1, "data/Sound/SE/returnButton.wav", false);
-			
+
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(loop) + ".wav");
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Cocking2_0) + loop, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(loop) + ".wav");
@@ -349,7 +349,7 @@ namespace FPS_n2 {
 				if (std::abs(kirogram - m_Gram) > 5.f) {
 					Easing(&m_Gram, kirogram, 0.95f, EasingType::OutExpo);
 				}
-				else if(std::abs(kirogram - m_Gram) > 0.02f){
+				else if (std::abs(kirogram - m_Gram) > 0.02f) {
 					m_Gram += DXLib_refParts->GetDeltaTime() / 0.1f * ((kirogram - m_Gram) > 0.f ? 1.f : -1.f);
 				}
 				else {
@@ -492,8 +492,8 @@ namespace FPS_n2 {
 
 					xp1 = 1920 / 2;
 					yp1 = 720 - 32;
-					if (hasItem  && this->intParam[0]) {
-						KeyGuideParts->DrawButton(xp1 - 32/2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE));
+					if (hasItem && this->intParam[0]) {
+						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE));
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
 							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3004));
 						yp1 += 64;
@@ -531,7 +531,7 @@ namespace FPS_n2 {
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (280), yp1, (this->floatParam[0] < 60.f) ? Red : White, Black, "%d:%05.2f",
 						static_cast<int>(floatParam[0] / 60.0f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 				}
-				yp1 = (10+32+10);
+				yp1 = (10 + 32 + 10);
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "SCORE");
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
@@ -784,7 +784,7 @@ namespace FPS_n2 {
 
 						DrawCircle(RetX, RetY, 1.f * (1.f - IsDownUIPer), IsDrawAimUIPer);
 					}
-					if ((1.f - IsDrawAimUIPer) > 0.01f && 
+					if ((1.f - IsDrawAimUIPer) > 0.01f &&
 						(ViewChara->GetGunPtrNow() && (ViewChara->GetGunPtrNow()->GetGunAnime() != Charas::GunAnimeID::Watch))
 						) {
 						int RetX = 1920 / 2;
@@ -846,7 +846,7 @@ namespace FPS_n2 {
 						yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
 						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 2);
 						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 5, yp1, xp1, yp1 + 10, Yellow, 2);
-						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 5, yp1, xp1, yp1 - 10,Yellow, 2);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 5, yp1, xp1, yp1 - 10, Yellow, 2);
 					}
 					else {
 						xp1 = 960 + static_cast<int>(28 * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
@@ -858,6 +858,349 @@ namespace FPS_n2 {
 				}
 			}
 			//
+		}
+		//
+		void			MainSceneResultUI::Load(void) noexcept {
+			auto* WindowSizeParts = WindowSizeControl::Instance();
+			m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
+			m_ResultGraph.Load("data/UI/result.png");
+		}
+		void			MainSceneResultUI::Start(float Time) noexcept {
+			m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
+			m_BattleTimer = Time;
+		}
+		int				MainSceneResultUI::Update(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			auto* Pad = PadControl::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+			//
+			int Answer = InvalidID;
+			this->m_GameClearCount += DXLib_refParts->GetDeltaTime();
+			this->m_GameClearTimer += DXLib_refParts->GetDeltaTime();
+			bool Prev = m_IsSkillSelect;
+			if (this->m_GameClearCount > 0.05f && !m_IsGameClearEnd) {
+				m_GameClearCount -= 0.05f;
+				m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
+				//
+				if (this->m_GameClearTimer > 1.5f) {
+					float Per = (this->m_GameClearTimer - 1.5f) / 2.f;
+					float LocalPer = 0.f;
+					const float LerpPer = 0.5f;
+
+					for (int loop = 0; loop < 4; ++loop) {
+						LocalPer = std::clamp((Per - (LerpPer + 0.1f) * loop) / LerpPer, 0.f, 1.f);
+						if (0.f < LocalPer && LocalPer < 1.f) {
+							if ((loop == 3) && (ViewPlayer->GetShot() == 0)) {
+								continue;
+							}
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultbutton))->Play(DX_PLAYTYPE_BACK, true);
+							break;
+						}
+					}
+
+					if (this->m_GameClearTimer > 1.5f + (0.5f + 0.1f) * 5.f * 2.f) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnd))->Play(DX_PLAYTYPE_BACK, true);
+						m_IsGameClearEnd = true;
+					}
+				}
+			}
+			if (this->m_GameClearTimer > 1.5f + (0.5f + 0.1f) * 5.f * 2.f + 1.f) {
+				m_IsSkillSelect = true;
+			}
+			if (this->m_GameClearTimer > 1.5f) {
+				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+					if (!m_IsGameClearEnd) {
+						this->m_GameClearTimer = 1.5f + (0.5f + 0.1f) * 5.f * 2.f;
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnd))->Play(DX_PLAYTYPE_BACK, true);
+						m_IsGameClearEnd = true;
+					}
+					else if (!m_IsSkillSelect) {
+						m_IsSkillSelect = true;
+					}
+					else {
+						Answer = 0;
+						this->m_IsSkillSelectEnd = true;
+					}
+				}
+				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+					if (m_IsGameClearEnd && m_IsSkillSelect) {
+						Answer = 1;
+						this->m_IsSkillSelectEnd = true;
+					}
+				}
+			}
+			if (Prev != m_IsSkillSelect && m_IsSkillSelect) {
+				//選べるスキル総数
+				int CanPicSkill = 0;
+				for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+					if (!(Player::SkillList::Instance()->GetSkilLevel(static_cast<Player::SkillType>(loop)) >= 3)) {
+						++CanPicSkill;
+					}
+				}
+				//
+				for (int loop = 0; loop < 3; ++loop) {
+					if (loop >= CanPicSkill) {
+						m_SkillSelect.at(loop) = Player::SkillType::ADDSCORE;//次遊ぶ際のスコアを+500
+						continue;
+					}
+					m_SkillSelect.at(loop) = static_cast<Player::SkillType>(GetRand(static_cast<int>(Player::SkillType::Max) - 1));
+					bool isContinue = false;
+					//スキルラインナップに被りがある
+					if (!isContinue) {
+						for (int loop2 = 0; loop2 < loop; ++loop2) {
+							if (this->m_SkillSelect.at(loop2) == m_SkillSelect.at(loop)) {
+								isContinue = true;
+								break;
+							}
+						}
+					}
+					//もう選べないスキル
+					if (!isContinue) {
+						if (Player::SkillList::Instance()->GetSkilLevel(this->m_SkillSelect.at(loop)) >= 3) {
+							isContinue = true;
+						}
+					}
+					if (isContinue) {
+						--loop;
+						continue;
+					}
+				}
+			}
+			if (this->m_IsSkillSelect) {
+				m_SkillSelectTimer = std::clamp(this->m_SkillSelectTimer + DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
+			}
+			if (!this->m_IsSkillSelectEnd) {
+				//スキル選択
+				if (this->m_IsGameClearEnd && m_IsSkillSelect && m_SkillSelectTimer >= 1.f) {
+					int xp1 = 1920 / 2;
+					int yp1 = 1080 / 2;
+					float wide = 400.f;
+					bool isSelect = false;
+					for (int loop = 0; loop < 3; ++loop) {
+						xp1 = 1920 / 2 + static_cast<int>(wide * (-(3.f - 1.f) / 2.f + loop));
+						yp1 = 1080 / 2;
+						if (HitPointToRectangle(Pad->GetMS_X(), Pad->GetMS_Y(), xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2)) {
+							if (this->m_SkillSelectNow != loop) {
+								SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
+							}
+							this->m_SkillSelectNow = loop;
+							isSelect = true;
+							if (Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press() || Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press()) {
+								Answer = (Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press()) ? 1 : 0;
+								this->m_IsSkillSelectEnd = true;
+							}
+							break;
+						}
+					}
+					if (!isSelect) {
+						if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
+							--m_SkillSelectNow;
+							if (this->m_SkillSelectNow < 0) {
+								m_SkillSelectNow = 3 - 1;
+							}
+						}
+						if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
+							++m_SkillSelectNow;
+							if (this->m_SkillSelectNow > 3 - 1) {
+								m_SkillSelectNow = 0;
+							}
+						}
+					}
+				}
+			}
+			return Answer;
+		}
+		void			MainSceneResultUI::Draw(void) const noexcept {
+			auto* KeyGuideParts = KeyGuide::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+
+			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
+			if (this->m_GameClearTimer > 1.5f) {
+				float Per = (this->m_GameClearTimer - 1.5f) / 2.f;
+				float LocalPer = 0.f;
+				float Value = 0.f;
+				const float LerpPer = 0.5f;
+				//リザルト描画
+				int xp1 = 960;
+				int yp1 = 930;
+
+				if (!m_IsGameClearEnd || !m_IsSkillSelect) {
+					KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3008));
+				}
+
+
+				xp1 = (960);
+				yp1 = (540);
+
+				LocalPer = std::clamp((Per - 0.f) / LerpPer, 0.f, 1.f);
+				Value = Lerp(0.f, m_BattleTimer, LocalPer);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "TIME");
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d:%05.2f",
+					static_cast<int>(Value / 60.0f), static_cast<float>(static_cast<int>(Value) % 60) + (Value - static_cast<float>(static_cast<int>(Value))));
+
+				yp1 += (32 + 10);
+				LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 1.f) / LerpPer, 0.f, 1.f);
+				Value = Lerp(0.f, static_cast<float>(ViewPlayer->GetScore()), LocalPer);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "SCORE");
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%04d",
+					static_cast<int>(Value));
+
+				yp1 += (32 + 10);
+				LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 2.f) / LerpPer, 0.f, 1.f);
+				Value = Lerp(0.f, static_cast<float> (ViewPlayer->GetKill()), LocalPer);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "KILL");
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d",
+					static_cast<int>(Value));
+
+				if (ViewPlayer->GetShot() > 0) {
+					yp1 += (32 + 10);
+					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 3.f) / LerpPer, 0.f, 1.f);
+					Value = Lerp(0.f, 100.f * static_cast<float>(ViewPlayer->GetHit()) / ViewPlayer->GetShot(), LocalPer);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "HIT RATE");
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%05.2f ％",
+						Value);
+				}
+
+				xp1 = (960);
+				yp1 = (270);
+				LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 5.f) / 0.1f, 0.f, 1.f);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+
+				if (LocalPer < 0.8f) {
+					LocalPer = Lerp(5.f, 0.9f, (LocalPer - 0.f) / (0.8f - 0.0f));
+				}
+				else {
+					LocalPer = Lerp(0.9f, 1.f, (LocalPer - 0.8f) / (1.f - 0.8f));
+				}
+
+				int ShadowOfs = 10 + static_cast<int>((LocalPer - 1.f) * 10.f);
+
+				xp1 += ShadowOfs;
+				yp1 += ShadowOfs;
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
+				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
+				xp1 -= ShadowOfs;
+				yp1 -= ShadowOfs;
+
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+
+				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+
+
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			}
+
+			//スキル選択
+			if (this->m_IsGameClearEnd && m_IsSkillSelect && m_SkillSelectTimer > 0.f) {
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(Lerp(0.f, 128.f, m_SkillSelectTimer)));
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, true);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+
+				int xp1 = 1920 / 2;
+				int yp1 = 1080 / 2;
+
+				if (this->m_SkillSelectTimer < 0.8f) {
+					yp1 += static_cast<int>(Lerp(-1080.f, 64.f, (this->m_SkillSelectTimer - 0.f) / (0.8f - 0.f)));
+				}
+				else if (this->m_SkillSelectTimer < 1.f) {
+					yp1 += static_cast<int>(Lerp(64.f, 0.f, (this->m_SkillSelectTimer - 0.8f) / (1.f - 0.8f)));
+				}
+
+				float wide = 400.f;
+				for (int loop = 0; loop < 3; ++loop) {
+					xp1 = 1920 / 2 + static_cast<int>(wide * (-(3.f - 1.f) / 2.f + loop));
+					bool IsADDSCORE = (this->m_SkillSelect.at(loop) == Player::SkillType::ADDSCORE);
+					int ID = static_cast<int>(this->m_SkillSelect.at(loop));
+					if (IsADDSCORE) {
+						ID = static_cast<int>(Player::SkillType::Max);
+					}
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
+
+					std::string Title = LocalizeParts->Get(5000 + ID);
+					if (!IsADDSCORE) {
+						Title += " Lv.";
+						Title += std::to_string(Player::SkillList::Instance()->GetSkilLevel(this->m_SkillSelect.at(loop)) + 1);
+					}
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1 - 200, White, Black, Title.c_str());
+
+					std::string Str = LocalizeParts->Get(5100 + ID);
+					{
+						std::string t = "[d]";  // 検索文字列
+						auto pos = Str.find(t);
+						auto len = t.length();
+						if (pos != std::string::npos) {
+							int ADD = 1000;
+							if (!IsADDSCORE) {
+								ADD = static_cast<int>(Player::SkillList::Instance()->GetSkillValueNext(this->m_SkillSelect.at(loop)));
+							}
+							Str.replace(pos, len, std::to_string(ADD));
+						}
+					}
+					DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+						xp1 - (static_cast<int>(wide) / 2 - 8 - 64), yp1 + 32, xp1 + (static_cast<int>(wide) / 2 - 8 - 64), yp1 + 540 / 2,
+						White, Black, Str);
+					if (loop == m_SkillSelectNow) {
+						DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
+							xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2,
+							Green, false, 5);
+					}
+				}
+
+				{
+					xp1 = 960;
+					yp1 = 70;
+
+					if (this->m_SkillSelectTimer < 0.9f) {
+						yp1 += static_cast<int>(Lerp(-1080.f, 64.f, (this->m_SkillSelectTimer - 0.f) / (0.9f - 0.f)));
+					}
+					else if (this->m_SkillSelectTimer < 1.f) {
+						yp1 += static_cast<int>(Lerp(64.f, 0.f, (this->m_SkillSelectTimer - 0.9f) / (1.f - 0.9f)));
+					}
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (64),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Green, Black, "Select Skill!");
+				}
+
+				if (this->m_SkillSelectTimer == 1.f) {
+					xp1 = 960;
+					yp1 = 930;
+					KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+					KeyGuideParts->DrawButton(xp1 + 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::SHOT));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3009));
+
+					yp1 -= 64;
+					KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD));
+					KeyGuideParts->DrawButton(xp1 + 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::AIM));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
+				}
+			}
 		}
 	}
 }
