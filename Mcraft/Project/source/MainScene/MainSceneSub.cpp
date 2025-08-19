@@ -264,7 +264,7 @@ namespace FPS_n2 {
 			this->AdrenalineGraph.Load("data/UI/Adrenaline.png");
 
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
-			m_Score = static_cast<float>(ViewPlayer->GetScore());
+			this->m_Score = static_cast<float>(ViewPlayer->GetScore());
 		}
 		void			MainSceneUI::Update(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -292,9 +292,9 @@ namespace FPS_n2 {
 			Easing(&m_AmmoInPer, 0.f, 0.9f, EasingType::OutExpo);
 			if (ViewChara->GetGunPtrNow()) {
 				if (this->m_AmmoNumTotal != ViewChara->GetGunPtrNow()->GetAmmoNumTotal()) {
-					m_AmmoNumTotal = ViewChara->GetGunPtrNow()->GetAmmoNumTotal();
-					m_AmmoInPer = 1.f;
-					m_AmmoRand = (GetRand(100) < 50) ? 1.f : -1.f;
+					this->m_AmmoNumTotal = ViewChara->GetGunPtrNow()->GetAmmoNumTotal();
+					this->m_AmmoInPer = 1.f;
+					this->m_AmmoRand = (GetRand(100) < 50) ? 1.f : -1.f;
 				}
 			}
 			Easing(&m_AmmoRandR, m_AmmoRand, 0.9f, EasingType::OutExpo);
@@ -325,7 +325,7 @@ namespace FPS_n2 {
 						(this->m_RadPrev == 1 && Now == 2) ||
 						(this->m_RadPrev == 2 && Now == 0)
 						) {
-						m_RadR = -1.f;
+						this->m_RadR = -1.f;
 					}
 					else if (
 						(this->m_RadPrev == 0 && Now == 2) ||
@@ -333,12 +333,12 @@ namespace FPS_n2 {
 						(this->m_RadPrev == 1 && Now == 0)
 						)
 					{
-						m_RadR = 1.f;
+						this->m_RadR = 1.f;
 					}
 					else {
-						m_RadR = 1.f;
+						this->m_RadR = 1.f;
 					}
-					m_RadPrev = Now;
+					this->m_RadPrev = Now;
 				}
 				else {
 					Easing(&m_RadR, 0.f, 0.9f, EasingType::OutExpo);
@@ -350,10 +350,10 @@ namespace FPS_n2 {
 					Easing(&m_Gram, kirogram, 0.95f, EasingType::OutExpo);
 				}
 				else if (std::abs(kirogram - m_Gram) > 0.02f) {
-					m_Gram += DXLib_refParts->GetDeltaTime() / 0.1f * ((kirogram - m_Gram) > 0.f ? 1.f : -1.f);
+					this->m_Gram += DXLib_refParts->GetDeltaTime() / 0.1f * ((kirogram - m_Gram) > 0.f ? 1.f : -1.f);
 				}
 				else {
-					m_Gram = kirogram;
+					this->m_Gram = kirogram;
 				}
 			}
 
@@ -363,10 +363,10 @@ namespace FPS_n2 {
 					Easing(&m_Score, Score, 0.95f, EasingType::OutExpo);
 				}
 				else if (std::abs(Score - m_Score) > 0.02f) {
-					m_Score += DXLib_refParts->GetDeltaTime() / 0.1f * ((Score - m_Score) > 0.f ? 1.f : -1.f);
+					this->m_Score += DXLib_refParts->GetDeltaTime() / 0.1f * ((Score - m_Score) > 0.f ? 1.f : -1.f);
 				}
 				else {
-					m_Score = Score;
+					this->m_Score = Score;
 				}
 			}
 
@@ -862,12 +862,12 @@ namespace FPS_n2 {
 		//
 		void			MainSceneResultUI::Load(void) noexcept {
 			auto* WindowSizeParts = WindowSizeControl::Instance();
-			m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
-			m_ResultGraph.Load("data/UI/result.png");
+			this->m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
+			this->m_ResultGraph.Load("data/UI/result.png");
 		}
 		void			MainSceneResultUI::Start(float Time) noexcept {
-			m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
-			m_BattleTimer = Time;
+			this->m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
+			this->m_BattleTimer = Time;
 		}
 		int				MainSceneResultUI::Update(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -881,8 +881,8 @@ namespace FPS_n2 {
 			this->m_GameClearTimer += DXLib_refParts->GetDeltaTime();
 			bool Prev = m_IsSkillSelect;
 			if (this->m_GameClearCount > 0.05f && !m_IsGameClearEnd) {
-				m_GameClearCount -= 0.05f;
-				m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
+				this->m_GameClearCount -= 0.05f;
+				this->m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
 				//
 				if (this->m_GameClearTimer > 1.5f) {
 					float Per = (this->m_GameClearTimer - 1.5f) / 2.f;
@@ -902,22 +902,22 @@ namespace FPS_n2 {
 
 					if (this->m_GameClearTimer > 1.5f + (0.5f + 0.1f) * 5.f * 2.f) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnd))->Play(DX_PLAYTYPE_BACK, true);
-						m_IsGameClearEnd = true;
+						this->m_IsGameClearEnd = true;
 					}
 				}
 			}
 			if (this->m_GameClearTimer > 1.5f + (0.5f + 0.1f) * 5.f * 2.f + 1.f) {
-				m_IsSkillSelect = true;
+				this->m_IsSkillSelect = true;
 			}
 			if (this->m_GameClearTimer > 1.5f) {
 				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 					if (!m_IsGameClearEnd) {
 						this->m_GameClearTimer = 1.5f + (0.5f + 0.1f) * 5.f * 2.f;
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnd))->Play(DX_PLAYTYPE_BACK, true);
-						m_IsGameClearEnd = true;
+						this->m_IsGameClearEnd = true;
 					}
 					else if (!m_IsSkillSelect) {
-						m_IsSkillSelect = true;
+						this->m_IsSkillSelect = true;
 					}
 					else {
 						Answer = 0;
@@ -942,10 +942,10 @@ namespace FPS_n2 {
 				//
 				for (int loop = 0; loop < 3; ++loop) {
 					if (loop >= CanPicSkill) {
-						m_SkillSelect.at(loop) = Player::SkillType::ADDSCORE;//次遊ぶ際のスコアを+500
+						this->m_SkillSelect.at(loop) = Player::SkillType::ADDSCORE;//次遊ぶ際のスコアを+500
 						continue;
 					}
-					m_SkillSelect.at(loop) = static_cast<Player::SkillType>(GetRand(static_cast<int>(Player::SkillType::Max) - 1));
+					this->m_SkillSelect.at(loop) = static_cast<Player::SkillType>(GetRand(static_cast<int>(Player::SkillType::Max) - 1));
 					bool isContinue = false;
 					//スキルラインナップに被りがある
 					if (!isContinue) {
@@ -969,7 +969,7 @@ namespace FPS_n2 {
 				}
 			}
 			if (this->m_IsSkillSelect) {
-				m_SkillSelectTimer = std::clamp(this->m_SkillSelectTimer + DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
+				this->m_SkillSelectTimer = std::clamp(this->m_SkillSelectTimer + DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
 			}
 			if (!this->m_IsSkillSelectEnd) {
 				//スキル選択
@@ -999,14 +999,14 @@ namespace FPS_n2 {
 							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 							--m_SkillSelectNow;
 							if (this->m_SkillSelectNow < 0) {
-								m_SkillSelectNow = 3 - 1;
+								this->m_SkillSelectNow = 3 - 1;
 							}
 						}
 						if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 							++m_SkillSelectNow;
 							if (this->m_SkillSelectNow > 3 - 1) {
-								m_SkillSelectNow = 0;
+								this->m_SkillSelectNow = 0;
 							}
 						}
 					}
@@ -1278,10 +1278,10 @@ namespace FPS_n2 {
 			}
 		}
 		void			TaskOperator::Load(void) noexcept {
-			m_KillGraph.Load("data/UI/kill.png");
+			this->m_KillGraph.Load("data/UI/kill.png");
 		}
 		void			TaskOperator::Set(void) noexcept {
-			m_TaskInfoList.clear();
+			this->m_TaskInfoList.clear();
 		}
 		bool			TaskOperator::CheckItem(int ItemID) noexcept {
 			auto* SideLogParts = SideLog::Instance();
@@ -1290,7 +1290,7 @@ namespace FPS_n2 {
 			if (IsActiveTask(TaskType::Obtain) && m_TaskInfoList.begin()->first.m_ItemID == ItemID) {
 				++m_TaskInfoList.begin()->second;
 				if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
-					m_TaskInfoList.erase(this->m_TaskInfoList.begin());
+					this->m_TaskInfoList.erase(this->m_TaskInfoList.begin());
 					PlayerMngr->GetPlayer(0)->AddScore(200);
 					SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
 					StartNextTask();
@@ -1306,7 +1306,7 @@ namespace FPS_n2 {
 			if (IsActiveTask(TaskType::KillEnemy)) {
 				++m_TaskInfoList.begin()->second;
 				if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
-					m_TaskInfoList.erase(this->m_TaskInfoList.begin());
+					this->m_TaskInfoList.erase(this->m_TaskInfoList.begin());
 					PlayerMngr->GetPlayer(0)->AddScore(200);
 					SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
 					StartNextTask();
@@ -1340,7 +1340,7 @@ namespace FPS_n2 {
 				}
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "%d / %d",
-					m_TaskInfoList.begin()->second, m_TaskInfoList.begin()->first.m_Count);
+					this->m_TaskInfoList.begin()->second, m_TaskInfoList.begin()->first.m_Count);
 			}
 			else {
 				int xp1 = 400;
@@ -1352,7 +1352,7 @@ namespace FPS_n2 {
 			}
 		}
 		void			TaskOperator::Dispose(void) noexcept {
-			m_KillGraph.Dispose();
+			this->m_KillGraph.Dispose();
 		}
 		//
 		void			StartMovie::Load(void) noexcept {
@@ -1361,7 +1361,7 @@ namespace FPS_n2 {
 		}
 		void			StartMovie::Set(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
-			m_MovieHeli = std::make_shared<Charas::MovieObject>();
+			this->m_MovieHeli = std::make_shared<Charas::MovieObject>();
 			ObjMngr->InitObject(this->m_MovieHeli, "data/model/UH60_Movie/");
 			this->m_StartAnimTimer = 0.f;
 			this->m_MovieEndTimer = 1.5f;
@@ -1382,7 +1382,7 @@ namespace FPS_n2 {
 			if (this->m_StartAnimTimer == 0.f) {
 				SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, true);
 			}
-			m_StartAnimTimer += DXLib_refParts->GetDeltaTime();
+			this->m_StartAnimTimer += DXLib_refParts->GetDeltaTime();
 
 			if (PlayerMngr->GetHelicopter()) {
 				PlayerMngr->GetHelicopter()->SetActive(false);
@@ -1392,9 +1392,9 @@ namespace FPS_n2 {
 			}
 
 			Vector3DX Pos = PlayerMngr->GetItemContainerObj()->GetMove().GetPos(); Pos.y = -20.f * Scale3DRate;
-			m_MovieHeli->SetMove().SetPos(Pos);
+			this->m_MovieHeli->SetMove().SetPos(Pos);
 
-			m_MovieHeli->UpdateLocal();
+			this->m_MovieHeli->UpdateLocal();
 
 			//カメラ
 			Vector3DX CamPos = CameraParts->GetMainCamera().GetCamPos();
@@ -1430,9 +1430,9 @@ namespace FPS_n2 {
 						FadeControl::Instance()->SetBlackOut(true);
 					}
 					else {
-						m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+						this->m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 						if (this->m_MovieEndTimer == 0.f) {
-							m_MovieHeli->SetActive(false);
+							this->m_MovieHeli->SetActive(false);
 							FadeControl::Instance()->SetBlackOut(false);
 							IsEnd = true;
 							fovBuf = fovTarget;
@@ -1451,14 +1451,14 @@ namespace FPS_n2 {
 			if (this->m_StartAnimTimer < 4.5f + 3.f) {
 				if (!m_IsSkipMovie) {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
-						m_IsSkipMovie = true;
+						this->m_IsSkipMovie = true;
 						FadeControl::Instance()->SetBlackOut(true);
 					}
 				}
 				else {
-					m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+					this->m_MovieEndTimer = std::max(this->m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 					if (this->m_MovieEndTimer == 0.f) {
-						m_MovieHeli->SetActive(false);
+						this->m_MovieHeli->SetActive(false);
 						FadeControl::Instance()->SetBlackOut(false);
 						IsEnd = true;
 						fovBuf = fovTarget;

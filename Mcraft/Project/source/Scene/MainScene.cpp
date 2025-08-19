@@ -441,13 +441,13 @@ namespace FPS_n2 {
 				SceneParts->SetPauseEnable(false);
 			}
 			if (this->m_IsEnd && FadeControl::Instance()->IsAll()) {
-				m_FadeoutEndTimer += DXLib_refParts->GetDeltaTime();
+				this->m_FadeoutEndTimer += DXLib_refParts->GetDeltaTime();
 				if (this->m_FadeoutEndTimer > 2.f) {
 					return false;
 				}
 			}
 			else {
-				m_FadeoutEndTimer = 0.f;
+				this->m_FadeoutEndTimer = 0.f;
 			}
 
 			FadeControl::Instance()->Update();
@@ -605,7 +605,7 @@ namespace FPS_n2 {
 
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				m_IsFindContainer = false;
+				this->m_IsFindContainer = false;
 			}
 			//Input,AI
 			{
@@ -633,13 +633,13 @@ namespace FPS_n2 {
 
 								StartPos = StartPos - ((StartPos - EndPos).normalized()*(3.f*Scale3DRate));
 								if (BackGroundParts->CheckLinetoMap(StartPos, &EndPos) == 0) {
-									m_IsFindContainer = true;
+									this->m_IsFindContainer = true;
 								}
 							}
 						}
 						if (!this->m_IsEnd) {
 							if (this->m_IsFindContainer) {
-								m_FindContainerTimer += DXLib_refParts->GetDeltaTime();
+								this->m_FindContainerTimer += DXLib_refParts->GetDeltaTime();
 								if (!PrevFindContainer) {
 									if (static_cast<int>(this->m_BattleTimer) > 60) {
 										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4001));
@@ -648,7 +648,7 @@ namespace FPS_n2 {
 										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4002));
 									}
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
-									m_AnnounceTimer = 1.f;
+									this->m_AnnounceTimer = 1.f;
 									if (!this->m_IsTutorial) {
 										this->m_TransceiverUI->Put(2);
 									}
@@ -658,7 +658,7 @@ namespace FPS_n2 {
 										if (static_cast<int>(this->m_BattleTimer) == 60) {
 											SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4002));
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
-											m_AnnounceTimer = 1.f;
+											this->m_AnnounceTimer = 1.f;
 											if (!this->m_IsTutorial) {
 												this->m_TransceiverUI->Put(3);
 											}
@@ -667,12 +667,12 @@ namespace FPS_n2 {
 								}
 							}
 							else {
-								m_FindContainerTimer = 0.f;
+								this->m_FindContainerTimer = 0.f;
 								if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
 									if (static_cast<int>(this->m_BattleTimer) == 179) {
 										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4000));
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
-										m_AnnounceTimer = 1.f;
+										this->m_AnnounceTimer = 1.f;
 										if (!this->m_IsTutorial) {
 											this->m_TransceiverUI->Put(1);
 										}
@@ -778,12 +778,12 @@ namespace FPS_n2 {
 						IsPressArmor = MyInput.GetPADSPress(Controls::PADS::HEALARMOR);
 					}
 
-					m_IsAddScoreArea = false;
+					this->m_IsAddScoreArea = false;
 					if (PlayerMngr->GetItemContainerObj()) {
 						auto Vec = ViewChara->GetMove().GetPos() - PlayerMngr->GetItemContainerObj()->GetMove().GetPos(); Vec.y = 0.f;
 						if (Vec.magnitude() < 3.f * Scale3DRate) {
 							//捨てると納品できるエリア
-							m_IsAddScoreArea = true;
+							this->m_IsAddScoreArea = true;
 						}
 					}
 
@@ -951,7 +951,7 @@ namespace FPS_n2 {
 						if (this->m_IsTutorial) {
 							this->m_TransceiverUI->Put(108, 180.f);
 						}
-						m_IsGameClear = true;
+						this->m_IsGameClear = true;
 						KeyGuideParts->SetGuideFlip();
 						this->m_UIresult->Start(180.f - m_BattleTimer);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
@@ -988,7 +988,7 @@ namespace FPS_n2 {
 					MoveInfoData.mat = ViewChara->GetMove().GetMat();
 					MoveInfoData.WatchRad = ViewChara->GetRotateRad();
 
-					m_LocalSend.SetMyPlayer(MyInput, MoveInfoData, ViewChara->GetDamageEvent(), FreeData);
+					this->m_LocalSend.SetMyPlayer(MyInput, MoveInfoData, ViewChara->GetDamageEvent(), FreeData);
 					ViewChara->SetDamageEventReset();
 					if (this->m_NetWorkController->IsServer()) {
 						//ホストならBMP、ヘリの射撃判定もやる

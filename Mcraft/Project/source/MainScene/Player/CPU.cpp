@@ -257,7 +257,7 @@ namespace FPS_n2 {
 					MyPos = BackGroundParts->GetBuildData().at(SelList.at(GetRand((int)SelList.size() - 1))).GetPos();
 					};
 				auto CheckPathToTarget = [&]() {
-					m_PathChecker.Dispose();
+					this->m_PathChecker.Dispose();
 					return m_PathChecker.Init(MyPos, Target);	// 指定の２点の経路情報を探索する
 					};
 
@@ -326,21 +326,21 @@ namespace FPS_n2 {
 					Vector3DX VecHY; VecHY.Set(Vec.magnitude(), 0.f, VEC.y);
 					auto IsFront = ((Vector3DX::Dot(DirHY.normalized(), VecHY.normalized())) > 0.f);
 					auto cross = Vector3DX::Cross(DirHY.normalized(), VecHY.normalized()).y;
-					m_MyInput.SetAddxRad(IsFront ? (-0.04f * cross) : 0.f);
+					this->m_MyInput.SetAddxRad(IsFront ? (-0.04f * cross) : 0.f);
 				}
 				{
 					auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized())) > 0.f);
 					auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;
 					if (IsFront) {
 						if (abs(cross) < 0.4f) {
-							m_MyInput.SetAddyRad(cross * 0.07f);
+							this->m_MyInput.SetAddyRad(cross * 0.07f);
 						}
 						else {
-							m_MyInput.SetAddyRad(cross * 0.14f);
+							this->m_MyInput.SetAddyRad(cross * 0.14f);
 						}
 					}
 					else {
-						m_MyInput.SetAddyRad((cross > 0) ? 0.1f : -0.1f);
+						this->m_MyInput.SetAddyRad((cross > 0) ? 0.1f : -0.1f);
 					}
 					if (!(IsFront && (abs(cross) < 0.4f))) {
 						if (this->m_MyInput.GetAddyRad() > 0.07f) {
@@ -359,29 +359,29 @@ namespace FPS_n2 {
 				this->Reset();
 				this->m_PathUpdateTimer = 0.f;
 				this->m_MoveFrontTimer = static_cast<float>(GetRand(6));
-				m_PeaceMakerLength = 0.f;
+				this->m_PeaceMakerLength = 0.f;
 				float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::PeaceMaker);
 				if (value > 0.f) {
-					m_PeaceMakerLength = value * Scale3DRate;
+					this->m_PeaceMakerLength = value * Scale3DRate;
 				}
 			}
 			//
 			void		Execute_Before() noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				//初期化
-				m_MyInput.ResetAllInput();
+				this->m_MyInput.ResetAllInput();
 				IsGotLengthToTarget = false;
 				//前準備
-				m_PathUpdateTimer = std::max(this->m_PathUpdateTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+				this->m_PathUpdateTimer = std::max(this->m_PathUpdateTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 				if (this->m_PathUpdateTimer <= 0.f) {
-					m_PathUpdateTimer += 1.f;
+					this->m_PathUpdateTimer += 1.f;
 					this->ChangePoint();
 				}
 
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 
-				m_MyInput.SetInputPADS(Controls::PADS::SQUAT, MyChara->GetIsSquat() && (GetRand(100) < 1));
+				this->m_MyInput.SetInputPADS(Controls::PADS::SQUAT, MyChara->GetIsSquat() && (GetRand(100) < 1));
 
 				//CanRepop
 				if (!MyChara->IsAlive()) {
@@ -402,17 +402,17 @@ namespace FPS_n2 {
 
 					auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized())) > 0.f);
 					auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;
-					m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, IsFront);
-					m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, !IsFront);
-					m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, !(cross > 0));
-					m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, (cross > 0));
+					this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, IsFront);
+					this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, !IsFront);
+					this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, !(cross > 0));
+					this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, (cross > 0));
 				}
 				else{
 					AimDir(Matrix4x4DX::Vtrans(Vec, Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
 					//
-					m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
-					m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, GetRand(100) > 50);
-					m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, GetRand(100) > 50);
+					this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
+					this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, GetRand(100) > 50);
+					this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, GetRand(100) > 50);
 				}
 				//
 				if (MyChara->GetCanLookByPlayer()) {
@@ -440,8 +440,8 @@ namespace FPS_n2 {
 				//エイム
 				AimDir(Matrix4x4DX::Vtrans(GetVectorToTarget(), Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
 				//リーン
-				m_MyInput.SetInputPADS(Controls::PADS::LEAN_L, (this->m_LeanLR == 1));
-				m_MyInput.SetInputPADS(Controls::PADS::LEAN_R, (this->m_LeanLR == -1));
+				this->m_MyInput.SetInputPADS(Controls::PADS::LEAN_L, (this->m_LeanLR == 1));
+				this->m_MyInput.SetInputPADS(Controls::PADS::LEAN_R, (this->m_LeanLR == -1));
 				//後退
 				if (MyChara->GetCanLookByPlayer()) {
 					this->m_BackTimer = std::max(this->m_BackTimer - DXLib_refParts->GetDeltaTime(), 0.f);
@@ -449,7 +449,7 @@ namespace FPS_n2 {
 						this->m_BackTimer = 3.f + GetRandf(2.f);
 					}
 					if (this->m_BackTimer <= 1.f) {
-						m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, true);
+						this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, true);
 					}
 				}
 				else {
@@ -468,17 +468,17 @@ namespace FPS_n2 {
 							auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized())) > 0.f);
 							auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;
 							if (IsFront) {
-								m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, true);
+								this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, true);
 							}
 							else {
-								m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
+								this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
 							}
 							if (!(IsFront && (abs(cross) < 0.4f))) {
 								if (this->m_MyInput.GetAddyRad() > 0.07f) {
-									m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, true);
+									this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, true);
 								}
 								if (this->m_MyInput.GetAddyRad() < -0.07f) {
-									m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, true);
+									this->m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, true);
 								}
 							}
 
@@ -487,7 +487,7 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				m_MyInput.SetInputPADS(Controls::PADS::AIM, true);
+				this->m_MyInput.SetInputPADS(Controls::PADS::AIM, true);
 				//
 				this->m_ShotTimer = std::max(this->m_ShotTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 				if (GetLengthToTarget() < m_PeaceMakerLength) {
@@ -503,7 +503,7 @@ namespace FPS_n2 {
 					this->m_ShotTimer = static_cast<float>(50 + GetRand(100)) / 100.f;
 					Vector3DX Vec = GetVectorToTarget(); Vec.y = 0.f;
 					Vector3DX Vec2 = MyChara->GetEyeRotationCache().zvec() * -1.f; Vec2.y = 0.f;
-					m_MyInput.SetInputPADS(Controls::PADS::SHOT, (MyChara->GetCanLookByPlayer() && (Vector3DX::Dot(Vec, Vec2) > cos(deg2rad(30)))));
+					this->m_MyInput.SetInputPADS(Controls::PADS::SHOT, (MyChara->GetCanLookByPlayer() && (Vector3DX::Dot(Vec, Vec2) > cos(deg2rad(30)))));
 
 				}
 				//
@@ -562,7 +562,7 @@ namespace FPS_n2 {
 		}
 		//
 		AIControl::AIControl(PlayerID MyID) noexcept {
-			m_Param = new Impl;
+			this->m_Param = new Impl;
 			Init(MyID);
 		}
 		AIControl::~AIControl(void) noexcept {
