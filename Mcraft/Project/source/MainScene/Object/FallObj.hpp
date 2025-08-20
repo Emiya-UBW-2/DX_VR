@@ -53,7 +53,7 @@ namespace FPS_n2 {
 			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
+				if (!(GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).IsLangeSmaller(10.0f * Scale3DRate)) { return; }
 				GetObj().DrawModel();
 			}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
@@ -61,7 +61,7 @@ namespace FPS_n2 {
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
 				if (!this->m_FallObject->IsDrawFar()) {
-					if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
+					if (!(GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).IsLangeSmaller(10.0f * Scale3DRate)) { return; }
 				}
 				GetObj().DrawModel();
 			}
@@ -87,14 +87,14 @@ namespace FPS_n2 {
 			void				FirstUpdate(void) noexcept override{}
 			void				DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
+				if (!(GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).IsLangeSmaller(10.0f * Scale3DRate)) { return; }
 				GetObj().DrawModel();
 			}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
 				if (!IsActive()) { return; }
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
+				if (!(GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).IsLangeSmaller(10.0f * Scale3DRate)) { return; }
 				GetObj().DrawModel();
 			}
 			void			Dispose_Sub(void) noexcept override {}
