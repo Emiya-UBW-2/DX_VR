@@ -1173,7 +1173,8 @@ namespace FPS_n2 {
 			//視認判定系
 			this->m_IsActiveCameraPos = false;
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
-				auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
+				auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+				auto& ViewChara = ViewPlayer->GetChara();
 				Vector3DX EndPos = GetEyePositionCache();
 				this->m_CanLookTarget = !GetIsRappelling() && BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0;
 				if (this->m_CanLookTarget) {
@@ -1253,7 +1254,7 @@ namespace FPS_n2 {
 			this->m_IsSquat = false;
 			Vector3DX posBuf = pPos;
 			if (CheckGround) {
-				Vector3DX EndPos = posBuf - Vector3DX::up() * 50.0f * Scale3DRate;
+				Vector3DX EndPos = posBuf - Vector3DX::up() * 40.0f * Scale3DRate;
 				if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
 					posBuf = EndPos;
 				}

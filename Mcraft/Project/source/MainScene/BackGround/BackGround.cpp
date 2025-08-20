@@ -720,20 +720,16 @@ namespace FPS_n2 {
 		int			BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			int HitCount = 0;
 
-			{
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				if (PlayerMngr->GetItemContainerObj()) {
-					auto ColLine = PlayerMngr->GetItemContainerObj()->GetCol().CollCheck_Line(StartPos, *EndPos);
-					if (ColLine.HitFlag == TRUE) {
-						*EndPos = ColLine.HitPosition;
-						if (Normal) {
-							*Normal = ColLine.Normal;
-						}
-						HitCount += 3;
+			if (this->m_ItemContainerObj) {
+				auto ColLine = this->m_ItemContainerObj->GetCol().CollCheck_Line(StartPos, *EndPos);
+				if (ColLine.HitFlag == TRUE) {
+					*EndPos = ColLine.HitPosition;
+					if (Normal) {
+						*Normal = ColLine.Normal;
 					}
+					HitCount += 3;
 				}
 			}
-
 
 			if (isnan<float>(StartPos.x) || isnan<float>(StartPos.y) || isnan<float>(StartPos.z)) {
 				return HitCount;
@@ -855,12 +851,10 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-
 			{
 #define PLAYER_ENUM_MIN_SIZE		(0.1f * Scale3DRate)		// 周囲のポリゴン検出に使用する球の初期サイズ
 #define PLAYER_ENUM_DEFAULT_SIZE	(1.6f * Scale3DRate)		// 周囲のポリゴン検出に使用する球の初期サイズ
-				auto HitDim = PlayerMngr->GetItemContainerObj()->GetCol().CollCheck_Sphere(StartPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude());
+				auto HitDim = this->m_ItemContainerObj->GetCol().CollCheck_Sphere(StartPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude());
 				// 検出されたポリゴンが壁ポリゴン( ＸＺ平面に垂直なポリゴン )か床ポリゴン( ＸＺ平面に垂直ではないポリゴン )かを判断する
 				for (int i = 0; i < HitDim.HitNum; ++i) {
 					auto& h_d = HitDim.Dim[i];
@@ -1520,6 +1514,60 @@ namespace FPS_n2 {
 			SettingChange();
 			this->m_ThreadCounter = 0;
 			this->m_isChangeBlock = false;
+
+			//コンテナ配置
+			{
+				Vector3DX TargetPos = Vector3DX::zero();
+				if (IsTutorial) {
+					TargetPos = Vector3DX::vget(0.f, 0.f, -16.f) * Scale3DRate;
+				}
+				else {
+					TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 0.f, 16.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+				}
+				//一旦床判定
+				{
+					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+					if (CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						TargetPos = EndPos - Vector3DX::up() * 0.5f * Scale3DRate;;
+					}
+				}
+				//周りの壁を破壊する
+				//壁破壊
+				{
+					int								xput = 25;
+					int								yput = 20;
+					int								zput = 25;
+					int8_t							damage = 100;
+					auto Put = GetPoint(TargetPos);
+					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
+						for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
+							for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
+								DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, damage);
+							}
+							for (int yp = -yput / 2; yp <= 0; ++yp) {
+								//SetBlick(Put.x + xp, Put.y + yp, Put.z + zp, 1);
+							}
+						}
+
+					}
+				}
+				//再度床判定しなおす
+				{
+					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+					if (CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						TargetPos = EndPos - Vector3DX::up() * 0.5f * Scale3DRate;;
+					}
+				}
+				if (this->m_ItemContainerObj) {
+					const std::shared_ptr<Objects::ItemContainerObj>& Container = (std::shared_ptr<Objects::ItemContainerObj>&)(this->m_ItemContainerObj);
+					Container->Put(TargetPos, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+				}
+				{
+					auto obj = std::make_shared<Objects::CircleEffect>();
+					ObjectManager::Instance()->InitObject(obj, "data/model/circle/");
+					obj->Put(TargetPos);
+				}
+			}
 		}
 		//
 		void		BackGroundControl::Update(void) noexcept {
@@ -1616,7 +1664,8 @@ namespace FPS_n2 {
 
 			/*
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+			auto& ViewChara = ViewPlayer->GetChara();
 			float Height = ViewChara->GetEyePositionCache().y;
 			for (auto& b : this->m_ObjBuilds) {
 				Vector3DX Pos = b.GetPos();
@@ -1638,6 +1687,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundControl::Dispose_Load(void) noexcept {
+			m_ItemContainerObj.reset();
 			this->m_ObjSky.Dispose();
 			this->m_tex.Dispose();
 		}

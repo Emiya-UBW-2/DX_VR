@@ -34,14 +34,13 @@ namespace FPS_n2 {
 			float										m_BattleTimer{ 0.0f };
 			float										m_ReturnPer{ 0.0f };
 			bool										m_IsFindContainer{ false };
-			float										m_FindContainerTimer{ 0.0f };
 			float										m_AnnounceTimer{ 0.0f };
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
 			float										m_FadeoutEndTimer = 0.f;
 			Vector3DX									m_EffectPos;
-			InputControl								MyInput;
-			float										AberrationPower{ 1.f };
+			InputControl								m_MyInput;
+			float										m_AberrationPower{ 1.f };
 			bool										m_IsAddScoreArea = false;
 			int											m_LimitAlarmCount{};
 			float										m_LimitAlarmTimer{ 0.0f };

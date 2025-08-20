@@ -271,7 +271,7 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
-			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
+			auto& ViewChara = ViewPlayer->GetChara();
 
 			CanLookTarget = false;
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -375,10 +375,12 @@ namespace FPS_n2 {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* CameraParts = Camera3D::Instance();
-			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
-			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+			auto& ViewChara = ViewPlayer->GetChara();
 
 			int xp1{}, yp1{};
 			int xp2{}, yp2{};
@@ -814,8 +816,8 @@ namespace FPS_n2 {
 				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec2(); Vec.y = 0.0f; Vec = Vec.normalized();
 				float degreeBase = rad2deg(std::atan2f(Vec.x, Vec.z));
 				float degreeBase2 = 0.f;
-				if (PlayerMngr->GetItemContainerObj()) {
-					Vector3DX Vec2 = PlayerMngr->GetItemContainerObj()->GetMove().GetPos() - ViewChara->GetEyePositionCache(); Vec2.y = 0.f; Vec2 = Vec2.normalized();
+				if (BackGroundParts->GetItemContainerObj()) {
+					Vector3DX Vec2 = BackGroundParts->GetItemContainerObj()->GetMove().GetPos() - ViewChara->GetEyePositionCache(); Vec2.y = 0.f; Vec2 = Vec2.normalized();
 					degreeBase2 = rad2deg(Vector3DX::SignedAngle(Vec, Vec2, Vector3DX::up()));
 				}
 
@@ -1287,11 +1289,12 @@ namespace FPS_n2 {
 			auto* SideLogParts = SideLog::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			if (IsActiveTask(TaskType::Obtain) && m_TaskInfoList.begin()->first.m_ItemID == ItemID) {
 				++m_TaskInfoList.begin()->second;
 				if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
 					this->m_TaskInfoList.erase(this->m_TaskInfoList.begin());
-					PlayerMngr->GetPlayer(0)->AddScore(200);
+					ViewPlayer->AddScore(200);
 					SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
 					StartNextTask();
 					return true;
@@ -1303,11 +1306,12 @@ namespace FPS_n2 {
 			auto* SideLogParts = SideLog::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			if (IsActiveTask(TaskType::KillEnemy)) {
 				++m_TaskInfoList.begin()->second;
 				if (this->m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
 					this->m_TaskInfoList.erase(this->m_TaskInfoList.begin());
-					PlayerMngr->GetPlayer(0)->AddScore(200);
+					ViewPlayer->AddScore(200);
 					SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
 					StartNextTask();
 					return true;
@@ -1391,7 +1395,7 @@ namespace FPS_n2 {
 				PlayerMngr->GetTeamHelicopter()->SetActive(false);
 			}
 
-			Vector3DX Pos = PlayerMngr->GetItemContainerObj()->GetMove().GetPos(); Pos.y = -20.f * Scale3DRate;
+			Vector3DX Pos = BackGroundParts->GetItemContainerObj()->GetMove().GetPos(); Pos.y = -20.f * Scale3DRate;
 			this->m_MovieHeli->SetMove().SetPos(Pos);
 
 			this->m_MovieHeli->UpdateLocal();
@@ -1421,7 +1425,7 @@ namespace FPS_n2 {
 					fovBuf = deg2rad(70);
 				}
 				else {
-					Easing(&CamVec, PlayerMngr->GetItemContainerObj()->GetMove().GetPos(), 0.95f, EasingType::OutExpo);
+					Easing(&CamVec, BackGroundParts->GetItemContainerObj()->GetMove().GetPos(), 0.95f, EasingType::OutExpo);
 					Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
 				}
 

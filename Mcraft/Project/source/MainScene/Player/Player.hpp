@@ -409,13 +409,12 @@ namespace FPS_n2 {
 			std::shared_ptr<Objects::TeamHelicopterObj>	m_TeamHelicopterObj;
 			std::shared_ptr<Objects::ArmorObj>			m_ArmorObj;
 			std::shared_ptr<Objects::ArmorObj>			m_HelmetObj;
-			std::shared_ptr<Objects::ItemContainerObj>	m_ItemContainerObj;
 			MV1											m_MainRagDoll;
 			MV1											m_RagDoll;
 		public:
 			float										m_FindCount{};
 		private:
-			PlayerManager(void) noexcept {}
+			PlayerManager(void) noexcept { Load(); }
 			PlayerManager(const PlayerManager&) = delete;
 			PlayerManager(PlayerManager&&) = delete;
 			PlayerManager& operator=(const PlayerManager&) = delete;
@@ -426,15 +425,14 @@ namespace FPS_n2 {
 			const auto& GetTeamRagDoll(void) const noexcept { return this->m_MainRagDoll; }
 			const auto& GetEnemyRagDoll(void) const noexcept { return this->m_RagDoll; }
 
-
 			const auto& GetWatchPlayerID(void) const noexcept { return this->m_WatchPlayer; }
 
-			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
-			auto& GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
+			const auto&	GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
+			auto&		GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
 
-			auto& GetWatchPlayer(void) noexcept { return this->m_Player[this->m_WatchPlayer]; }
+			auto&		GetWatchPlayer(void) noexcept { return GetPlayer(this->m_WatchPlayer); }
 
-			void SetWatchPlayerID(PlayerID playerID) noexcept { this->m_WatchPlayer = playerID; }
+			void		SetWatchPlayerID(PlayerID playerID) noexcept { this->m_WatchPlayer = playerID; }
 
 			void		SetVehicle(const std::shared_ptr<Objects::VehicleObj>& pObj) noexcept { this->m_VehicleObj = pObj; }
 			auto&		GetVehicle(void) noexcept { return this->m_VehicleObj; }
@@ -450,12 +448,12 @@ namespace FPS_n2 {
 
 			void		SetHelmet(const std::shared_ptr<Objects::ArmorObj>& pObj) noexcept { this->m_HelmetObj = pObj; }
 			auto&		GetHelmet(void) noexcept { return this->m_HelmetObj; }
-
-			void		SetItemContainerObj(const std::shared_ptr<Objects::ItemContainerObj>& pObj) noexcept { this->m_ItemContainerObj = pObj; }
-			auto&		GetItemContainerObj(void) noexcept { return this->m_ItemContainerObj; }
 		public:
 			void Load() noexcept {
+				auto* ObjMngr = ObjectManager::Instance();
+				ObjMngr->LoadModelBefore("data/Charactor/Main/");
 				MV1::Load("data/Charactor/Main/model_Rag.mv1", &m_MainRagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+				ObjMngr->LoadModelBefore("data/Charactor/Soldier/");
 				MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 			}
 			void Init(int playerNum) noexcept {
@@ -463,7 +461,11 @@ namespace FPS_n2 {
 					this->m_PlayerNum = playerNum;
 					this->m_Player.resize(static_cast<size_t>(this->m_PlayerNum));
 					for (auto& player : this->m_Player) {
+						int index = static_cast<int>(&player - &this->m_Player.front());
 						player = std::make_unique<PlayerControl>();
+						player->SetChara(std::make_shared<Charas::CharacterObj>());
+						player->GetChara()->SetPlayerID((PlayerID)index);
+						player->SetAI(std::make_shared<AIs::AIControl>((PlayerID)index));
 					}
 				}
 			}
@@ -473,7 +475,6 @@ namespace FPS_n2 {
 				m_TeamHelicopterObj.reset();
 				m_ArmorObj.reset();
 				m_HelmetObj.reset();
-				m_ItemContainerObj.reset();
 				for (auto& player : this->m_Player) {
 					player.reset();
 				}

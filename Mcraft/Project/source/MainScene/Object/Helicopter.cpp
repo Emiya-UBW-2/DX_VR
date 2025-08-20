@@ -45,7 +45,8 @@ namespace FPS_n2 {
 				m_PrevPos = m_NowPos;
 				{
 					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
-					auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
+					auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+					auto& ViewChara = ViewPlayer->GetChara();
 					while (true) {
 						m_TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
 						if (std::abs(this->m_TargetPos.x) < 16.f * Scale3DRate && std::abs(this->m_TargetPos.z) < 16.f * Scale3DRate) {

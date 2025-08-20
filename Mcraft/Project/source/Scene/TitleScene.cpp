@@ -140,7 +140,7 @@ namespace FPS_n2 {
 				int index = static_cast<int>(&sel - &this->m_GunSelect.front());
 				for (const auto& guns : Guns::GunPartsDataManager::Instance()->GetGunNameList()) {
 					int index2 = static_cast<int>(&guns - &Guns::GunPartsDataManager::Instance()->GetGunNameList().front());
-					if (SaveDataParts->GetParam(guns) == (index + 1)) {
+					if (SaveDataParts->GetParam(guns) == static_cast<int64_t>(index + 1)) {
 						sel = index2;
 						break;
 					}
@@ -560,7 +560,7 @@ namespace FPS_n2 {
 				for (auto& sel : this->m_GunSelect) {
 					int index2 = static_cast<int>(&sel - &this->m_GunSelect.front());
 					if (sel == index) {
-						SaveDataParts->SetParam(guns, index2 + 1);
+						SaveDataParts->SetParam(guns, static_cast<int64_t>(index2 + 1));
 					}
 				}
 			}
@@ -651,7 +651,7 @@ namespace FPS_n2 {
 				// 
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-					64 + 369, 64 + 207, White, Black, "Ver 1.0.3");
+					64 + 369, 64 + 207, White, Black, "Ver 1.0.4");
 				// 
 				ButtonParts->Draw();
 				//

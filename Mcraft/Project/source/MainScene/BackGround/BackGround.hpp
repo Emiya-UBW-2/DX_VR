@@ -2,7 +2,6 @@
 #pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
-
 namespace FPS_n2 {
 	namespace BackGround {
 		static constexpr int8_t s_EmptyBlick = 0;
@@ -328,6 +327,7 @@ namespace FPS_n2 {
 			std::array<Draw, TotalCellLayer + TotalCellLayer>	m_Draws;
 			bool							m_isChangeBlock{ false };
 			bool							m_GrenadeBomb{ false };
+			std::shared_ptr<BaseObject>		m_ItemContainerObj;
 		private:
 			BackGroundControl(void) noexcept { Load(); }
 			BackGroundControl(const BackGroundControl&) = delete;
@@ -708,7 +708,7 @@ namespace FPS_n2 {
 			};
 			std::vector<Builds>			m_ObjBuilds;
 		public:
-			const auto& GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
+			const auto&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
 
 			const int		GetNearestBuilds(const Vector3DX& NowPosition) const noexcept {
 				for (auto& bu : this->m_ObjBuilds) {
@@ -735,7 +735,7 @@ namespace FPS_n2 {
 				return Answer;
 			}
 			// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )
-			bool CheckPolyMove(Vector3DX StartPos, Vector3DX TargetPos) const {
+			bool			CheckPolyMove(Vector3DX StartPos, Vector3DX TargetPos) const {
 				int Rate = 6;
 
 				int CheckPoly[4]{};
@@ -841,7 +841,7 @@ namespace FPS_n2 {
 					CheckPolyPrevNum = NextCheckPolyPrevNum;
 				}
 			}
-			bool CheckPolyMoveWidth(Vector3DX StartPos, int TargetIndex, float Width) const {
+			bool			CheckPolyMoveWidth(Vector3DX StartPos, int TargetIndex, float Width) const {
 				// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )( 幅指定版 )
 				Vector3DX TargetPos = this->m_ObjBuilds.at(TargetIndex).GetPos();
 				// 最初に開始座標から目標座標に直線的に移動できるかどうかをチェック
@@ -869,15 +869,18 @@ namespace FPS_n2 {
 				return true;		// ここまできたら指定の幅があっても直線的に移動できるということなので true を返す
 			}
 
-			void SetGrenadeBomb() noexcept {
+			void			SetGrenadeBomb() noexcept {
 				m_GrenadeBomb = true;
 			}
-			bool PopGrenadeBomb() noexcept {
+			bool			PopGrenadeBomb() noexcept {
 				auto G = m_GrenadeBomb;
 				m_GrenadeBomb = false;
 				return G;
 			}
 		public:
+			void			SetItemContainerObj(const std::shared_ptr<BaseObject>& pObj) noexcept { this->m_ItemContainerObj = pObj; }
+			auto&			GetItemContainerObj(void) noexcept { return this->m_ItemContainerObj; }
+
 			int				CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			int				CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
 				Vector3DX pEndPos = EndPos;

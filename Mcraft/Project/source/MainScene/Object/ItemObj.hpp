@@ -241,6 +241,7 @@ namespace FPS_n2 {
 		class ItemContainerObj : public BaseObject {
 			bool										m_IsDrawUI{ false };
 			ScreenPosition								m_DispPos;
+			float										m_FindContainerTimer{ 0.0f };
 		public:
 			ItemContainerObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::ItemContainerObj); }
 			virtual ~ItemContainerObj(void) noexcept {}
@@ -257,13 +258,53 @@ namespace FPS_n2 {
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				GetCol().RefreshCollInfo();
 			}
+			void				DrawUI() const noexcept {
+				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+				if (this->IsDrawUI()) {
+					float Per = std::clamp(this->m_FindContainerTimer / 0.5f, 0.f, 1.f);
+
+					float LocalPer = 0.f;
+					if (Per < 0.8f) {
+						LocalPer = Lerp(0.f, 1.2f, (Per - 0.f) / (0.8f - 0.f));
+					}
+					else {
+						LocalPer = Lerp(1.2f, 1.f, (Per - 0.8f) / (1.f - 0.8f));
+					}
+					bool IsDraw = true;
+					if (Per >= 1.f) {
+						if ((this->m_FindContainerTimer / 2.f - static_cast<int>(this->m_FindContainerTimer / 2.f)) > 0.5f) {
+							IsDraw = false;
+						}
+					}
+					if (IsDraw) {
+						int xp1 = static_cast<int>(m_DispPos.XScreenPos() - 10.f * LocalPer);
+						int yp1 = static_cast<int>(m_DispPos.YScreenPos() - 20.f * LocalPer);
+						int xp2 = static_cast<int>(m_DispPos.XScreenPos());
+						int yp2 = static_cast<int>(m_DispPos.YScreenPos());
+						int xp3 = static_cast<int>(m_DispPos.XScreenPos() + 10.f * LocalPer);
+						int yp3 = static_cast<int>(m_DispPos.YScreenPos() - 20.f * LocalPer);
+						if (Per >= 0.8f) {
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
+								18, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
+								(xp1 + xp3) / 2, (yp1 + yp3) / 2 - 30, Yellow, Black, "CONTAINER");
+						}
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Yellow, 2);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Yellow, 2);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Yellow, 2);
+					}
+				}
+			}
 		public:
 			void				Init_Sub(void) noexcept override {
 				SetActive(true);
 				SetMinAABB(Vector3DX::vget(-5.f, 0.f, -5.f) * Scale3DRate);
 				SetMaxAABB(Vector3DX::vget(5.f, 5.f, 5.f) * Scale3DRate);
+				this->m_FindContainerTimer = 0.f;
 			}
-			void				FirstUpdate(void) noexcept override {}
+			void				FirstUpdate(void) noexcept override {
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				this->m_FindContainerTimer += DXLib_refParts->GetDeltaTime();
+			}
 			void				CheckDraw_Sub(int) noexcept override {
 				Vector3DX StartPos = GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate;
 				this->m_IsDrawUI |= this->m_DispPos.Calc(StartPos);
