@@ -36,7 +36,7 @@ namespace FPS_n2 {
 					m_TargetPos = Vector3DX::vget(GetRandf(16.f), 0.0f, GetRandf(16.f)) * Scale3DRate;
 					if (!PlayerMngr->GetTeamHelicopter()) { break; }
 					Vector3DX Vec = PlayerMngr->GetTeamHelicopter()->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
-					if (!Vec.IsLangeSmaller(10.f * Scale3DRate)) {
+					if (!Vec.IsRangeSmaller(10.f * Scale3DRate)) {
 						break;
 					}
 				}
@@ -51,7 +51,7 @@ namespace FPS_n2 {
 						m_TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
 						if (std::abs(this->m_TargetPos.x) < 16.f * Scale3DRate && std::abs(this->m_TargetPos.z) < 16.f * Scale3DRate) {
 							Vector3DX Vec = ViewChara->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
-							if (!Vec.IsLangeSmaller(8.f * Scale3DRate)) {
+							if (!Vec.IsRangeSmaller(8.f * Scale3DRate)) {
 								break;
 							}
 						}
@@ -67,7 +67,7 @@ namespace FPS_n2 {
 				break;
 			}
 			auto Vec = (this->m_TargetPos - m_PrevPos);
-			if (!Vec.IsLangeSmaller(0.0f)) {
+			if (!Vec.IsRangeSmaller(0.0f)) {
 				m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
 				if ((this->m_YradRT - m_Yrad) > deg2rad(180)) {
 					m_YradRT -= deg2rad(360);
@@ -242,7 +242,7 @@ namespace FPS_n2 {
 				if (this->m_Timer > 8.0f) {
 					auto& chara = PlayerMngr->GetPlayer(this->m_TargetPlayerID)->GetChara();
 					Vector3DX Vec = (chara->GetFrameWorldMat(Charas::CharaFrame::Upper).pos() - SetObj().GetFramePosition(this->m_GunRot.GetFrameID())).normalized();
-					if (!Vec.IsLangeSmaller(0.0f)) {
+					if (!Vec.IsRangeSmaller(0.0f)) {
 						m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
 						if ((this->m_YradRT - m_Yrad) > deg2rad(180)) {
 							m_YradRT -= deg2rad(360);

@@ -204,7 +204,7 @@ namespace FPS_n2 {
 						while (true) {
 							TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
 							Vector3DX Vec = TargetPos; Vec.y = 0.f;
-							if (Vec.IsLangeSmaller(5.f * Scale3DRate)) {
+							if (Vec.IsRangeSmaller(5.f * Scale3DRate)) {
 								Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
 								if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
 									TargetPos = EndPos;
@@ -217,7 +217,7 @@ namespace FPS_n2 {
 						while (true) {
 							TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
 							Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
-							if (!Vec.IsLangeSmaller(5.f * Scale3DRate)) {
+							if (!Vec.IsRangeSmaller(5.f * Scale3DRate)) {
 								//
 								Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
 								if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
@@ -267,7 +267,7 @@ namespace FPS_n2 {
 					while (true) {
 						TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
 						Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
-						if (!Vec.IsLangeSmaller(5.f * Scale3DRate)) {
+						if (!Vec.IsRangeSmaller(5.f * Scale3DRate)) {
 							break;
 						}
 					}
@@ -717,7 +717,7 @@ namespace FPS_n2 {
 					this->m_IsAddScoreArea = false;
 					if (BackGroundParts->GetItemContainerObj()) {
 						auto Vec = ViewChara->GetMove().GetPos() - BackGroundParts->GetItemContainerObj()->GetMove().GetPos(); Vec.y = 0.f;
-						if (Vec.IsLangeSmaller(3.f * Scale3DRate)) {
+						if (Vec.IsRangeSmaller(3.f * Scale3DRate)) {
 							//捨てると納品できるエリア
 							this->m_IsAddScoreArea = true;
 						}

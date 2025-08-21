@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 			Vector3DX Vec = PosBuf - m_Repos; Vec.y = 0.f;
 			//壁判定
-			if (!Vec.IsLangeSmaller(0.01f)) {
+			if (!Vec.IsRangeSmaller(0.01f)) {
 				BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (0.8f * Scale3DRate), 0.7f * Scale3DRate);
 				this->m_Yrad = Vector3DX::Angle(Vector3DX::right() * -1.f, Vec);
 				this->m_IsLR ^= 1;

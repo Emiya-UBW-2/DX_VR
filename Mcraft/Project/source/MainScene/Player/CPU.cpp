@@ -249,7 +249,7 @@ namespace FPS_n2 {
 					if (SelList.size() == 0) {
 						for (auto& C : BackGroundParts->GetBuildData()) {
 							auto Vec = C.GetPos() - MyPos; Vec.y = (0.f);
-							if (Vec.IsLangeSmaller(10.f * Scale3DRate)) {
+							if (Vec.IsRangeSmaller(10.f * Scale3DRate)) {
 								SelList.emplace_back(static_cast<int>(&C - &BackGroundParts->GetBuildData().front()));
 							}
 						}
@@ -265,7 +265,7 @@ namespace FPS_n2 {
 					if (SelList.size() == 0) {
 						for (auto& C : BackGroundParts->GetBuildData()) {
 							auto Vec = C.GetPos() - Target; Vec.y = (0.f);
-							if (Vec.IsLangeSmaller(10.f * Scale3DRate)) {
+							if (Vec.IsRangeSmaller(10.f * Scale3DRate)) {
 								SelList.emplace_back(static_cast<int>(&C - &BackGroundParts->GetBuildData().front()));
 							}
 						}
@@ -295,10 +295,10 @@ namespace FPS_n2 {
 
 					Vector3DX EndPos = pos_t + Vector3DX::up() * 1.f * Scale3DRate;
 					if (CanRepop) {
-						if ((TgtPos - EndPos).IsLangeSmaller(10.f * Scale3DRate)) { continue; }
+						if ((TgtPos - EndPos).IsRangeSmaller(10.f * Scale3DRate)) { continue; }
 					}
 					else {
-						if (!(TgtPos - EndPos).IsLangeSmaller(15.f * Scale3DRate)) { continue; }
+						if (!(TgtPos - EndPos).IsRangeSmaller(15.f * Scale3DRate)) { continue; }
 					}
 					if (BackGroundParts->CheckLinetoMap(TgtPos, &EndPos) != 0) { break; }
 				}
@@ -395,7 +395,7 @@ namespace FPS_n2 {
 				//
 				//エイム
 				Vector3DX Vec = m_PathChecker.GetNextPoint(MyChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(), &this->TargetPathPlanningIndex) - MyPos; Vec.y = (0.f);
-				if (Vec.IsLangeSmaller(0.5f * Scale3DRate)) {
+				if (Vec.IsRangeSmaller(0.5f * Scale3DRate)) {
 					Vec.y = (0.f);
 					auto Dir = MyChara->GetEyeRotationCache().zvec() * -1.f;
 					auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
@@ -463,7 +463,7 @@ namespace FPS_n2 {
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						if (this->m_MyCharaID == loop) { continue; }
 						Vector3DX Vec = PlayerMngr->GetPlayer(loop)->GetChara()->GetEyePositionCache() - MyPos; Vec.y = 0.f;
-						if (Vec.IsLangeSmaller(2.f * Scale3DRate)) {
+						if (Vec.IsRangeSmaller(2.f * Scale3DRate)) {
 
 							auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized())) > 0.f);
 							auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;

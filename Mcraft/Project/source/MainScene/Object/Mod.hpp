@@ -31,7 +31,7 @@ namespace FPS_n2 {
 				return true;
 			}
 			void			DrawCommon(void) const noexcept {
-				if (!(GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).IsLangeSmaller(10.0f * Scale3DRate)) { return; }
+				if (!(GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).IsRangeSmaller(10.0f * Scale3DRate)) { return; }
 				if (IsDrawAllMesh()) {
 					GetObj().DrawModel();
 				}

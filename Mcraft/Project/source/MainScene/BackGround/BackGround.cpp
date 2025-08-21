@@ -740,7 +740,7 @@ namespace FPS_n2 {
 			float scale = 200.f * Scale3DRate;
 			Vector3DX SP = StartPos; SP.y = 0.f;
 			Vector3DX EP = (*EndPos); SP.y = 0.f;
-			if (!SP.IsLangeSmaller(scale) || !EP.IsLangeSmaller(scale)) {
+			if (!SP.IsRangeSmaller(scale) || !EP.IsRangeSmaller(scale)) {
 				return HitCount;
 			}
 
@@ -871,7 +871,7 @@ namespace FPS_n2 {
 					// ポリゴンとプレイヤーが当たっていなかったら次のカウントへ
 					if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {
 						HitFlag = true;// ここにきたらポリゴンとプレイヤーが当たっているということなので、ポリゴンに当たったフラグを立てる
-						if (!MoveVector.IsLangeSmaller(0.001f)) {	// x軸かz軸方向に 0.001f 以上移動した場合は移動したと判定
+						if (!MoveVector.IsRangeSmaller(0.001f)) {	// x軸かz軸方向に 0.001f 以上移動した場合は移動したと判定
 							// 壁に当たったら壁に遮られない移動成分分だけ移動する
 							*EndPos = Vector3DX::Cross(kabe.Normal, Vector3DX::Cross(MoveVector, kabe.Normal)) + StartPos;
 							//EndPos->y(StartPos.y);
@@ -1429,7 +1429,7 @@ namespace FPS_n2 {
 							Dif.x = Pos.x - static_cast<int>(Pos.x);
 							Dif.y = Pos.y - static_cast<int>(Pos.y);
 							Dif.z = Pos.z - static_cast<int>(Pos.z);
-							if (Dif.IsLangeSmaller(0.25f)) {
+							if (Dif.IsRangeSmaller(0.25f)) {
 								int xPos = static_cast<int>(Pos.x * 1);
 								int yPos = static_cast<int>(Pos.y * 1);
 								int zPos = static_cast<int>(Pos.z * 1);
