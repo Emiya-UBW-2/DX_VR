@@ -245,9 +245,7 @@ namespace FPS_n2 {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + loop)->StopAll();
 					}
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_contact))->StopAll();
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_openfire))->StopAll();
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->StopAll();
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->StopAll();
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->StopAll();
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->StopAll();
 
@@ -473,12 +471,7 @@ namespace FPS_n2 {
 										}
 									}
 									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
-										if (GetRand(100) < 50) {
-											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
-										}
-										else {
-											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
-										}
+										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 									}
 								}
 							}
@@ -858,7 +851,7 @@ namespace FPS_n2 {
 				//壁判定
 				if (!GetMove().GetVec().IsRangeSmaller(0.01f)) {
 					
-					BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * ((this->GetIsSquat() ? 0.5f : 1.6f) * Scale3DRate), 0.7f * Scale3DRate);
+					BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * ((this->m_IsSquat ? 0.5f : 1.6f) * Scale3DRate), 0.7f * Scale3DRate);
 				}
 				//ほかプレイヤーとの判定
 				{

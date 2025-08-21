@@ -760,7 +760,7 @@ namespace FPS_n2 {
 					int yp1 = 128;
 
 					xp1 += 64;
-					for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+					for (int loop = 0, Max = static_cast<int>(Objects::ItemObjDataManager::Instance()->GetList().size()); loop < Max; ++loop) {
 						auto& item = Objects::ItemObjDataManager::Instance()->Get(loop);
 						int PrevY = yp1;
 						{

@@ -177,7 +177,6 @@ namespace FPS_n2 {
 			float									m_CheckAgain{ 0.f };
 			float									m_ShotTimer{ 0.f };
 			float									m_BackTimer{ 0.f };
-			float									m_MoveFrontTimer{ 0.f };
 
 			int										m_LeanLR{ 0 };
 
@@ -239,79 +238,20 @@ namespace FPS_n2 {
 				auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-				auto TgtPos = GetTargetPos();
+				Vector3DX TgtPos = GetTargetPos();
 				Vector3DX MyPos = MyChara->GetEyePositionCache();
 
-				auto Target = TgtPos;
-				std::vector<int> SelList;
-				SelList.clear();
-				auto GetRandomMyPos = [&]() {
-					if (SelList.size() == 0) {
-						for (auto& C : BackGroundParts->GetBuildData()) {
-							auto Vec = C.GetPos() - MyPos; Vec.y = (0.f);
-							if (Vec.IsRangeSmaller(10.f * Scale3DRate)) {
-								SelList.emplace_back(static_cast<int>(&C - &BackGroundParts->GetBuildData().front()));
-							}
-						}
-					}
-					MyPos = BackGroundParts->GetBuildData().at(SelList.at(GetRand((int)SelList.size() - 1))).GetPos();
-					};
-				auto CheckPathToTarget = [&]() {
-					this->m_PathChecker.Dispose();
-					return m_PathChecker.Init(MyPos, Target);	// 指定の２点の経路情報を探索する
-					};
-
-				if (GetLengthToTarget() > 20.f * Scale3DRate) {
-					if (SelList.size() == 0) {
-						for (auto& C : BackGroundParts->GetBuildData()) {
-							auto Vec = C.GetPos() - Target; Vec.y = (0.f);
-							if (Vec.IsRangeSmaller(10.f * Scale3DRate)) {
-								SelList.emplace_back(static_cast<int>(&C - &BackGroundParts->GetBuildData().front()));
-							}
-						}
-					}
-					Target = BackGroundParts->GetBuildData().at(SelList.at(GetRand((int)SelList.size() - 1))).GetPos();
-				}
 				this->TargetPathPlanningIndex = -1;
 				for (int i = 0; i < 10; i++) {
-					if (CheckPathToTarget()) {
+					this->m_PathChecker.Dispose();
+					if (m_PathChecker.Init(MyPos, TgtPos)) {	// 指定の２点の経路情報を探索する
 						this->TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
 						break;
 					}
 					else {
-						GetRandomMyPos();//再選定
+						MyPos = BackGroundParts->GetRandomPoint(MyPos, 10.f * Scale3DRate);//選定できない場合10m以内で再選定
 					}
 				}
-			}
-			void		Repop(bool CanRepop) noexcept {
-				auto* BackGroundParts = BackGround::BackGroundControl::Instance();
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-				auto TgtPos = GetTargetPos();
-
-				Vector3DX pos_t;
-				while (true) {
-					pos_t = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-
-					Vector3DX EndPos = pos_t + Vector3DX::up() * 1.f * Scale3DRate;
-					if (CanRepop) {
-						if ((TgtPos - EndPos).IsRangeSmaller(10.f * Scale3DRate)) { continue; }
-					}
-					else {
-						if (!(TgtPos - EndPos).IsRangeSmaller(15.f * Scale3DRate)) { continue; }
-					}
-					if (BackGroundParts->CheckLinetoMap(TgtPos, &EndPos) != 0) { break; }
-				}
-
-				/*
-				Vector3DX EndPos = pos_t + Vector3DX::up() * 10.f*Scale3DRate;
-				if (BackGroundParts->CheckLinetoMap(pos_t + Vector3DX::up() * -10.f*Scale3DRate, &EndPos, false) != 0) {
-					pos_t = EndPos;
-				}
-				//*/
-
-				MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0, true, 0.f);
-				this->Reset();
 			}
 			void		AimDir(const Vector3DX& VEC) {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -358,7 +298,6 @@ namespace FPS_n2 {
 			void		Init() noexcept {
 				this->Reset();
 				this->m_PathUpdateTimer = 0.f;
-				this->m_MoveFrontTimer = static_cast<float>(GetRand(6));
 				this->m_PeaceMakerLength = 0.f;
 				float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::PeaceMaker);
 				if (value > 0.f) {
@@ -368,6 +307,8 @@ namespace FPS_n2 {
 			//
 			void		Execute_Before() noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				//初期化
 				this->m_MyInput.ResetAllInput();
 				IsGotLengthToTarget = false;
@@ -376,14 +317,8 @@ namespace FPS_n2 {
 				if (this->m_PathUpdateTimer <= 0.f) {
 					this->m_PathUpdateTimer += 1.f;
 					this->ChangePoint();
+					this->m_MyInput.SetInputPADS(Controls::PADS::SQUAT, MyChara->GetIsSquat());
 				}
-
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-
-				this->m_MyInput.SetInputPADS(Controls::PADS::SQUAT, MyChara->GetIsSquat() && (GetRand(100) < 1));
-
-				//CanRepop
 				if (!MyChara->IsAlive()) {
 					this->m_Phase = ENUM_AI_PHASE::Dead;
 				}
@@ -422,12 +357,7 @@ namespace FPS_n2 {
 						PlayerMngr->m_FindCount = 10.f;
 						if (GetLengthToTarget() < 10.f * Scale3DRate) {
 							auto SE = SoundPool::Instance();
-							if (GetRand(1) == 0) {
-								SE->Get(SoundType::SE, (int)SoundEnum::Man_contact)->Play3D(MyPos, Scale3DRate * 10.f);
-							}
-							else {
-								SE->Get(SoundType::SE, (int)SoundEnum::Man_openfire)->Play3D(MyPos, Scale3DRate * 10.f);
-							}
+							SE->Get(SoundType::SE, (int)SoundEnum::Man_contact)->Play3D(MyPos, Scale3DRate * 10.f);
 						}
 					}
 				}

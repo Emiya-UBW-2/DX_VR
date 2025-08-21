@@ -4,7 +4,9 @@
 #include	"Scene/MainSceneLoader.hpp"
 #include	"Scene/TitleScene.hpp"
 
+#if defined(DEBUG) && ACTIVE_NET
 #include	"MainScene/NetworkBrowser.hpp"
+#endif
 
 #if defined(DEBUG) && DEBUG_CAM
 int DBG_CamSelect = InvalidID;
@@ -54,9 +56,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }
 	DXLib_refParts->StartLogic();
 	//追加設定
+#if defined(DEBUG) && ACTIVE_NET
 	std::string Title = "Phantom of the Bunker";
 	Title += std::to_string(GetRand(1000));
-	SetMainWindowText(Title.c_str());						//タイトル
+	SetMainWindowText(Title.c_str());
+#else
+	SetMainWindowText("Garbage Collector");
+#endif
 	SetUseHalfLambertLighting(true);
 	MV1SetLoadModelReMakeNormal(true);
 	//SetUsePixelLighting(true);

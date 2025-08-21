@@ -118,9 +118,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Hit), 3, "data/Sound/SE/hit.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::HitMe), 3, "data/Sound/SE/HitMe.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::HitGuard), 3, "data/Sound/SE/Guard.wav");
-			for (int loop = 0; loop < 5; ++loop) {
-				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + loop, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(loop + 1) + ".wav");
-			}
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::HitGround0), 2, "data/Sound/SE/gun/HitGround/1.wav");
 
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + loop, 2, "data/Sound/SE/voice/hurt_0" + std::to_string(loop + 1) + ".wav");
@@ -129,9 +127,7 @@ namespace FPS_n2 {
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_Death1) + loop, 2, "data/Sound/SE/voice/death_0" + std::to_string(loop + 1) + ".wav");
 			}
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_contact), 10, "data/Sound/SE/voice/contact.wav");
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_openfire), 10, "data/Sound/SE/voice/openfire.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_reload), 10, "data/Sound/SE/voice/reload.wav");
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover), 10, "data/Sound/SE/voice/takecover.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing), 5, "data/Sound/SE/voice/breathing.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend), 5, "data/Sound/SE/voice/breathend.wav", false);
 
@@ -170,9 +166,7 @@ namespace FPS_n2 {
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->SetLocalVolume(192);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->SetLocalVolume(192);
-			for (int loop = 0; loop < 5; ++loop) {
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + loop)->SetLocalVolume(92);
-			}
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0))->SetLocalVolume(92);
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -211,9 +205,7 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Hit));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::HitMe));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::HitGuard));
-			for (int loop = 0; loop < 5; ++loop) {
-				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + loop);
-			}
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::HitGround0));
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + loop);
 			}
@@ -221,9 +213,7 @@ namespace FPS_n2 {
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_Death1) + loop);
 			}
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_contact));
-			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_openfire));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_reload));
-			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend));
 
@@ -294,10 +284,10 @@ namespace FPS_n2 {
 				if (this->m_AmmoNumTotal != ViewChara->GetGunPtrNow()->GetAmmoNumTotal()) {
 					this->m_AmmoNumTotal = ViewChara->GetGunPtrNow()->GetAmmoNumTotal();
 					this->m_AmmoInPer = 1.f;
-					this->m_AmmoRand = (GetRand(100) < 50) ? 1.f : -1.f;
+					this->m_AmmoRand ^= 1;
 				}
 			}
-			Easing(&m_AmmoRandR, m_AmmoRand, 0.9f, EasingType::OutExpo);
+			Easing(&m_AmmoRandR, m_AmmoRand ? 1.f : -1.f, 0.9f, EasingType::OutExpo);
 
 			if (this->m_ReHP > ViewChara->GetHP().GetPoint()) {
 				this->m_DamagePer = 2.f;

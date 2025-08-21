@@ -115,8 +115,7 @@ namespace FPS_n2 {
 					if (IsChanged) {
 						auto* OptionParts = OptionManager::Instance();
 						if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
-							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z),
-								Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z), Vector3DX::forward(), 3.0f, 3.0f);
 						}
 					}
 				}
@@ -175,7 +174,7 @@ namespace FPS_n2 {
 				SetActive(false);
 				SetBreakWall();
 				//サウンド
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.0f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0))->Play3D(pos_tmp, Scale3DRate * 10.0f);
 			}
 			//消す(スピードが0以下、貫通が0以下、5回反射する)
 			if (this->m_speed <= 0.0f || this->m_penetration <= 0.0f || this->m_RicochetCnt > 5 || this->m_Timer > 5.0f) {

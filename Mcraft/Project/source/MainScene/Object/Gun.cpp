@@ -701,10 +701,10 @@ namespace FPS_n2 {
 					auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get(GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
 					for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 						//円周上にまき散らす
-						auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
+						auto zvec = (Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-(loop % 6) * 6)) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)))).zvec2();
 						Objects::AmmoPool::Instance()->Put(&AmmoSpec,
-							grenade->GetMove().GetPos() + mat.zvec2() * (0.5f * Scale3DRate) + Vector3DX::up() * (Lerp(0.5f, 1.5f, static_cast<float>(loop) / max) * Scale3DRate)
-							, mat.zvec2(), GetMyUserPlayerID());
+							grenade->GetMove().GetPos() + zvec * (0.5f * Scale3DRate) + Vector3DX::up() * (Lerp(0.5f, 1.5f, static_cast<float>(loop) / max) * Scale3DRate)
+							, zvec, GetMyUserPlayerID());
 					}
 
 					//破壊

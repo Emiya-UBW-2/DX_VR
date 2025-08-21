@@ -15,6 +15,8 @@ using namespace DXLibRef;
 #define CHECKTHREADTIME (false)
 //ヒットボックス表示
 #define DRAW_HITBOX (false)
+//ネット対戦のデバッグ
+#define ACTIVE_NET (false)
 
 #if defined(DEBUG) && DEBUG_CAM
 extern int DBG_CamSelect;

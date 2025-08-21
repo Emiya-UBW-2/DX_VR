@@ -710,6 +710,32 @@ namespace FPS_n2 {
 		public:
 			const auto&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
 
+			Vector3DX GetRandomPoint(const Vector3DX& Pos, float RangeSmaller = InvalidID, float RangeOver = InvalidID, bool IsPutGround = false) const noexcept {
+				std::vector<int> SelList;
+				SelList.clear();
+				for (auto& C : this->m_ObjBuilds) {
+					auto Vec = C.GetPos() - Pos; Vec.y = (0.f);
+					if (RangeSmaller != InvalidID && Vec.IsRangeSmaller(RangeSmaller)) {
+						SelList.emplace_back(static_cast<int>(&C - &this->m_ObjBuilds.front()));
+					}
+					if (RangeOver != InvalidID && !Vec.IsRangeSmaller(RangeOver)) {
+						SelList.emplace_back(static_cast<int>(&C - &this->m_ObjBuilds.front()));
+					}
+				}
+				Vector3DX Answer;
+				if (SelList.size() == 0) {
+					Answer = Pos;
+				}
+				Answer = this->m_ObjBuilds.at(SelList.at(GetRand((int)SelList.size() - 1))).GetPos();
+				if (IsPutGround) {
+					Vector3DX EndPos = Answer - Vector3DX::up() * 40.0f * Scale3DRate;
+					if (CheckLinetoMap(Answer + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						Answer = EndPos;
+					}
+				}
+				return Answer;
+			}
+
 			const int		GetNearestBuilds(const Vector3DX& NowPosition) const noexcept {
 				for (auto& bu : this->m_ObjBuilds) {
 					if (

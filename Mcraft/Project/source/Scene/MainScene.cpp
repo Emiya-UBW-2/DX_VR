@@ -1,5 +1,7 @@
 ﻿#pragma warning(disable:4464)
+#if defined(DEBUG) && ACTIVE_NET
 #include	"../MainScene/NetworkBrowser.hpp"
+#endif
 #include	"MainScene.hpp"
 
 namespace FPS_n2 {
@@ -139,7 +141,9 @@ namespace FPS_n2 {
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			//
 			CommonBattleResource::Set();
+#if defined(DEBUG) && ACTIVE_NET
 			NetWorkBrowser::Create();
+#endif
 
 			PostPassParts->SetShadowScale(0.5f);
 			//
@@ -201,32 +205,15 @@ namespace FPS_n2 {
 				}
 				else {
 					if (loop == PlayerMngr->GetWatchPlayerID()) {
-						while (true) {
-							TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-							Vector3DX Vec = TargetPos; Vec.y = 0.f;
-							if (Vec.IsRangeSmaller(5.f * Scale3DRate)) {
-								Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
-								if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-									TargetPos = EndPos;
-								}
-								break;
-							}
-						}
+						TargetPos = BackGroundParts->GetRandomPoint(Vector3DX::zero(), 5.f * Scale3DRate, InvalidID, true);
 					}
 					else {
 						while (true) {
-							TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-							Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
-							if (!Vec.IsRangeSmaller(5.f * Scale3DRate)) {
-								//
-								Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
-								if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-									TargetPos = EndPos;
-								}
-								EndPos = TargetPos;
-								if (BackGroundParts->CheckLinetoMap(ViewChara->GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate, &EndPos) != 0) {
-									break;
-								}
+							TargetPos = BackGroundParts->GetRandomPoint(ViewChara->GetMove().GetPos(), InvalidID, 5.f * Scale3DRate, true);
+							//ターゲット位置が視認できない場所であるべき
+							Vector3DX EndPos = TargetPos;
+							if (BackGroundParts->CheckLinetoMap(ViewChara->GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate, &EndPos) != 0) {
+								break;
 							}
 						}
 					}
@@ -263,22 +250,9 @@ namespace FPS_n2 {
 			}
 			else {
 				for (int loop = 0; loop < 20; ++loop) {
-					Vector3DX TargetPos;
-					while (true) {
-						TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-						Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
-						if (!Vec.IsRangeSmaller(5.f * Scale3DRate)) {
-							break;
-						}
-					}
-					{
-						Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
-						if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-							TargetPos = EndPos;
-						}
-					}
-					Objects::ItemObjPool::Instance()->Put(loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
-						TargetPos,
+					Objects::ItemObjPool::Instance()->Put(
+						loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
+						BackGroundParts->GetRandomPoint(ViewChara->GetMove().GetPos(), InvalidID, 5.f * Scale3DRate, true),
 						Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
 					);
 				}
@@ -287,7 +261,7 @@ namespace FPS_n2 {
 			if (this->m_IsTutorial) {
 				this->m_TaskOperator->AddKillEnemy(1);
 				this->m_TaskOperator->AddKillEnemy(3);
-				for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+				for (int loop = 0, Max = static_cast<int>(Objects::ItemObjDataManager::Instance()->GetList().size()); loop < Max; ++loop) {
 					if (Objects::ItemObjDataManager::Instance()->Get(loop)->EnableSpawnBySoldier()) {
 						this->m_TaskOperator->AddObtain(loop, 1);
 						break;
@@ -296,7 +270,7 @@ namespace FPS_n2 {
 			}
 			else{
 				this->m_TaskOperator->AddKillEnemy(2 + GetRand(2));
-				for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+				for (int loop = 0, Max = static_cast<int>(Objects::ItemObjDataManager::Instance()->GetList().size()); loop < Max; ++loop) {
 					this->m_TaskOperator->AddObtain(loop, 1 + GetRand(2));
 				}
 				this->m_TaskOperator->Shuffle();
@@ -349,16 +323,18 @@ namespace FPS_n2 {
 			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
-			auto* NetBrowser = NetWorkBrowser::Instance();
 			auto* OptionParts = OptionManager::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
+#if defined(DEBUG) && ACTIVE_NET
+			auto* NetBrowser = NetWorkBrowser::Instance();
 			if (this->m_NetWorkController) {
 				PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 			}
+#endif
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = ViewPlayer->GetChara();
 
@@ -434,9 +410,13 @@ namespace FPS_n2 {
 			if (SceneParts->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
 				BackGroundParts->SettingChange();
+#if defined(DEBUG) && ACTIVE_NET
 				if (!this->m_NetWorkController) {
 					return true;
 				}
+#else
+				return true;
+#endif
 			}
 
 			this->m_TransceiverUI->Update();
@@ -907,10 +887,13 @@ namespace FPS_n2 {
 				}
 
 				//ネットワーク
+#if defined(DEBUG) && ACTIVE_NET
 				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
 					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->IsServer(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
+#endif
 				int PrevKill = ViewPlayer->GetKill();
+#if defined(DEBUG) && ACTIVE_NET
 				if (this->m_NetWorkController) {
 					NetWork::MoveInfo MoveInfoData;
 					int32_t FreeData[10]{};
@@ -943,7 +926,9 @@ namespace FPS_n2 {
 					}
 					this->m_NetWorkController->Update(this->m_LocalSend);
 				}
+#endif
 				std::vector<DamageEvent>	DamageEvents;
+#if defined(DEBUG) && ACTIVE_NET
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 					bool IsServerNotPlayer = this->m_NetWorkController->IsServer() && !this->m_NetWorkController->GetServerPlayer();//サーバーだけど遊ばないよ
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -965,6 +950,9 @@ namespace FPS_n2 {
 						Ret.PopDamageEvent(&DamageEvents);
 					}
 				}
+#else
+				if (false) {}
+#endif
 				else {//オフライン
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
@@ -990,14 +978,16 @@ namespace FPS_n2 {
 					PlayerMngr->GetTeamHelicopter()->PopDamageEvent(&DamageEvents);
 				}
 				//ダメージイベント
-				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-					for (size_t loop2 = 0, Max = DamageEvents.size(); loop2 < Max; ++loop2) {
-						if (chara->SetDamageEvent(DamageEvents[loop2])) {
-							std::swap(DamageEvents[Max - 1], DamageEvents[loop2]);
-							//DamageEvents.pop_back();//ループ範囲外なのでやらなくてよい
-							--Max;
-							--loop2;
+				if (DamageEvents.size() > 0) {
+					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+						for (size_t loop2 = 0, Max = DamageEvents.size(); loop2 < Max; ++loop2) {
+							if (chara->SetDamageEvent(DamageEvents[loop2])) {
+								std::swap(DamageEvents[Max - 1], DamageEvents[loop2]);
+								//DamageEvents.pop_back();//ループ範囲外なのでやらなくてよい
+								--Max;
+								--loop2;
+							}
 						}
 					}
 				}
@@ -1047,6 +1037,7 @@ namespace FPS_n2 {
 				}
 
 				float Radius = 2.0f * 1.f * Scale3DRate;
+#if defined(DEBUG) && ACTIVE_NET
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& player = PlayerMngr->GetPlayer(loop);
@@ -1056,6 +1047,9 @@ namespace FPS_n2 {
 						//TODO
 					}
 				}
+#else
+				if (false) {}
+#endif
 				else {
 					if (ViewChara->IsAlive()) {
 						//自分が当たったら押し出す 取れるなら取る
@@ -1299,9 +1293,12 @@ namespace FPS_n2 {
 			//使い回しオブジェ系
 			BackGround::BackGroundControl::Instance()->Dispose();
 			//
+#if defined(DEBUG) && ACTIVE_NET
 			if (this->m_NetWorkController) {
 				this->m_NetWorkController.reset();
 			}
+			NetWorkBrowser::Release();
+#endif
 			{
 				PostPassParts->SetLevelFilter(0, 255, 1.0f);
 				PostPassParts->SetAberrationPower(1.0f);
@@ -1310,7 +1307,6 @@ namespace FPS_n2 {
 				PostPassParts->Set_is_lens(false);
 				PostPassParts->Set_zoom_lens(1.0f);
 			}
-			NetWorkBrowser::Release();
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			this->m_StartMovie.reset();
@@ -1344,7 +1340,6 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
-			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
@@ -1377,10 +1372,12 @@ namespace FPS_n2 {
 						//
 						this->m_TransceiverUI->Draw();
 					}
+#if defined(DEBUG) && ACTIVE_NET
 #if DEBUG_NET
 					NetWorkBrowser::Instance()->Draw();						//通信設定
 #endif
 					if (this->m_NetWorkController) {
+						auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 						std::string PingMes;
 						if (this->m_NetWorkController->GetPing() >= 0.0f) {
 							char Mes[260];
@@ -1400,6 +1397,7 @@ namespace FPS_n2 {
 							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
 							PingMes);
 					}
+#endif
 				}
 				//クリア時表示
 				if (this->m_IsGameClear) {

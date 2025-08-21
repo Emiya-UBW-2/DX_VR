@@ -113,9 +113,7 @@ namespace FPS_n2 {
 		Man_Death8,
 		//
 		Man_contact,
-		Man_openfire,
 		Man_reload,
-		Man_takecover,
 		Man_breathing,
 		Man_breathend,
 		//
@@ -124,10 +122,6 @@ namespace FPS_n2 {
 		HitGuard,
 		//
 		HitGround0,
-		HitGround1,
-		HitGround2,
-		HitGround3,
-		HitGround4,
 		//
 		Tank_Shot,
 		Tank_Ricochet,

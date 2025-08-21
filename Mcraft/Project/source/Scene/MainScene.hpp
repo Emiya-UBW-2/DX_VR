@@ -27,7 +27,9 @@ namespace FPS_n2 {
 			std::unique_ptr<TransceiverUI>				m_TransceiverUI;
 			std::unique_ptr<TaskOperator>				m_TaskOperator;
 			std::unique_ptr<StartMovie>					m_StartMovie;
+#if defined(DEBUG) && ACTIVE_NET
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };			//NetWork
+#endif
 			NetWork::PlayerSendData						m_LocalSend;
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
 			float										m_StartTimer{ 0.0f };
@@ -49,9 +51,11 @@ namespace FPS_n2 {
 			bool										m_IsTutorial{ false };
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
+#if defined(DEBUG) && ACTIVE_NET
 				if (this->m_NetWorkController) {
 					return this->m_NetWorkController->GetMyLocalPlayerID();
 				}
+#endif
 				return (PlayerID)0;
 			}
 			bool		IsStartedBattle(void) const noexcept { return this->m_StartTimer <= 0.0f; }

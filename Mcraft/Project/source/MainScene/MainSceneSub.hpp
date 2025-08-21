@@ -71,7 +71,7 @@ namespace FPS_n2 {
 			float						m_DamagePerR{};
 			int							m_ReHP{};
 
-			float						m_AmmoRand{};
+			bool						m_AmmoRand{};
 			float						m_AmmoRandR{};
 			float						m_AmmoInPer{};
 			int							m_AmmoNumTotal{};
