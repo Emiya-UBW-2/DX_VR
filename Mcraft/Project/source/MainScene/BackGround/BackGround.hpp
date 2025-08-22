@@ -9,7 +9,7 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<BackGroundControl>;
 		private:
-			VoxelControl					m_VoxelControl;
+			std::unique_ptr<VoxelControl>	m_VoxelControl;
 			MV1								m_ObjSky;
 			bool							m_GrenadeBomb{ false };
 			std::shared_ptr<BaseObject>		m_ItemContainerObj;
@@ -55,17 +55,18 @@ namespace FPS_n2 {
 			std::vector<Builds>			m_ObjBuilds;
 		public:
 			const auto&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
-
-			Vector3DX GetRandomPoint(const Vector3DX& Pos, float RangeSmaller = InvalidID, float RangeOver = InvalidID, bool IsPutGround = false) const noexcept {
+			//所定の位置からNm未満かNm以上の座標を取得する
+			Vector3DX		GetRandomPoint(const Vector3DX& Pos, float RangeSmaller = InvalidID, float RangeOver = InvalidID, bool IsPutGround = false) const noexcept {
 				std::vector<int> SelList;
 				SelList.clear();
 				for (auto& C : this->m_ObjBuilds) {
+					int index = static_cast<int>(&C - &this->m_ObjBuilds.front());
 					auto Vec = C.GetPos() - Pos; Vec.y = (0.f);
 					if (RangeSmaller != InvalidID && Vec.IsRangeSmaller(RangeSmaller)) {
-						SelList.emplace_back(static_cast<int>(&C - &this->m_ObjBuilds.front()));
+						SelList.emplace_back(index);
 					}
 					if (RangeOver != InvalidID && !Vec.IsRangeSmaller(RangeOver)) {
-						SelList.emplace_back(static_cast<int>(&C - &this->m_ObjBuilds.front()));
+						SelList.emplace_back(index);
 					}
 				}
 				Vector3DX Answer;
@@ -258,14 +259,16 @@ namespace FPS_n2 {
 				Vector3DX pEndPos = EndPos;
 				return CheckLinetoMap(StartPos, &pEndPos);
 			}
-			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
+			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
+				return m_VoxelControl->CheckWall(StartPos, EndPos, AddCapsuleMin, AddCapsuleMax, Radius, m_AddonColObj);
+			}
 		public:
-			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return m_VoxelControl.GetPoint(pos); }
-			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return m_VoxelControl.GetPos(xpos, ypos, zpos); }
+			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return m_VoxelControl->GetPoint(pos); }
+			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return m_VoxelControl->GetPos(xpos, ypos, zpos); }
 			//ブロックにダメージを与える
-			bool			DamageCell(int xpos, int ypos, int zpos, int8_t Damage) noexcept { return m_VoxelControl.DamageCell(xpos, ypos, zpos, Damage); }
-			void			SettingChange(void) noexcept { m_VoxelControl.SettingChange(); }
-			constexpr float GetDrawFarMax() const noexcept { return m_VoxelControl.GetDrawFarMax(); }
+			bool			DamageCell(int xpos, int ypos, int zpos, int8_t Damage) noexcept { return m_VoxelControl->DamageCell(xpos, ypos, zpos, Damage); }
+			void			SettingChange(void) noexcept { m_VoxelControl->SettingChange(); }
+			constexpr float GetDrawFarMax() const noexcept { return m_VoxelControl->GetDrawFarMax(); }
 		public://
 			void			Load(void) noexcept;
 			//

@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
 				Vert.norm = Vector3DX::right().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -31,7 +31,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
 				Vert.norm = Vector3DX::right().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
 				Vert.norm = Vector3DX::right().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -53,7 +53,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
 				Vert.norm = Vector3DX::right().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -81,7 +81,7 @@ namespace FPS_n2 {
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
 				Vert.norm = Vector3DX::left().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -92,7 +92,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
 				Vert.norm = Vector3DX::left().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -103,7 +103,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
 				Vert.norm = Vector3DX::left().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -114,7 +114,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
 				Vert.norm = Vector3DX::left().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -142,7 +142,7 @@ namespace FPS_n2 {
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
 				Vert.norm = Vector3DX::up().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -153,7 +153,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
 				Vert.norm = Vector3DX::up().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -164,7 +164,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
 				Vert.norm = Vector3DX::up().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -175,7 +175,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
 				Vert.norm = Vector3DX::up().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -203,7 +203,7 @@ namespace FPS_n2 {
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
 				Vert.norm = Vector3DX::down().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -214,7 +214,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
 				Vert.norm = Vector3DX::down().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -225,7 +225,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
 				Vert.norm = Vector3DX::down().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -236,7 +236,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
 				Vert.norm = Vector3DX::down().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -264,7 +264,7 @@ namespace FPS_n2 {
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b001).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmin, center.y + ypos, center.z + zpos, 0b001).get();
 				Vert.norm = Vector3DX::forward().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -275,7 +275,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b101).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmax, center.y + ypos, center.z + zpos, 0b101).get();
 				Vert.norm = Vector3DX::forward().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -286,7 +286,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b011).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmin, center.y + ypos, center.z + zpos, 0b011).get();
 				Vert.norm = Vector3DX::forward().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -297,7 +297,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b111).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmax, center.y + ypos, center.z + zpos, 0b111).get();
 				Vert.norm = Vector3DX::forward().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -325,7 +325,7 @@ namespace FPS_n2 {
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b010).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmin, center.y + ypos, center.z + zpos, 0b010).get();
 				Vert.norm = Vector3DX::back().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -336,7 +336,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b110).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmax, center.y + ypos, center.z + zpos, 0b110).get();
 				Vert.norm = Vector3DX::back().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -347,7 +347,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b000).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmin, center.y + ypos, center.z + zpos, 0b000).get();
 				Vert.norm = Vector3DX::back().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -358,7 +358,7 @@ namespace FPS_n2 {
 			}
 			{
 				auto& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b100).get();
+				Vert.pos = cellx.GetPosOffset(center.x + xmax, center.y + ypos, center.z + zpos, 0b100).get();
 				Vert.norm = Vector3DX::back().get();
 				Vert.dif = GetColorU8(128, 128, 128, 255);
 				Vert.spc = GetColorU8(64, 64, 64, 255);
@@ -370,7 +370,7 @@ namespace FPS_n2 {
 		}
 		void		VoxelControl::AddCubes(size_t id) noexcept {
 			auto& cellx = this->m_CellxN[id];
-			auto& Draws = this->m_Draws[id];
+			auto& Draws = this->m_DrawThreadDatas[id];
 			Draws.Vert32.ResetNum();
 			auto center = cellx.GetPoint(Draws.CamPos);
 
@@ -471,7 +471,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		VoxelControl::FlipCubes(size_t id) noexcept {
-			auto& Draws = this->m_Draws[id];
+			auto& Draws = this->m_DrawThreadDatas[id];
 			Draws.Vert32.FlipVerts();
 			auto* CameraParts = Camera3D::Instance();
 			Draws.CamPos = CameraParts->GetMainCamera().GetCamPos();
@@ -480,7 +480,7 @@ namespace FPS_n2 {
 		void		VoxelControl::AddShadowCubes(size_t id) noexcept {
 			size_t shadow = TotalCellLayer + id;
 			auto& cellx = this->m_CellxN[id];
-			auto& Draws = this->m_Draws[shadow];
+			auto& Draws = this->m_DrawThreadDatas[shadow];
 			Draws.Vert32.ResetNum();
 			auto center = cellx.GetPoint(Draws.CamPos);
 			//X
@@ -506,14 +506,14 @@ namespace FPS_n2 {
 			size_t shadow = TotalCellLayer + id;
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* SceneParts = SceneControl::Instance();
-			auto& Draws = this->m_Draws[shadow];
+			auto& Draws = this->m_DrawThreadDatas[shadow];
 			Draws.Vert32.FlipVerts();
 			//Draws.CamPos =  Camera3D::Instance()->GetMainCamera().GetCamPos();
 			Draws.CamPos = Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate;
 			Draws.CamVec = PostPassParts->GetShadowDir();
 			SceneParts->SetIsUpdateFarShadowActive();
 		}
-		int			VoxelControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
+		int			VoxelControl::CheckLine(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			int HitCount = 0;
 
 			if (isnan<float>(StartPos.x) || isnan<float>(StartPos.y) || isnan<float>(StartPos.z)) {
@@ -567,7 +567,7 @@ namespace FPS_n2 {
 			}
 			return HitCount;
 		}
-		bool		VoxelControl::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius, const std::vector<const MV1*>& addonColObj) const noexcept {
+		bool		VoxelControl::CheckWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius, const std::vector<const MV1*>& addonColObj) const noexcept {
 			auto MoveVector = *EndPos - StartPos;
 			// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
@@ -859,7 +859,7 @@ namespace FPS_n2 {
 		void		VoxelControl::Load(void) noexcept {
 			this->m_tex.Load("data/tex.png");
 		}
-		void		VoxelControl::Init(void) noexcept {
+		void		VoxelControl::Setup(void) noexcept {
 			//簡略版を制作
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
 				auto& cell1 = this->m_CellxN[loop];
@@ -885,7 +885,7 @@ namespace FPS_n2 {
 
 			//
 			constexpr size_t size = (DrawMaxXPlus - DrawMaxXMinus) * (DrawMaxYPlus - DrawMaxYMinus) * (DrawMaxZPlus - DrawMaxZMinus) / 2 * 3 / 100;
-			for (auto& Vert : this->m_Draws) {
+			for (auto& Vert : this->m_DrawThreadDatas) {
 				Vert.Vert32.Init(size);
 			}
 			//
@@ -930,16 +930,16 @@ namespace FPS_n2 {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
 				auto& cell1 = this->m_CellxN[loop];
 				//
-				if (this->m_BaseRate < cell1.ScaleInt) {
-					this->m_Draws[loop].Vert32.Disable();
+				if (this->m_BaseRate < cell1.GetScale()) {
+					this->m_DrawThreadDatas[loop].Vert32.Disable();
 				}
 				else {
 					this->m_Jobs[loop].Update();
 				}
 				//
 				int shadow = TotalCellLayer + loop;
-				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cell1.ScaleInt)) {
-					this->m_Draws[shadow].Vert32.Disable();
+				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cell1.GetScale())) {
+					this->m_DrawThreadDatas[shadow].Vert32.Disable();
 					this->m_Jobs[shadow].UpdateDisable();
 				}
 				else {
@@ -951,7 +951,7 @@ namespace FPS_n2 {
 #if defined(DEBUG) && FALSE
 			{
 				for (int loop = 0; loop < TotalCellLayer; ++loop) {
-					auto& Vert = this->m_Draws[loop].Vert32;
+					auto& Vert = this->m_DrawThreadDatas[loop].Vert32;
 					auto& cell1 = this->m_CellxN[loop];
 					if (Vert.GetOutNum() == 0) { continue; }
 					printfDx("Vertex[%d]\n", Vert.GetOutNum() * 4);
@@ -961,7 +961,7 @@ namespace FPS_n2 {
 		}
 		void		VoxelControl::Shadow_Draw(void) const noexcept {
 			for (int shadow = TotalCellLayer; shadow < TotalCellLayer + TotalCellLayer; ++shadow) {
-				auto& Vert = this->m_Draws[shadow].Vert32;
+				auto& Vert = this->m_DrawThreadDatas[shadow].Vert32;
 				Vert.Draw(this->m_tex);
 			}
 		}
@@ -973,7 +973,7 @@ namespace FPS_n2 {
 
 			SetUseTextureToShader(0, this->m_tex.get());
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				auto& Vert = this->m_Draws[loop].Vert32;
+				auto& Vert = this->m_DrawThreadDatas[loop].Vert32;
 				auto& cell1 = this->m_CellxN[loop];
 				if (Vert.GetOutNum() == 0) { continue; }
 				if (!cell1.isFarCells() && !(cell1.Scale < Far)) { continue; }
@@ -989,35 +989,23 @@ namespace FPS_n2 {
 			float Far = GetCameraFar() / MinLimit;
 
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				auto& Vert = this->m_Draws[loop].Vert32;
+				auto& Vert = this->m_DrawThreadDatas[loop].Vert32;
 				auto& cell1 = this->m_CellxN[loop];
 				if (Vert.GetOutNum() == 0) { continue; }
 				if (!cell1.isFarCells() && !(cell1.Scale < Far)) { continue; }
 				if (cell1.isFarCells() && !(Near < cell1.Scale && cell1.Scale < Far)) { continue; }
 				Vert.Draw(this->m_tex);
 			}
-
-			/*
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
-			auto& ViewChara = ViewPlayer->GetChara();
-			float Height = ViewChara->GetEyePositionCache().y;
-			for (auto& b : this->m_ObjBuilds) {
-				Vector3DX Pos = b.GetPos();
-				Pos.y = Height;
-				DrawCube3D((Pos - Vector3DX::vget(1.f, 1.f, 1.f)).get(), (Pos + Vector3DX::vget(1.f, 1.f, 1.f)).get(), GetColor(0, 255, 0), GetColor(0, 255, 0), true);
-			}
-			//*/
 		}
 		void		VoxelControl::Dispose(void) noexcept {
 			for (auto& job : m_Jobs) {
 				job.Dispose();
 			}
-			for (auto& Vert : this->m_Draws) {
-				Vert.Vert32.Dispose();
+			for (auto& Vert : this->m_DrawThreadDatas) {
+				Vert.Dispose();
 			}
 			for (auto& cellx : this->m_CellxN) {
-				cellx.m_CellBuffer.clear();
+				cellx.Dispose();
 			}
 		}
 		void		VoxelControl::Dispose_Load(void) noexcept {

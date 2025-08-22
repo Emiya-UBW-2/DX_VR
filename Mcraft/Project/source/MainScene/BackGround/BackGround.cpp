@@ -207,7 +207,7 @@ namespace FPS_n2 {
 		int			BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			int HitCount = 0;
 
-			for(auto& ad : m_AddonColObj) {
+			for (auto& ad : m_AddonColObj) {
 				auto ColLine = ad->CollCheck_Line(StartPos, *EndPos);
 				if (ColLine.HitFlag == TRUE) {
 					*EndPos = ColLine.HitPosition;
@@ -217,16 +217,14 @@ namespace FPS_n2 {
 					HitCount += 3;
 				}
 			}
-			HitCount += m_VoxelControl.CheckLinetoMap(StartPos, EndPos, Normal);
+			HitCount += m_VoxelControl->CheckLine(StartPos, EndPos, Normal);
 			return HitCount;
-		}
-		bool		BackGroundControl::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
-			return m_VoxelControl.CheckMapWall(StartPos, EndPos, AddCapsuleMin, AddCapsuleMax, Radius, m_AddonColObj);
 		}
 		//
 		void		BackGroundControl::Load(void) noexcept {
 			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
-			m_VoxelControl.Load();
+			m_VoxelControl = std::make_unique<VoxelControl>();
+			m_VoxelControl->Load();
 		}
 		void		BackGroundControl::Init(bool IsTutorial) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -237,9 +235,10 @@ namespace FPS_n2 {
 				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.0f));
 				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
 			}
+			//ボクセル描画の設定
 			if (IsTutorial) {
 				//空っぽ
-				m_VoxelControl.SetReferenceCells().SetScale(0);
+				m_VoxelControl->SetReferenceCells().SetScale(0);
 
 				int Size = 23;
 				int Rate = 6;
@@ -248,33 +247,33 @@ namespace FPS_n2 {
 				int EdgePX = -54;
 				int EdgeP = -0;
 				int Maxheight = 0;
-				for (int xpos = 0; xpos < m_VoxelControl.GetReferenceCells().All; ++xpos) {
-					for (int zpos = 0; zpos < m_VoxelControl.GetReferenceCells().All; ++zpos) {
-						for (int ypos = 0; ypos < m_VoxelControl.GetReferenceCells().All; ++ypos) {
-							m_VoxelControl.SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
+				for (int xpos = 0; xpos < m_VoxelControl->GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < m_VoxelControl->GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < m_VoxelControl->GetReferenceCells().All; ++ypos) {
+							m_VoxelControl->SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
 						}
 					}
 				}
-				for (int xpos = 0; xpos < m_VoxelControl.GetReferenceCells().All; ++xpos) {
-					for (int zpos = 0; zpos < m_VoxelControl.GetReferenceCells().All; ++zpos) {
+				for (int xpos = 0; xpos < m_VoxelControl->GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < m_VoxelControl->GetReferenceCells().All; ++zpos) {
 						int xPos = -Size * Rate / 2 + xpos;
 						int zPos = -Size * Rate / 2 + zpos;
 						//外壁
 						if ((-EdgePX <= xpos && xpos <= Size * Rate + EdgePX - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
 							if ((xpos == -EdgePX || xpos == Size * Rate + EdgePX - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
-								for (int ypos = 0; ypos <= m_VoxelControl.GetReferenceCells().All / 8 - 5; ++ypos) {
-									m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos, ypos, m_VoxelControl.GetReferenceCells().Half + zPos).Cell = 1;
+								for (int ypos = 0; ypos <= m_VoxelControl->GetReferenceCells().All / 8 - 5; ++ypos) {
+									m_VoxelControl->SetReferenceCells().SetCellBuf(m_VoxelControl->GetReferenceCells().Half + xPos, ypos, m_VoxelControl->GetReferenceCells().Half + zPos).Cell = 1;
 								}
 							}
 						}
 						//床
 						if ((-EdgePX < xpos && xpos < Size * Rate + EdgePX - 1) && (-EdgeP < zpos && zpos < Size * Rate + EdgeP - 1)) {
-							auto Height = m_VoxelControl.GetReferenceCells().All / 8 - 15;
+							auto Height = m_VoxelControl->GetReferenceCells().All / 8 - 15;
 							if (Maxheight < Height) {
 								Maxheight = Height;
 							}
 							for (int ypos = 0; ypos <= Height; ++ypos) {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos, ypos, m_VoxelControl.GetReferenceCells().Half + zPos).Cell = 4;
+								m_VoxelControl->SetReferenceCells().SetCellBuf(m_VoxelControl->GetReferenceCells().Half + xPos, ypos, m_VoxelControl->GetReferenceCells().Half + zPos).Cell = 4;
 							}
 						}
 					}
@@ -285,9 +284,9 @@ namespace FPS_n2 {
 						auto SetWall = [&](int xt, int zt) {
 							int xPos = -Size * Rate / 2 + xpos + xt;
 							int zPos = -Size * Rate / 2 + zpos + zt;
-							auto Height = m_VoxelControl.GetReferenceCells().All / 8 - 15;
+							auto Height = m_VoxelControl->GetReferenceCells().All / 8 - 15;
 							for (int ypos = Height + 1; ypos <= Height + Heights; ++ypos) {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos, ypos, m_VoxelControl.GetReferenceCells().Half + zPos).Cell = 2;
+								m_VoxelControl->SetReferenceCells().SetCellBuf(m_VoxelControl->GetReferenceCells().Half + xPos, ypos, m_VoxelControl->GetReferenceCells().Half + zPos).Cell = 2;
 							}
 							};
 						if ((-EdgePX <= xpos && xpos <= Size * Rate + EdgePX - 1)) {
@@ -301,25 +300,23 @@ namespace FPS_n2 {
 
 					}
 				}
-				for (int xpos = 0; xpos < m_VoxelControl.GetReferenceCells().All; ++xpos) {
-					for (int zpos = 0; zpos < m_VoxelControl.GetReferenceCells().All; ++zpos) {
-						for (int ypos = 0; ypos < m_VoxelControl.GetReferenceCells().All; ++ypos) {
-							if (m_VoxelControl.GetReferenceCells().GetCellBuf(xpos, ypos, zpos).GetCell() != s_EmptyBlick) {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 100;
+				for (int xpos = 0; xpos < m_VoxelControl->GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < m_VoxelControl->GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < m_VoxelControl->GetReferenceCells().All; ++ypos) {
+							if (m_VoxelControl->GetReferenceCells().GetCellBuf(xpos, ypos, zpos).GetCell() != s_EmptyBlick) {
+								m_VoxelControl->SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 100;
 							}
 							else {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 0;
+								m_VoxelControl->SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 0;
 							}
 						}
 					}
 				}
-				this->m_ObjBuilds.resize(1);
-				this->m_ObjBuilds.back().Set(0);
-				this->m_ObjBuilds.back().SetPosition(Vector3DX::zero(), Vector3DX::zero());
+				this->m_ObjBuilds.clear();
 			}
 			else if (true) {
 				//空っぽ
-				m_VoxelControl.SetReferenceCells().SetScale(0);
+				m_VoxelControl->SetReferenceCells().SetScale(0);
 
 				int seed = GetRand(100);
 #if DEBUG_NET
@@ -336,22 +333,22 @@ namespace FPS_n2 {
 				int Edge = -Rate;
 				int EdgeP = -0;
 				int Maxheight = 0;
-				for (int xpos = 0; xpos < m_VoxelControl.GetReferenceCells().All; ++xpos) {
-					for (int zpos = 0; zpos < m_VoxelControl.GetReferenceCells().All; ++zpos) {
-						for (int ypos = 0; ypos < m_VoxelControl.GetReferenceCells().All; ++ypos) {
-							m_VoxelControl.SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
+				for (int xpos = 0; xpos < m_VoxelControl->GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < m_VoxelControl->GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < m_VoxelControl->GetReferenceCells().All; ++ypos) {
+							m_VoxelControl->SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
 						}
 					}
 				}
-				for (int xpos = 0; xpos < m_VoxelControl.GetReferenceCells().All; ++xpos) {
-					for (int zpos = 0; zpos < m_VoxelControl.GetReferenceCells().All; ++zpos) {
+				for (int xpos = 0; xpos < m_VoxelControl->GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < m_VoxelControl->GetReferenceCells().All; ++zpos) {
 						int xPos = -Size * Rate / 2 + xpos;
 						int zPos = -Size * Rate / 2 + zpos;
 						//外壁
 						if ((-EdgeP <= xpos && xpos <= Size * Rate + EdgeP - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
 							if ((xpos == -EdgeP || xpos == Size * Rate + EdgeP - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
-								for (int ypos = 0; ypos <= m_VoxelControl.GetReferenceCells().All / 8 - 5; ++ypos) {
-									m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos, ypos, m_VoxelControl.GetReferenceCells().Half + zPos).Cell = 1;
+								for (int ypos = 0; ypos <= m_VoxelControl->GetReferenceCells().All / 8 - 5; ++ypos) {
+									m_VoxelControl->SetReferenceCells().SetCellBuf(m_VoxelControl->GetReferenceCells().Half + xPos, ypos, m_VoxelControl->GetReferenceCells().Half + zPos).Cell = 1;
 								}
 							}
 						}
@@ -359,40 +356,38 @@ namespace FPS_n2 {
 						if ((-EdgeP < xpos && xpos < Size * Rate + EdgeP - 1) && (-EdgeP < zpos && zpos < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
-								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(m_VoxelControl.GetReferenceCells().All * 1 / 10));
+								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(m_VoxelControl->GetReferenceCells().All * 1 / 10));
 							if (OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
-								Height = m_VoxelControl.GetReferenceCells().All / 8 - 15;
+								Height = m_VoxelControl->GetReferenceCells().All / 8 - 15;
 							}
 							if (Maxheight < Height) {
 								Maxheight = Height;
 							}
 							for (int ypos = 0; ypos <= Height; ++ypos) {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos, ypos, m_VoxelControl.GetReferenceCells().Half + zPos).Cell = 4;
+								m_VoxelControl->SetReferenceCells().SetCellBuf(m_VoxelControl->GetReferenceCells().Half + xPos, ypos, m_VoxelControl->GetReferenceCells().Half + zPos).Cell = 4;
 							}
 						}
 					}
 				}
 				//内壁
-				//*
 				for (int zpos = -Edge; zpos < Size * Rate + Edge; ++zpos) {
 					for (int xpos = -Edge; xpos < Size * Rate + Edge; ++xpos) {
 						auto SetWall = [&](int xt, int zt) {
 #if DEBUG_NET
 							return;
 #endif
-
 							int xPos = -Size * Rate / 2 + xpos + xt;
 							int zPos = -Size * Rate / 2 + zpos + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos + xt)) / (Size * Rate),
-								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(m_VoxelControl.GetReferenceCells().All * 1 / 10));
+								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(m_VoxelControl->GetReferenceCells().All * 1 / 10));
 							if (OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
-								Height = m_VoxelControl.GetReferenceCells().All / 8 - 15;
+								Height = m_VoxelControl->GetReferenceCells().All / 8 - 15;
 							}
 							for (int ypos = Height + 1; ypos <= Height + Heights; ++ypos) {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos, ypos, m_VoxelControl.GetReferenceCells().Half + zPos).Cell = 2;
+								m_VoxelControl->SetReferenceCells().SetCellBuf(m_VoxelControl->GetReferenceCells().Half + xPos, ypos, m_VoxelControl->GetReferenceCells().Half + zPos).Cell = 2;
 							}
-				};
+							};
 						int xp = xpos / Rate;
 						int zp = zpos / Rate;
 						if (!mazeControl.PosIsPath(xp, zp) && (xpos % Rate == 0) && (zpos % Rate == 0)) {
@@ -418,51 +413,22 @@ namespace FPS_n2 {
 								}
 							}
 						}
-			}
-		}
-				//*/
-				/*
-				for (int zpos = -Edge * 2; zpos < Size * Rate + Edge * 3; ++zpos) {
-					for (int xpos = -Edge * 2; xpos < Size * Rate + Edge * 3; ++xpos) {
-						auto SetWall = [&](int xt, int zt) {
-#if DEBUG_NET
-							return;
-#endif
-							int xPos = -Size * Rate / 2 + xpos + xt;
-							int zPos = -Size * Rate / 2 + zpos + zt;
-							int ypos = Maxheight + Heights;
-							m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos, ypos, m_VoxelControl.GetReferenceCells().Half + zPos).Cell = 4;
-							};
-						if ((xpos % Rate == 0) && (zpos % Rate == 0)) {
-							for (int xt = 0; xt <= Rate; ++xt) {
-								for (int zt = 0; zt <= Rate; ++zt) {
-									SetWall(xt, zt);
-								}
-							}
-						}
 					}
 				}
-				//*/
-				for (int xpos = 0; xpos < m_VoxelControl.GetReferenceCells().All; ++xpos) {
-					for (int zpos = 0; zpos < m_VoxelControl.GetReferenceCells().All; ++zpos) {
-						for (int ypos = 0; ypos < m_VoxelControl.GetReferenceCells().All; ++ypos) {
-							if (m_VoxelControl.GetReferenceCells().GetCellBuf(xpos, ypos, zpos).GetCell() != s_EmptyBlick) {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 100;
+				//HPを設定
+				for (int xpos = 0; xpos < m_VoxelControl->GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < m_VoxelControl->GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < m_VoxelControl->GetReferenceCells().All; ++ypos) {
+							if (m_VoxelControl->GetReferenceCells().GetCellBuf(xpos, ypos, zpos).GetCell() != s_EmptyBlick) {
+								m_VoxelControl->SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 100;
 							}
 							else {
-								m_VoxelControl.SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 0;
+								m_VoxelControl->SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 0;
 							}
 						}
 					}
 				}
-				//SaveCellsFile();
-
-
-
-
-
-
-						//
+				//経路探索
 				this->m_ObjBuilds.resize(mazeControl.GetPachCount());
 				{
 					float deg = 0.f;
@@ -514,9 +480,9 @@ namespace FPS_n2 {
 									break;
 								}
 								this->m_ObjBuilds[loop].Set(loop);
-								int xPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
-								int zPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
-								this->m_ObjBuilds[loop].SetPosition(m_VoxelControl.GetPos(xPos, 0, zPos), m_VoxelControl.GetPos(xPos + Rate, 0, zPos + Rate));
+								int xPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
+								int zPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
+								this->m_ObjBuilds[loop].SetPosition(m_VoxelControl->GetPos(xPos, 0, zPos), m_VoxelControl->GetPos(xPos + Rate, 0, zPos + Rate));
 								loop++;
 							}
 						}
@@ -529,24 +495,24 @@ namespace FPS_n2 {
 							if (mazeControl.PosIsPath(x, y)) {
 								auto& bu = this->m_ObjBuilds[loop];
 								if (mazeControl.PosIsPath(x + 1, y)) {
-									int xPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate + Rate;
-									int zPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
-									bu.SetLink(0, GetNearestBuilds((m_VoxelControl.GetPos(xPos, 0, zPos) + m_VoxelControl.GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+									int xPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate + Rate;
+									int zPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
+									bu.SetLink(0, GetNearestBuilds((m_VoxelControl->GetPos(xPos, 0, zPos) + m_VoxelControl->GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
 								}
 								if (mazeControl.PosIsPath(x, y + 1)) {
-									int xPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
-									int zPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate + Rate;
-									bu.SetLink(1, GetNearestBuilds((m_VoxelControl.GetPos(xPos, 0, zPos) + m_VoxelControl.GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+									int xPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
+									int zPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate + Rate;
+									bu.SetLink(1, GetNearestBuilds((m_VoxelControl->GetPos(xPos, 0, zPos) + m_VoxelControl->GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
 								}
 								if (mazeControl.PosIsPath(x - 1, y)) {
-									int xPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate - Rate;
-									int zPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
-									bu.SetLink(2, GetNearestBuilds((m_VoxelControl.GetPos(xPos, 0, zPos) + m_VoxelControl.GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+									int xPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate - Rate;
+									int zPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
+									bu.SetLink(2, GetNearestBuilds((m_VoxelControl->GetPos(xPos, 0, zPos) + m_VoxelControl->GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
 								}
 								if (mazeControl.PosIsPath(x, y - 1)) {
-									int xPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
-									int zPos = m_VoxelControl.GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate - Rate;
-									bu.SetLink(3, GetNearestBuilds((m_VoxelControl.GetPos(xPos, 0, zPos) + m_VoxelControl.GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+									int xPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
+									int zPos = m_VoxelControl->GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate - Rate;
+									bu.SetLink(3, GetNearestBuilds((m_VoxelControl->GetPos(xPos, 0, zPos) + m_VoxelControl->GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
 								}
 								loop++;
 							}
@@ -556,12 +522,12 @@ namespace FPS_n2 {
 			}
 			else if (false) {
 				//空っぽ
-				m_VoxelControl.SetReferenceCells().SetScale(0);
+				m_VoxelControl->SetReferenceCells().SetScale(0);
 
-				for (int xpos = 0; xpos < m_VoxelControl.GetReferenceCells().All; ++xpos) {
-					for (int zpos = 0; zpos < m_VoxelControl.GetReferenceCells().All; ++zpos) {
-						for (int ypos = 0; ypos < m_VoxelControl.GetReferenceCells().All; ++ypos) {
-							m_VoxelControl.SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
+				for (int xpos = 0; xpos < m_VoxelControl->GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < m_VoxelControl->GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < m_VoxelControl->GetReferenceCells().All; ++ypos) {
+							m_VoxelControl->SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
 						}
 					}
 				}
@@ -585,7 +551,7 @@ namespace FPS_n2 {
 								for (int xp = 0; xp < 1; ++xp) {
 									for (int yp = 0; yp < 1; ++yp) {
 										for (int zp = 0; zp < 1; ++zp) {
-											m_VoxelControl.SetReferenceCells().SetCellBuf(m_VoxelControl.GetReferenceCells().Half + xPos + xp, yPos + yp, m_VoxelControl.GetReferenceCells().Half + zPos + zp).Cell = 1;
+											m_VoxelControl->SetReferenceCells().SetCellBuf(m_VoxelControl->GetReferenceCells().Half + xPos + xp, yPos + yp, m_VoxelControl->GetReferenceCells().Half + zPos + zp).Cell = 1;
 										}
 									}
 								}
@@ -595,11 +561,15 @@ namespace FPS_n2 {
 					}
 					Model.Dispose();
 				}
-				m_VoxelControl.SaveCellsFile();
+				m_VoxelControl->SaveCellsFile();
 			}
 			else {
-				m_VoxelControl.LoadCellsFile();
+				m_VoxelControl->LoadCellsFile();
 			}
+			m_VoxelControl->Setup();
+			m_AddonColObj.clear();
+			m_AddonColObj.emplace_back(&this->m_ItemContainerObj->GetCol());
+			//
 			MATERIALPARAM Param{};
 			Param.Diffuse = GetColorF(0.0f, 0.0f, 0.0f, 1.0f);						// ディフューズカラー
 			Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// アンビエントカラー
@@ -607,10 +577,6 @@ namespace FPS_n2 {
 			Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// エミッシブカラー
 			Param.Power = 500.0f;													// スペキュラハイライトの鮮明度
 			SetMaterialParam(Param);
-
-			m_VoxelControl.Init();
-			m_AddonColObj.clear();
-			m_AddonColObj.emplace_back(&this->m_ItemContainerObj->GetCol());
 			//コンテナ配置
 			{
 				Vector3DX TargetPos = Vector3DX::zero();
@@ -634,14 +600,14 @@ namespace FPS_n2 {
 					int								yput = 20;
 					int								zput = 25;
 					int8_t							damage = 100;
-					auto Put = m_VoxelControl.GetPoint(TargetPos);
+					auto Put = m_VoxelControl->GetPoint(TargetPos);
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
 						for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
 							for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
-								m_VoxelControl.DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, damage);
+								m_VoxelControl->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, damage);
 							}
 							for (int yp = -yput / 2; yp <= 0; ++yp) {
-								//SetBlick(Put.x + xp, Put.y + yp, Put.z + zp, 1);
+								//m_VoxelControl->SetBlick(Put.x + xp, Put.y + yp, Put.z + zp, 1);
 							}
 						}
 
@@ -666,7 +632,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundControl::Update(void) noexcept {
-			m_VoxelControl.Update();
+			m_VoxelControl->Update();
 		}
 		void		BackGroundControl::BG_Draw(void) const noexcept {
 			auto Fog = GetFogEnable();
@@ -680,20 +646,32 @@ namespace FPS_n2 {
 			SetVerticalFogEnable(VFog);
 		}
 		void		BackGroundControl::Shadow_Draw(void) const noexcept {
-			m_VoxelControl.Shadow_Draw();
+			m_VoxelControl->Shadow_Draw();
 		}
 		void		BackGroundControl::SetShadow_Draw_Rigid(void) const noexcept {
-			m_VoxelControl.SetShadow_Draw_Rigid();
+			m_VoxelControl->SetShadow_Draw_Rigid();
 		}
 		void		BackGroundControl::Draw(void) const noexcept {
-			m_VoxelControl.Draw();
+			m_VoxelControl->Draw();
+			/*
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+			auto& ViewChara = ViewPlayer->GetChara();
+			float Height = ViewChara->GetEyePositionCache().y;
+			for (auto& b : this->m_ObjBuilds) {
+				Vector3DX Pos = b.GetPos();
+				Pos.y = Height;
+				DrawCube3D((Pos - Vector3DX::vget(1.f, 1.f, 1.f)).get(), (Pos + Vector3DX::vget(1.f, 1.f, 1.f)).get(), GetColor(0, 255, 0), GetColor(0, 255, 0), true);
+			}
+			//*/
 		}
 		void		BackGroundControl::Dispose(void) noexcept {
-			m_VoxelControl.Dispose();
+			m_VoxelControl->Dispose();
 			m_AddonColObj.clear();
 		}
 		void		BackGroundControl::Dispose_Load(void) noexcept {
-			m_VoxelControl.Dispose_Load();
+			m_VoxelControl->Dispose_Load();
+			m_VoxelControl.reset();
 			m_ItemContainerObj.reset();
 			this->m_ObjSky.Dispose();
 		}

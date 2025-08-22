@@ -63,27 +63,25 @@ namespace FPS_n2 {
 					void SetOcclusion(int id) noexcept { FillInfo |= (1 << id); }
 				};
 			private:
-			public:
 				std::vector<CellBuffer>	m_CellBuffer;
-				int						ScaleInt = 0;
+				int						m_ScaleInt = 0;
+			public:
 				//算術補助系
-				int						ScaleRate = static_cast<int>(std::pow(MulPer, this->ScaleInt));
+				int						ScaleRate = static_cast<int>(std::pow(MulPer, GetScale()));
 				int						All = 256 / this->ScaleRate;
 				int						Half = this->All / 2;
 				int						AllPow2 = this->All * this->All;
 				float					Scale = (CellScale * this->ScaleRate);
+			private:
+				const int			GetIndex(int pos) const noexcept { return (pos % this->All + this->All) % this->All; }
 			public:
-				const bool		isFarCells(void) const noexcept { return this->ScaleInt != 0; }
-				//
-				const int		GetIndex(int pos) const noexcept { return (pos % this->All + this->All) % this->All; }
-				const size_t	GetCellNum(int xpos, int ypos, int zpos) const noexcept { return static_cast<size_t>(GetIndex(xpos) * this->AllPow2 + ypos * this->All + GetIndex(zpos)); }
-				//
-				const auto& GetCellBuf(int xpos, int ypos, int zpos) const noexcept { return this->m_CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
-				auto& SetCellBuf(int xpos, int ypos, int zpos) noexcept { return this->m_CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
-				//
-				const auto		GetPosBuffer(int xpos, int ypos, int zpos, int ID) const noexcept { return GetPos(xpos + ((ID >> 2) & 1), ypos + ((ID >> 1) & 1), zpos + (ID & 1)); }
-				//
-				const int8_t	isFill(int xpos, int ypos, int zpos, int mul) const noexcept {
+				const auto&			GetCellBuf(int xpos, int ypos, int zpos) const noexcept { return this->m_CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
+				auto&				SetCellBuf(int xpos, int ypos, int zpos) noexcept { return this->m_CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
+				const int&			GetScale(void) const noexcept { return this->m_ScaleInt; }
+			public:
+				const bool			isFarCells(void) const noexcept { return GetScale() != 0; }
+				const size_t		GetCellNum(int xpos, int ypos, int zpos) const noexcept { return static_cast<size_t>(GetIndex(xpos) * this->AllPow2 + ypos * this->All + GetIndex(zpos)); }
+				const int8_t		isFill(int xpos, int ypos, int zpos, int mul) const noexcept {
 					mul /= this->ScaleRate;
 					int FillCount = 0;
 					int FillAll = 0;
@@ -121,19 +119,20 @@ namespace FPS_n2 {
 						return s_EmptyBlick;
 					}
 				}
-				const bool		isInside(int ypos) const noexcept { return ((0 <= ypos) && (ypos < this->All)); }
-				const Vector3DX	GetPos(int xpos, int ypos, int zpos) const noexcept {
+				const bool			isInside(int ypos) const noexcept { return ((0 <= ypos) && (ypos < this->All)); }
+				//ボクセル座標から描画座標の最小範囲に変換
+				const Vector3DX		GetPos(int xpos, int ypos, int zpos) const noexcept {
 					return Vector3DX::vget(static_cast<float>(xpos - this->Half), static_cast<float>(ypos - this->Half), static_cast<float>(zpos - this->Half)) * this->Scale;
 				}
+				const Vector3DX		GetPosOffset(int xpos, int ypos, int zpos, int ID) const noexcept { return GetPos(xpos + ((ID >> 2) & 1), ypos + ((ID >> 1) & 1), zpos + (ID & 1)); }
+				//指定の描画座標が入っている範囲のボクセル座標に変換
 				const Vector3Int	GetPoint(const Vector3DX& pos) const noexcept {
 					Vector3DX Start = pos / this->Scale;
 					return Vector3Int(static_cast<int>(Start.x) + this->Half, static_cast<int>(Start.y) + this->Half, static_cast<int>(Start.z) + this->Half);
 				}
-
-				//
-				void			SetScale(int scale) noexcept {
-					this->ScaleInt = scale;
-					this->ScaleRate = static_cast<int>(std::pow(MulPer, this->ScaleInt));
+				void				SetScale(int scale) noexcept {
+					this->m_ScaleInt = scale;
+					this->ScaleRate = static_cast<int>(std::pow(MulPer, GetScale()));
 					this->All = 256 / this->ScaleRate;
 					//算術補助系
 					this->Half = this->All / 2;
@@ -141,8 +140,7 @@ namespace FPS_n2 {
 					this->Scale = (CellScale * this->ScaleRate);
 					this->m_CellBuffer.resize(static_cast<size_t>(this->All * this->All * this->All));
 				}
-				//
-				void			CalcOcclusion(int xpos, int ypos, int zpos) noexcept {
+				void				CalcOcclusion(int xpos, int ypos, int zpos) noexcept {
 					if (!isInside(ypos)) { return; }
 					if (GetCellBuf(xpos, ypos, zpos).IsEmpty()) { return; }
 
@@ -154,6 +152,10 @@ namespace FPS_n2 {
 					if ((ypos == 0) ? true : !GetCellBuf(xpos, ypos - 1, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(3); }
 					if (!GetCellBuf(xpos, ypos, zpos + 1).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(4); }
 					if (!GetCellBuf(xpos, ypos, zpos - 1).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(5); }
+				}
+			public:
+				void				Dispose(void) noexcept {
+					this->m_CellBuffer.clear();
 				}
 			};
 			//
@@ -309,26 +311,28 @@ namespace FPS_n2 {
 				}
 			};
 			//
-			struct Draw {
+			struct DrawThreadData {
 				vert32				Vert32;
 				Vector3DX			CamPos;
 				Vector3DX			CamVec;
+			public:
+				void Dispose() noexcept {
+					Vert32.Dispose();
+				}
 			};
 		private:
 			std::vector<int8_t>				m_CellBase{};
 			std::array<CellsData, TotalCellLayer>	m_CellxN;
-			std::array<ThreadJobs, TotalCellLayer + TotalCellLayer>	m_Jobs;
-			//
 			int								m_BaseRate = 1;
 			int								m_ShadowRate = 1;
 			int								m_ThreadCounter = 0;
-			//0~TotalCellLayer-1 : 表示ポリゴンスレッド用
-			//TotalCellLayer~:影スレッド用
-			std::array<Draw, TotalCellLayer + TotalCellLayer>	m_Draws;
 			bool							m_isChangeBlock{ false };
 			GraphHandle						m_tex{};
+			//0~TotalCellLayer-1 = 表示ポリゴンスレッド用 / TotalCellLayer~ = 影スレッド用
+			std::array<DrawThreadData, TotalCellLayer + TotalCellLayer>	m_DrawThreadDatas;
+			std::array<ThreadJobs, TotalCellLayer + TotalCellLayer>	m_Jobs;
 		private:
-			//
+			//ブレゼンハムアルゴリズムで線分上にボクセルを走査
 			inline static void		Bresenham3D(int x1, int y1, int z1, int x2, int y2, int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept {
 				int err_1{}, err_2{};
 				int point[3]{};
@@ -405,6 +409,7 @@ namespace FPS_n2 {
 				}
 				OutPutLine(point[0], point[1], point[2]);
 			}
+			//AABBと線分の当たり判定
 			inline static bool		ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr) noexcept {
 				Vector3DX Vec = (*EndPos - StartPos);
 				// 交差判定
@@ -660,16 +665,17 @@ namespace FPS_n2 {
 			}
 			//視界から見て映るものだけをテクスチャ関係込みで更新
 			void			AddCubes(size_t id) noexcept;
+			//AddCubesした情報を反映する
 			void			FlipCubes(size_t id) noexcept;
 			//ライトから見て映るものだけを更新
 			void			AddShadowCubes(size_t id) noexcept;
+			//AddShadowCubesした情報を反映する
 			void			FlipShadowCubes(size_t id) noexcept;
-			//
+			//ブロックを直接指定
+			void			SetBlick(int xpos, int ypos, int zpos, int8_t select) noexcept;
 		public:
 			const auto& GetReferenceCells(void) const noexcept { return this->m_CellxN[0]; }
 			auto& SetReferenceCells(void) noexcept { return this->m_CellxN[0]; }
-
-			void			SetBlick(int xpos, int ypos, int zpos, int8_t select) noexcept;
 			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return GetReferenceCells().GetPoint(pos); }
 			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return GetReferenceCells().GetPos(xpos, ypos, zpos); }
 			//ブロックにダメージを与える
@@ -691,14 +697,17 @@ namespace FPS_n2 {
 				}
 				return false;
 			}
-
-			int				CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
-			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius, const std::vector<const MV1*>& addonColObj) const noexcept;
-
+			//ボクセルとの線での当たり判定を取る
+			int				CheckLine(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
+			//対人を想定した壁判定を行う
+			bool			CheckWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius, const std::vector<const MV1*>& addonColObj) const noexcept;
+			//ボクセルデータをロードする
 			void			LoadCellsFile(void) noexcept;
+			//ボクセルデータをセーブする
 			void			SaveCellsFile(void) noexcept;
-
+			//所定の座標にボクセルデータをロードする
 			void			LoadCellsClip(int xbasepos, int ybasepos, int zbasepos) noexcept;
+			//所定の範囲のボクセルデータをセーブする
 			void			SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept;
 
 			void			SettingChange(void) noexcept;
@@ -716,7 +725,7 @@ namespace FPS_n2 {
 			virtual ~VoxelControl(void) noexcept {}
 		public://
 			void			Load(void) noexcept;
-			void			Init(void) noexcept;
+			void			Setup(void) noexcept;
 			void			Update(void) noexcept;
 			void			Shadow_Draw(void) const noexcept;
 			void			SetShadow_Draw_Rigid(void) const noexcept;
