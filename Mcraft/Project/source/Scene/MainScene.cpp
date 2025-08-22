@@ -6,8 +6,6 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
-
 		void			MainGameScene::Load_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 
@@ -171,7 +169,7 @@ namespace FPS_n2 {
 			//Fog
 			SetFogEnable(true);
 			SetFogMode(DX_FOGMODE_LINEAR);
-			SetFogStartEnd(FarMax, FarMax * 20.0f);
+			SetFogStartEnd(BackGroundParts->GetDrawFarMax(), BackGroundParts->GetDrawFarMax() * 20.0f);
 			SetFogColor(128, 110, 110);
 			//
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
@@ -1212,8 +1210,8 @@ namespace FPS_n2 {
 #endif
 			//DoF
 			PostPassEffect::Instance()->Set_DoFNearFar(
-				CamChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), CamChara->GetIsADS() ? (FarMax * 0.8f) : Scale3DRate * 5.0f,
-				CamChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), FarMax);
+				CamChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), CamChara->GetIsADS() ? (BackGroundParts->GetDrawFarMax() * 0.8f) : Scale3DRate * 5.0f,
+				CamChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), BackGroundParts->GetDrawFarMax());
 			//埃エフェクト
 			if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
 				if (!EffectSingleton::Instance()->IsPlayLoopEffect(Effect::ef_dust)) {
