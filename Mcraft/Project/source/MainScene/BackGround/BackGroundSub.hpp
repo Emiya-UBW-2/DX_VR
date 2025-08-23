@@ -546,13 +546,9 @@ namespace FPS_n2 {
 			void			AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) noexcept;
 			void			AddPlanesZ(vert32* pTarget, float camVecZ, const CellsData& cellx, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int Yvoxel, int Zvoxel, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) noexcept;
 			//視界から見て映るものだけをテクスチャ関係込みで更新
-			void			AddCubes(size_t id) noexcept;
+			void			AddCubes(size_t id, size_t threadID, bool CheckCamPosition, bool IsCalcUV) noexcept;
 			//AddCubesした情報を反映する
-			void			FlipCubes(size_t id) noexcept;
-			//ライトから見て映るものだけを更新
-			void			AddShadowCubes(size_t id) noexcept;
-			//AddShadowCubesした情報を反映する
-			void			FlipShadowCubes(size_t id) noexcept;
+			void			FlipCubes(size_t threadID, const Vector3DX& camPos, const Vector3DX& camVec) noexcept;
 		public:
 			const CellsData& GetReferenceCells(void) const noexcept { return this->m_CellxN[ReferenceCell]; }
 			//ブロックを直接指定

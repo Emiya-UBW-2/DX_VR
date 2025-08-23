@@ -516,9 +516,26 @@ namespace FPS_n2 {
 			}
 		}
 
-		void		VoxelControl::AddCubes(size_t id) noexcept {
+		bool CullingLine(int* MaxminT, int* MaxmaxT, float dTa, float dTb) {
+			bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
+			bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
+			if (Onbehind && !OnFront) {
+				return false;
+			}
+			if (!OnFront && !Onbehind) {
+				if (dTa < 0.0f) {
+					*MaxminT = std::max(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) - 1, *MaxminT);
+				}
+				else {
+					*MaxmaxT = std::min(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) + 1, *MaxmaxT);
+				}
+			}
+			return true;
+		};
+
+		void		VoxelControl::AddCubes(size_t id, size_t threadID, bool CheckCamPosition, bool IsCalcUV) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			DrawThreadData& Draws = this->m_DrawThreadDatas[id];
+			DrawThreadData& Draws = this->m_DrawThreadDatas[threadID];
 			Draws.StartRegist();
 			Vector3Int center = cellx.GetVoxelPoint(Draws.GetCamPos());
 
@@ -529,148 +546,84 @@ namespace FPS_n2 {
 			float CamZMinZ = Draws.GetCamVec().z * (static_cast<float>(DrawMaxZMinus) + 0.5f);
 			float CamZMaxZ = Draws.GetCamVec().z * (static_cast<float>(DrawMaxZPlus) + 0.5f);
 			//X
-			auto PX = [&](int* MaxminT, int* MaxmaxT, float dTa, float dTb) {
-				bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
-				bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
-				if (Onbehind && !OnFront) {
-					return false;
-				}
-				if (!OnFront && !Onbehind) {
-					if (dTa < 0.0f) {
-						*MaxminT = std::max(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) - 1, *MaxminT);
-					}
-					else {
-						*MaxmaxT = std::min(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) + 1, *MaxmaxT);
-					}
-				}
-				return true;
-				};
-			auto PZ = [&](int* MaxminT, int* MaxmaxT, float dTa, float dTb) {
-				bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
-				bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
-				if (Onbehind && !OnFront) {
-					return false;
-				}
-				if (!OnFront && !Onbehind) {
-					if (dTa < 0.0f) {
-						*MaxminT = std::max(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) - 1, *MaxminT);
-					}
-					else {
-						*MaxmaxT = std::min(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) + 1, *MaxmaxT);
-					}
-				}
-				return true;
-				};
-
 			for (int Zvoxel = DrawMaxZMinus; Zvoxel <= DrawMaxZPlus; ++Zvoxel) {
 				float CamZZ = Draws.GetCamVec().z * (static_cast<float>(Zvoxel) + 0.5f);
-				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-				if (
-					((CamXMinX + CamYMinY + CamZZ) <= 0.0f) &&//Dot
-					((CamXMaxX + CamYMaxY + CamZZ) <= 0.0f) &&//Dot
-					((CamXMaxX + CamYMinY + CamZZ) <= 0.0f) &&//Dot
-					((CamXMinX + CamYMaxY + CamZZ) <= 0.0f)//Dot
-					) {
-					continue;
+				bool CheckFillZ = false;
+				if (CheckCamPosition) {
+					//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
+					if (
+						((CamXMinX + CamYMinY + CamZZ) <= 0.0f) &&//Dot
+						((CamXMaxX + CamYMaxY + CamZZ) <= 0.0f) &&//Dot
+						((CamXMaxX + CamYMinY + CamZZ) <= 0.0f) &&//Dot
+						((CamXMinX + CamYMaxY + CamZZ) <= 0.0f)//Dot
+						) { continue; }
+					CheckFillZ = cellx.isFarCells() && ((DrawMinZMinus <= Zvoxel) && (Zvoxel <= DrawMinZPlus));
 				}
-
-				bool CheckFillZ = cellx.isFarCells() && ((DrawMinZMinus <= Zvoxel) && (Zvoxel <= DrawMinZPlus));
 				bool CheckInsideZ = cellx.isFarCells() && ((DrawMinZMinus < Zvoxel) && (Zvoxel < DrawMinZPlus));
-
 				for (int Yvoxel = DrawMaxYMinus; Yvoxel <= DrawMaxYPlus; ++Yvoxel) {
 					if (!cellx.isInside(center.y + Yvoxel)) { continue; }
-
-					float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
-					float dTa = (CamXMinX + CamYY + CamZZ);//Dot
-					float dTb = (CamXMaxX + CamYY + CamZZ);//Dot
-
 					int xMaxminT = DrawMaxXMinus;
 					int xMaxmaxT = DrawMaxXPlus;
-					if (!PX(&xMaxminT, &xMaxmaxT, dTa, dTb)) {
-						continue;
+					bool CheckFillYZ = false;
+					if (CheckCamPosition) {
+						float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
+						float dTa = (CamXMinX + CamYY + CamZZ);//Dot
+						float dTb = (CamXMaxX + CamYY + CamZZ);//Dot
+						if (!CullingLine(&xMaxminT, &xMaxmaxT, dTa, dTb)) {
+							continue;
+						}
+						CheckFillYZ = CheckFillZ && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
 					}
-					bool CheckFillYZ = CheckFillZ && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
 					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < Yvoxel) && (Yvoxel < DrawMinYPlus));
-					AddPlanesZ(&Draws.Vert32, static_cast<float>(Zvoxel), cellx, center, xMaxminT, xMaxmaxT, Yvoxel, Zvoxel, CheckInsideYZ, CheckFillYZ, true);
+					AddPlanesZ(&Draws.Vert32,
+						CheckCamPosition ? static_cast<float>(Zvoxel) : Draws.GetCamVec().z,
+						cellx, center, xMaxminT, xMaxmaxT, Yvoxel, Zvoxel, CheckInsideYZ, CheckFillYZ, IsCalcUV);
 				}
 			}
 			//Z
 			for (int Xvoxel = DrawMaxXMinus; Xvoxel <= DrawMaxXPlus; ++Xvoxel) {
 				float CamXX = Draws.GetCamVec().x * (static_cast<float>(Xvoxel) + 0.5f);
-				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-				if (
-					((CamXX + CamYMinY + CamZMinZ) <= 0.0f) &&//Dot
-					((CamXX + CamYMaxY + CamZMaxZ) <= 0.0f) &&//Dot
-					((CamXX + CamYMinY + CamZMaxZ) <= 0.0f) &&//Dot
-					((CamXX + CamYMaxY + CamZMinZ) <= 0.0f)//Dot
-					) {
-					continue;
+				bool CheckFillX = false;
+				if (CheckCamPosition) {
+					//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
+					if (
+						((CamXX + CamYMinY + CamZMinZ) <= 0.0f) &&//Dot
+						((CamXX + CamYMaxY + CamZMaxZ) <= 0.0f) &&//Dot
+						((CamXX + CamYMinY + CamZMaxZ) <= 0.0f) &&//Dot
+						((CamXX + CamYMaxY + CamZMinZ) <= 0.0f)//Dot
+						) { continue; }
+					CheckFillX = cellx.isFarCells() && ((DrawMinXMinus <= Xvoxel) && (Xvoxel <= DrawMinXPlus));
 				}
-
-				bool CheckFillX = cellx.isFarCells() && ((DrawMinXMinus <= Xvoxel) && (Xvoxel <= DrawMinXPlus));
 				bool CheckInsideX = cellx.isFarCells() && ((DrawMinXMinus < Xvoxel) && (Xvoxel < DrawMinXPlus));
-
 				for (int Yvoxel = DrawMaxYMinus; Yvoxel <= DrawMaxYPlus; ++Yvoxel) {
 					if (!cellx.isInside(center.y + Yvoxel)) { continue; }
-
-					float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
-					float dTa = (CamXX + CamYY + CamZMinZ);//Dot
-					float dTb = (CamXX + CamYY + CamZMaxZ);//Dot
-
 					int zMaxminT = DrawMaxZMinus;
 					int zMaxmaxT = DrawMaxZPlus;
-					if (!PZ(&zMaxminT, &zMaxmaxT, dTa, dTb)) {
-						continue;
+					bool CheckFillXY = false;
+					if (CheckCamPosition) {
+						float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
+						float dTa = (CamXX + CamYY + CamZMinZ);//Dot
+						float dTb = (CamXX + CamYY + CamZMaxZ);//Dot
+						if (!CullingLine(&zMaxminT, &zMaxmaxT, dTa, dTb)) {
+							continue;
+						}
+						CheckFillXY = CheckFillX && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
 					}
-					bool CheckFillXY = CheckFillX && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
 					bool CheckInsideXY = CheckInsideX && ((DrawMinYMinus < Yvoxel) && (Yvoxel < DrawMinYPlus));
-					AddPlanesXY(&Draws.Vert32, static_cast<float>(Xvoxel), static_cast<float>(Yvoxel), cellx, center, Xvoxel, Yvoxel, zMaxminT, zMaxmaxT, CheckInsideXY, CheckFillXY, true);
+					AddPlanesXY(&Draws.Vert32,
+						CheckCamPosition ? static_cast<float>(Xvoxel) : Draws.GetCamVec().x,
+						CheckCamPosition ? static_cast<float>(Yvoxel) : Draws.GetCamVec().y,
+						cellx, center, Xvoxel, Yvoxel, zMaxminT, zMaxmaxT, CheckInsideXY, CheckFillXY, IsCalcUV);
 				}
 			}
 		}
-		void		VoxelControl::FlipCubes(size_t id) noexcept {
-			DrawThreadData& Draws = this->m_DrawThreadDatas[id];
+		void		VoxelControl::FlipCubes(size_t threadID, const Vector3DX& camPos, const Vector3DX& camVec) noexcept {
+			DrawThreadData& Draws = this->m_DrawThreadDatas[threadID];
 			Draws.EndRegist();
-			auto* CameraParts = Camera3D::Instance();
-			Draws.SetCamPos(CameraParts->GetMainCamera().GetCamPos());
-			Draws.SetCamVec((CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
+			Draws.SetCamPos(camPos);
+			Draws.SetCamVec(camVec);
 		}
-		void		VoxelControl::AddShadowCubes(size_t id) noexcept {
-			size_t shadow = TotalCellLayer + id;
-			CellsData& cellx = this->m_CellxN[id];
-			DrawThreadData& Draws = this->m_DrawThreadDatas[shadow];
-			Draws.StartRegist();
-			Vector3Int center = cellx.GetVoxelPoint(Draws.GetCamPos());
-			//X
-			for (int Zvoxel = DrawMaxZMinus; Zvoxel <= DrawMaxZPlus; ++Zvoxel) {
-				bool CheckInsideZ = cellx.isFarCells() && ((DrawMinZMinus < Zvoxel) && (Zvoxel < DrawMinZPlus));
-				for (int Yvoxel = DrawMaxYMinus; Yvoxel <= DrawMaxYPlus; ++Yvoxel) {
-					if (!cellx.isInside(center.y + Yvoxel)) { continue; }
-					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < Yvoxel) && (Yvoxel < DrawMinYPlus));
-					AddPlanesZ(&Draws.Vert32, Draws.GetCamVec().z, cellx, center, DrawMaxXMinus, DrawMaxXPlus, Yvoxel, Zvoxel, CheckInsideYZ, false, false);
-				}
-			}
-			//Z
-			for (int Xvoxel = DrawMaxXMinus; Xvoxel <= DrawMaxXPlus; ++Xvoxel) {
-				bool CheckInsideX = cellx.isFarCells() && ((DrawMinXMinus < Xvoxel) && (Xvoxel < DrawMinXPlus));
-				for (int Yvoxel = DrawMaxYMinus; Yvoxel <= DrawMaxYPlus; ++Yvoxel) {
-					if (!cellx.isInside(center.y + Yvoxel)) { continue; }
-					bool CheckInsideXY = CheckInsideX && ((DrawMinYMinus < Yvoxel) && (Yvoxel < DrawMinYPlus));
-					AddPlanesXY(&Draws.Vert32, Draws.GetCamVec().x, Draws.GetCamVec().y, cellx, center, Xvoxel, Yvoxel, DrawMaxZMinus, DrawMaxZPlus, CheckInsideXY, false, false);
-				}
-			}
-		}
-		void		VoxelControl::FlipShadowCubes(size_t id) noexcept {
-			size_t shadow = TotalCellLayer + id;
-			auto* PostPassParts = PostPassEffect::Instance();
-			auto* SceneParts = SceneControl::Instance();
-			DrawThreadData& Draws = this->m_DrawThreadDatas[shadow];
-			Draws.EndRegist();
-			//Draws.SetCamPos(Camera3D::Instance()->GetMainCamera().GetCamPos());
-			Draws.SetCamPos(Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate);
-			Draws.SetCamVec(PostPassParts->GetShadowDir());
-			SceneParts->SetIsUpdateFarShadowActive();
-		}
+		//
 		int			VoxelControl::CheckLine(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			int HitCount = 0;
 
@@ -1027,29 +980,61 @@ namespace FPS_n2 {
 				Vert.Init(size);
 			}
 			this->m_Jobs[0].Init(
-				[this]() { AddCubes(0); },
-				[this]() { FlipCubes(0); }, false);
+				[this]() { AddCubes(0, 0, true, true); },
+				[this]() {
+					auto* CameraParts = Camera3D::Instance();
+					FlipCubes(0, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
+				}, false);
 			this->m_Jobs[1].Init(
-				[this]() { AddCubes(1); },
-				[this]() { FlipCubes(1); }, false);
+				[this]() { AddCubes(1, 1, true, true); },
+				[this]() {
+					auto* CameraParts = Camera3D::Instance();
+					FlipCubes(1, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
+				}, false);
 			this->m_Jobs[2].Init(
-				[this]() { AddCubes(2); },
-				[this]() { FlipCubes(2); }, false);
+				[this]() { AddCubes(2, 2, true, true); },
+				[this]() {
+					auto* CameraParts = Camera3D::Instance();
+					FlipCubes(2, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
+				}, false);
 			this->m_Jobs[3].Init(
-				[this]() { AddCubes(3); },
-				[this]() { FlipCubes(3); }, false);
+				[this]() { AddCubes(3, 3, true, true); },
+				[this]() {
+					auto* CameraParts = Camera3D::Instance();
+					FlipCubes(3, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
+				}, false);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 0)].Init(
-				[this]() { AddShadowCubes(0); },
-				[this]() { FlipShadowCubes(0); }, true);
+				[this]() { AddCubes(0, TotalCellLayer + 0, false, false); },
+				[this]() {
+					auto* PostPassParts = PostPassEffect::Instance();
+					auto* SceneParts = SceneControl::Instance();
+					FlipCubes(TotalCellLayer + 0, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
+					SceneParts->SetIsUpdateFarShadowActive();
+				}, true);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 1)].Init(
-				[this]() { AddShadowCubes(1); },
-				[this]() { FlipShadowCubes(1); }, true);
+				[this]() { AddCubes(1, TotalCellLayer + 1, false, false); },
+				[this]() {
+					auto* PostPassParts = PostPassEffect::Instance();
+					auto* SceneParts = SceneControl::Instance();
+					FlipCubes(TotalCellLayer + 1, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
+					SceneParts->SetIsUpdateFarShadowActive();
+				}, true);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 2)].Init(
-				[this]() { AddShadowCubes(2); },
-				[this]() { FlipShadowCubes(2); }, true);
+				[this]() { AddCubes(2, TotalCellLayer + 2, false, false); },
+				[this]() {
+					auto* PostPassParts = PostPassEffect::Instance();
+					auto* SceneParts = SceneControl::Instance();
+					FlipCubes(TotalCellLayer + 2, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
+					SceneParts->SetIsUpdateFarShadowActive();
+				}, true);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 3)].Init(
-				[this]() { AddShadowCubes(3); },
-				[this]() { FlipShadowCubes(3); }, true);
+				[this]() { AddCubes(3, TotalCellLayer + 3, false, false); },
+				[this]() {
+					auto* PostPassParts = PostPassEffect::Instance();
+					auto* SceneParts = SceneControl::Instance();
+					FlipCubes(TotalCellLayer + 3, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
+					SceneParts->SetIsUpdateFarShadowActive();
+				}, true);
 			this->m_ThreadCounter = 0;
 			this->m_isChangeBlock = false;
 			//
@@ -1075,13 +1060,13 @@ namespace FPS_n2 {
 					this->m_Jobs[loop].Update();
 				}
 				//
-				int shadow = TotalCellLayer + loop;
+				int threadID = TotalCellLayer + loop;
 				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cellx.GetScale())) {
-					this->m_DrawThreadDatas[shadow].Reset();
-					this->m_Jobs[shadow].UpdateDisable();
+					this->m_DrawThreadDatas[threadID].Reset();
+					this->m_Jobs[threadID].UpdateDisable();
 				}
 				else {
-					this->m_Jobs[shadow].Update();
+					this->m_Jobs[threadID].Update();
 				}
 			}
 			++this->m_ThreadCounter %= TotalCellLayer;
@@ -1098,8 +1083,8 @@ namespace FPS_n2 {
 #endif
 		}
 		void		VoxelControl::Shadow_Draw(void) const noexcept {
-			for (int shadow = TotalCellLayer; shadow < TotalCellLayer + TotalCellLayer; ++shadow) {
-				const vert32& Vert = this->m_DrawThreadDatas[shadow].GetVert32();
+			for (int threadID = TotalCellLayer; threadID < TotalCellLayer + TotalCellLayer; ++threadID) {
+				const vert32& Vert = this->m_DrawThreadDatas[threadID].GetVert32();
 				Vert.Draw(this->m_tex);
 			}
 		}
