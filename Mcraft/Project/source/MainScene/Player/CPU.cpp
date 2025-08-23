@@ -23,10 +23,10 @@ namespace FPS_n2 {
 				bool SetPrevPolyUnit(PATHPLANNING_UNIT* PUnit, int tris) {
 					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 					// 隣接するポリゴンが既に経路探索処理が行われていて、且つより距離の長い経路となっている場合は何もしない
-					auto& Unit = BackGroundParts->GetBuildData().at(PUnit->PolyIndex);
+					auto& Unit = BackGroundParts->GetWayPoint()->GetWayPoints().at(PUnit->PolyIndex);
 
 					auto trisdistance = PUnit->TotalDistance +
-						(BackGroundParts->GetBuildData().at(Unit.GetLinkPolyIndex(tris)).GetPos() + Unit.GetPos()).magnitude();
+						(BackGroundParts->GetWayPoint()->GetWayPoints().at(Unit.GetLinkPolyIndex(tris)).GetPos() + Unit.GetPos()).magnitude();
 
 					if (this->TotalDistance > trisdistance) {
 						this->TotalDistance = trisdistance;		// 隣接するポリゴンにここに到達するまでの距離を代入する
@@ -77,9 +77,9 @@ namespace FPS_n2 {
 		public:
 			Vector3DX GetNextPoint(const Vector3DX& NowPosition, int* TargetPathPlanningIndex) const {
 				auto* BackGroundParts = BackGround::BackGroundControl::Instance();
-				int NowIndex = BackGroundParts->GetNearestBuilds(NowPosition);
+				int NowIndex = BackGroundParts->GetWayPoint()->GetNearestBuilds(NowPosition);
 				if (!((*TargetPathPlanningIndex != -1) && (this->GoalUnit))) {
-					return BackGroundParts->GetBuildData().at(BackGroundParts->GetNearestBuilds2(NowPosition)).GetPos();
+					return BackGroundParts->GetWayPoint()->GetWayPoints().at(BackGroundParts->GetWayPoint()->GetNearestBuilds2(NowPosition)).GetPos();
 				}
 				if (NowIndex != this->GoalUnit->GetPolyIndex()) {																	// 現在乗っているポリゴンがゴール地点にあるポリゴンの場合は処理を分岐
 					if (NowIndex == *TargetPathPlanningIndex) {													// 現在乗っているポリゴンが移動中間地点のポリゴンの場合は次の中間地点を決定する処理を行う
@@ -87,13 +87,13 @@ namespace FPS_n2 {
 						while (true) {																				// 次の中間地点が決定するまでループし続ける
 							if (!this->UnitArray.at(*TargetPathPlanningIndex).GetNextPolyUnit()) { break; }
 							auto NextIndex = this->UnitArray.at(*TargetPathPlanningIndex).GetNextPolyUnit()->GetPolyIndex();
-							if (!BackGroundParts->CheckPolyMoveWidth(NowPosition, NextIndex, COLLWIDTH)) { break; }		// 経路上の次のポリゴンの中心座標に直線的に移動できない場合はループから抜ける
+							if (!BackGroundParts->GetWayPoint()->CheckPolyMoveWidth(NowPosition, NextIndex, COLLWIDTH)) { break; }		// 経路上の次のポリゴンの中心座標に直線的に移動できない場合はループから抜ける
 							(*TargetPathPlanningIndex) = NextIndex;													// チェック対象を経路上の更に一つ先のポリゴンに変更する
 							if ((*TargetPathPlanningIndex) == this->GoalUnit->GetPolyIndex()) { break; }				// もしゴール地点のポリゴンだったらループを抜ける
 						}
 					}
 					// 移動方向を決定する、移動方向は現在の座標から中間地点のポリゴンの中心座標に向かう方向
-					return BackGroundParts->GetBuildData().at(*TargetPathPlanningIndex).GetPos();
+					return BackGroundParts->GetWayPoint()->GetWayPoints().at(*TargetPathPlanningIndex).GetPos();
 				}
 				else {
 					// 方向は目標座標
@@ -106,16 +106,16 @@ namespace FPS_n2 {
 				// 指定の２点の経路を探索する( 戻り値 true:経路構築成功 false:経路構築失敗( スタート地点とゴール地点を繋ぐ経路が無かった等 ) )
 				this->GoalPosition = GoalPos;			// ゴール位置を保存
 
-				this->UnitArray.resize(BackGroundParts->GetBuildData().size());			// 経路探索用のポリゴン情報を格納するメモリ領域を確保、初期化
+				this->UnitArray.resize(BackGroundParts->GetWayPoint()->GetWayPoints().size());			// 経路探索用のポリゴン情報を格納するメモリ領域を確保、初期化
 				for (auto& p : this->UnitArray) {
 					p.Init(static_cast<int>(&p - &this->UnitArray.front()));
 				}
 
-				int StartIndex = BackGroundParts->GetNearestBuilds(StartPos);	// スタート地点にあるポリゴンの番号を取得し、ポリゴンの経路探索処理用の構造体のアドレスを保存
+				int StartIndex = BackGroundParts->GetWayPoint()->GetNearestBuilds(StartPos);	// スタート地点にあるポリゴンの番号を取得し、ポリゴンの経路探索処理用の構造体のアドレスを保存
 				if (StartIndex == -1) { return false; }
 				this->StartUnit = &this->UnitArray[StartIndex];					// スタート地点にあるポリゴンの番号を取得し、ポリゴンの経路探索処理用の構造体のアドレスを保存
 
-				int GoalIndex = BackGroundParts->GetNearestBuilds(GoalPos);		// ゴール地点にあるポリゴンの番号を取得し、ポリゴンの経路探索処理用の構造体のアドレスを保存
+				int GoalIndex = BackGroundParts->GetWayPoint()->GetNearestBuilds(GoalPos);		// ゴール地点にあるポリゴンの番号を取得し、ポリゴンの経路探索処理用の構造体のアドレスを保存
 				if (GoalIndex == -1) { return false; }
 				this->GoalUnit = &this->UnitArray[GoalIndex];				// ゴール地点にあるポリゴンの番号を取得し、ポリゴンの経路探索処理用の構造体のアドレスを保存
 				if (GoalIndex == StartIndex) { return false; }				// ゴール地点にあるポリゴンとスタート地点にあるポリゴンが同じだったら false を返す
@@ -130,7 +130,7 @@ namespace FPS_n2 {
 					while (true) {
 						// ポリゴンの辺の数だけ繰り返し
 						for (int K = 0; K < 4; K++) {
-							int Index = BackGroundParts->GetBuildData().at(PUnit->GetPolyIndex()).GetLinkPolyIndex(K);
+							int Index = BackGroundParts->GetWayPoint()->GetWayPoints().at(PUnit->GetPolyIndex()).GetLinkPolyIndex(K);
 							if (Index == -1) { continue; }											// 辺に隣接するポリゴンが無い場合は何もしない
 							if (Index == this->StartUnit->GetPolyIndex()) { continue; }				//スタート地点のポリゴンだった場合は何もしない
 							auto& NowUnit = this->UnitArray[Index];
@@ -249,7 +249,7 @@ namespace FPS_n2 {
 						break;
 					}
 					else {
-						MyPos = BackGroundParts->GetRandomPoint(MyPos, 10.f * Scale3DRate);//選定できない場合10m以内で再選定
+						MyPos = BackGroundParts->GetWayPoint()->GetRandomPoint(MyPos, 10.f * Scale3DRate);//選定できない場合10m以内で再選定
 					}
 				}
 			}

@@ -203,11 +203,21 @@ namespace FPS_n2 {
 				}
 				else {
 					if (loop == PlayerMngr->GetWatchPlayerID()) {
-						TargetPos = BackGroundParts->GetRandomPoint(Vector3DX::zero(), 5.f * Scale3DRate, InvalidID, true);
+						TargetPos = BackGroundParts->GetWayPoint()->GetRandomPoint(Vector3DX::zero(), 5.f * Scale3DRate, InvalidID);
+						Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
+						if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+							TargetPos = EndPos;
+						}
 					}
 					else {
 						while (true) {
-							TargetPos = BackGroundParts->GetRandomPoint(ViewChara->GetMove().GetPos(), InvalidID, 5.f * Scale3DRate, true);
+							TargetPos = BackGroundParts->GetWayPoint()->GetRandomPoint(ViewChara->GetMove().GetPos(), InvalidID, 5.f * Scale3DRate);
+							{
+								Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
+								if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+									TargetPos = EndPos;
+								}
+							}
 							//ターゲット位置が視認できない場所であるべき
 							Vector3DX EndPos = TargetPos;
 							if (BackGroundParts->CheckLinetoMap(ViewChara->GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate, &EndPos) != 0) {
@@ -248,9 +258,14 @@ namespace FPS_n2 {
 			}
 			else {
 				for (int loop = 0; loop < 20; ++loop) {
+					Vector3DX TargetPos = BackGroundParts->GetWayPoint()->GetRandomPoint(ViewChara->GetMove().GetPos(), InvalidID, 5.f * Scale3DRate);
+					Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
+					if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						TargetPos = EndPos;
+					}
 					Objects::ItemObjPool::Instance()->Put(
 						loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
-						BackGroundParts->GetRandomPoint(ViewChara->GetMove().GetPos(), InvalidID, 5.f * Scale3DRate, true),
+						TargetPos,
 						Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
 					);
 				}

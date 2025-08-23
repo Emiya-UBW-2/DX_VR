@@ -47,13 +47,12 @@ namespace FPS_n2 {
 					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 					auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 					auto& ViewChara = ViewPlayer->GetChara();
+
+					
 					while (true) {
-						m_TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+						m_TargetPos = BackGroundParts->GetWayPoint()->GetRandomPoint(ViewChara->GetMove().GetPos(), 8.f * Scale3DRate);
 						if (std::abs(this->m_TargetPos.x) < 16.f * Scale3DRate && std::abs(this->m_TargetPos.z) < 16.f * Scale3DRate) {
-							Vector3DX Vec = ViewChara->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
-							if (!Vec.IsRangeSmaller(8.f * Scale3DRate)) {
-								break;
-							}
+							break;
 						}
 					}
 					m_TargetPos.y = 0.f;

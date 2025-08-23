@@ -357,6 +357,11 @@ namespace FPS_n2 {
 			//0~TotalCellLayer-1 = 表示ポリゴンスレッド用 / TotalCellLayer~ = 影スレッド用
 			std::array<DrawThreadData, TotalCellLayer + TotalCellLayer>	m_DrawThreadDatas;
 			std::array<ThreadJobs, TotalCellLayer + TotalCellLayer>	m_Jobs;
+
+			Vector3DX						m_CamPos;
+			Vector3DX						m_CamVec;
+			Vector3DX						m_ShadowCamPos;
+			Vector3DX						m_ShadowCamVec;
 		private:
 			//ブレゼンハムアルゴリズムで線分上にボクセルを走査
 			inline static void		Bresenham3D(int x1, int y1, int z1, int x2, int y2, int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept {
@@ -536,15 +541,15 @@ namespace FPS_n2 {
 				return true;
 			}
 			//各方向に向いているポリゴンの追加
-			void			AddPlaneXPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneXMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneYPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneYMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneZPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept;
-			void			AddPlaneZMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept;
+			void			AddPlaneXPlus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
+			void			AddPlaneXMinus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
+			void			AddPlaneYPlus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
+			void			AddPlaneYMinus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
+			void			AddPlaneZPlus(vert32* pTarget, size_t id, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept;
+			void			AddPlaneZMinus(vert32* pTarget, size_t id, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept;
 			//XZ方向に走査してポリゴンをなるべく少ないポリゴン数で表示する
-			void			AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) noexcept;
-			void			AddPlanesZ(vert32* pTarget, float camVecZ, const CellsData& cellx, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int Yvoxel, int Zvoxel, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) noexcept;
+			void			AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) noexcept;
+			void			AddPlanesZ(vert32* pTarget, float camVecZ, size_t id, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int Yvoxel, int Zvoxel, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) noexcept;
 			//視界から見て映るものだけをテクスチャ関係込みで更新
 			void			AddCubes(size_t id, size_t threadID, bool CheckCamPosition, bool IsCalcUV) noexcept;
 			//AddCubesした情報を反映する
@@ -584,7 +589,7 @@ namespace FPS_n2 {
 			//ボクセルデータをセーブする
 			void			SaveCellsFile(std::string_view Path) noexcept;
 			//所定の座標にボクセルデータをロードする
-			void			LoadCellsClip(int xbasepos, int ybasepos, int zbasepos, std::string_view Path) noexcept;
+			void			LoadCellsClip(int Xvoxel, int Yvoxel, int Zvoxel, std::string_view Path) noexcept;
 			//所定の範囲のボクセルデータをセーブする
 			void			SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax, std::string_view Path) noexcept;
 

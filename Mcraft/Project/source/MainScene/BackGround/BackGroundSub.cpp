@@ -2,7 +2,8 @@
 
 namespace FPS_n2 {
 	namespace BackGround {
-		void		VoxelControl::AddPlaneXPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlaneXPlus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -63,7 +64,8 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		VoxelControl::AddPlaneXMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlaneXMinus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -124,7 +126,8 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		VoxelControl::AddPlaneYPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlaneYPlus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -185,7 +188,8 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		VoxelControl::AddPlaneYMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlaneYMinus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -246,7 +250,8 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		VoxelControl::AddPlaneZPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlaneZPlus(vert32* pTarget, size_t id, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			pTarget->AllocatePlane();
 
 			int xscale{};
@@ -307,7 +312,8 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		VoxelControl::AddPlaneZMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlaneZMinus(vert32* pTarget, size_t id, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			pTarget->AllocatePlane();
 
 			int xscale{};
@@ -369,7 +375,8 @@ namespace FPS_n2 {
 			}
 		}
 
-		void		VoxelControl::AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			int zmin = 0;
 			int zmax = 0;
 			bool CheckFillXYZ = false;
@@ -394,22 +401,22 @@ namespace FPS_n2 {
 						isHitmin = true;
 						if (camVecX < 0.0f) {
 							if (CheckFillXYZ || CanDrawXPlus) {
-								AddPlaneXPlus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+								AddPlaneXPlus(pTarget, id, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
 							}
 						}
 						else {
 							if (CheckFillXYZ || CanDrawXMinus) {
-								AddPlaneXMinus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+								AddPlaneXMinus(pTarget, id, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
 							}
 						}
 						if (camVecY < 0.0f) {
 							if (CheckFillXYZ || CanDrawYPlus) {
-								AddPlaneYPlus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+								AddPlaneYPlus(pTarget, id, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
 							}
 						}
 						else {
 							if (CheckFillXYZ || CanDrawYMinus) {
-								AddPlaneYMinus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+								AddPlaneYMinus(pTarget, id, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
 							}
 						}
 						//この場合だけもう一回判定させるドン
@@ -454,7 +461,8 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		VoxelControl::AddPlanesZ(vert32* pTarget, float camVecZ, const CellsData& cellx, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int Yvoxel, int Zvoxel, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) noexcept {
+		void		VoxelControl::AddPlanesZ(vert32* pTarget, float camVecZ, size_t id, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int Yvoxel, int Zvoxel, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) noexcept {
+			CellsData& cellx = this->m_CellxN[id];
 			int xmin = 0;
 			int xmax = 0;
 			bool CheckFillXYZ = false;
@@ -477,12 +485,12 @@ namespace FPS_n2 {
 						isHitmin = true;
 						if (camVecZ < 0) {
 							if (CheckFillXYZ || CanDrawZPlus) {
-								AddPlaneZPlus(pTarget, cellx, center, xmin, xmax, Yvoxel, Zvoxel, IsCalcUV);
+								AddPlaneZPlus(pTarget, id, center, xmin, xmax, Yvoxel, Zvoxel, IsCalcUV);
 							}
 						}
 						else {
 							if (CheckFillXYZ || CanDrawZMinus) {
-								AddPlaneZMinus(pTarget, cellx, center, xmin, xmax, Yvoxel, Zvoxel, IsCalcUV);
+								AddPlaneZMinus(pTarget, id, center, xmin, xmax, Yvoxel, Zvoxel, IsCalcUV);
 							}
 						}
 						//この場合だけもう一回判定させるドン
@@ -516,7 +524,7 @@ namespace FPS_n2 {
 			}
 		}
 
-		bool CullingLine(int* MaxminT, int* MaxmaxT, float dTa, float dTb) {
+		static bool CullingLine(int* MaxminT, int* MaxmaxT, float dTa, float dTb) noexcept {
 			bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
 			bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
 			if (Onbehind && !OnFront) {
@@ -567,9 +575,7 @@ namespace FPS_n2 {
 					bool CheckFillYZ = false;
 					if (CheckCamPosition) {
 						float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
-						float dTa = (CamXMinX + CamYY + CamZZ);//Dot
-						float dTb = (CamXMaxX + CamYY + CamZZ);//Dot
-						if (!CullingLine(&xMaxminT, &xMaxmaxT, dTa, dTb)) {
+						if (!CullingLine(&xMaxminT, &xMaxmaxT, CamXMinX + CamYY + CamZZ, CamXMaxX + CamYY + CamZZ)) {
 							continue;
 						}
 						CheckFillYZ = CheckFillZ && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
@@ -577,7 +583,7 @@ namespace FPS_n2 {
 					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < Yvoxel) && (Yvoxel < DrawMinYPlus));
 					AddPlanesZ(&Draws.Vert32,
 						CheckCamPosition ? static_cast<float>(Zvoxel) : Draws.GetCamVec().z,
-						cellx, center, xMaxminT, xMaxmaxT, Yvoxel, Zvoxel, CheckInsideYZ, CheckFillYZ, IsCalcUV);
+						id, center, xMaxminT, xMaxmaxT, Yvoxel, Zvoxel, CheckInsideYZ, CheckFillYZ, IsCalcUV);
 				}
 			}
 			//Z
@@ -602,9 +608,7 @@ namespace FPS_n2 {
 					bool CheckFillXY = false;
 					if (CheckCamPosition) {
 						float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
-						float dTa = (CamXX + CamYY + CamZMinZ);//Dot
-						float dTb = (CamXX + CamYY + CamZMaxZ);//Dot
-						if (!CullingLine(&zMaxminT, &zMaxmaxT, dTa, dTb)) {
+						if (!CullingLine(&zMaxminT, &zMaxmaxT, CamXX + CamYY + CamZMinZ, CamXX + CamYY + CamZMaxZ)) {
 							continue;
 						}
 						CheckFillXY = CheckFillX && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
@@ -613,7 +617,7 @@ namespace FPS_n2 {
 					AddPlanesXY(&Draws.Vert32,
 						CheckCamPosition ? static_cast<float>(Xvoxel) : Draws.GetCamVec().x,
 						CheckCamPosition ? static_cast<float>(Yvoxel) : Draws.GetCamVec().y,
-						cellx, center, Xvoxel, Yvoxel, zMaxminT, zMaxmaxT, CheckInsideXY, CheckFillXY, IsCalcUV);
+						id, center, Xvoxel, Yvoxel, zMaxminT, zMaxmaxT, CheckInsideXY, CheckFillXY, IsCalcUV);
 				}
 			}
 		}
@@ -644,13 +648,13 @@ namespace FPS_n2 {
 			Vector3Int Start = GetReferenceCells().GetVoxelPoint(StartPos);
 			Vector3Int End = GetReferenceCells().GetVoxelPoint(*EndPos);// *EndPos
 
-			for (int xm = -1; xm <= 1; ++xm) {
-				for (int ym = -1; ym <= 1; ++ym) {
-					for (int zm = -1; zm <= 1; ++zm) {
+			for (int Xofs = -1; Xofs <= 1; ++Xofs) {
+				for (int Yofs = -1; Yofs <= 1; ++Yofs) {
+					for (int Zofs = -1; Zofs <= 1; ++Zofs) {
 						bool isHit = false;
 						Bresenham3D(
-							Start.x + xm, Start.y + ym, Start.z + zm,
-							End.x + xm, End.y + ym, End.z + zm,
+							Start.x + Xofs, Start.y + Yofs, Start.z + Zofs,
+							End.x + Xofs, End.y + Yofs, End.z + Zofs,
 							[&](int Xvoxel, int Yvoxel, int Zvoxel) {
 								if (!GetReferenceCells().isInside(Yvoxel)) { return false; }
 								if (!GetReferenceCells().GetCellBuf(Xvoxel, Yvoxel, Zvoxel).CanDraw()) { return false; }
@@ -685,12 +689,12 @@ namespace FPS_n2 {
 			Vector3Int Start = GetReferenceCells().GetVoxelPoint(StartPos);
 			Vector3Int End = GetReferenceCells().GetVoxelPoint(*EndPos);// *EndPos
 
-			for (int xm = -3; xm <= 3; ++xm) {
-				for (int ym = 3; ym <= 6; ++ym) {
-					for (int zm = -3; zm <= 3; ++zm) {
+			for (int Xofs = -3; Xofs <= 3; ++Xofs) {
+				for (int Yofs = 3; Yofs <= 6; ++Yofs) {
+					for (int Zofs = -3; Zofs <= 3; ++Zofs) {
 						Bresenham3D(
-							Start.x + xm, Start.y + ym, Start.z + zm,
-							End.x + xm, End.y + ym, End.z + zm,
+							Start.x + Xofs, Start.y + Yofs, Start.z + Zofs,
+							End.x + Xofs, End.y + Yofs, End.z + Zofs,
 							[&](int Xvoxel, int Yvoxel, int Zvoxel) {
 								if (!GetReferenceCells().isInside(Yvoxel)) { return false; }
 								if (!GetReferenceCells().GetCellBuf(Xvoxel, Yvoxel, Zvoxel).CanDraw()) { return false; }
@@ -817,26 +821,27 @@ namespace FPS_n2 {
 			}
 			return HitFlag;
 		}
+		//
 		void		VoxelControl::LoadCellsFile(std::string_view Path) noexcept {
 			std::ifstream fin{};
 			fin.open(Path, std::ios::in | std::ios::binary);
 			this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
 			fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0])) * 256 * 256 * 256);
 			fin.close();
-			for (int xm = 0; xm < GetReferenceCells().All; ++xm) {
-				for (int ym = 0; ym < GetReferenceCells().All; ++ym) {
-					for (int zm = 0; zm < GetReferenceCells().All; ++zm) {
-						SetBlick(xm, ym, zm, this->m_CellBase[GetReferenceCells().GetCellNum(xm, ym, zm)], false);
+			for (int Xvoxel = 0; Xvoxel < GetReferenceCells().All; ++Xvoxel) {
+				for (int Yvoxel = 0; Yvoxel < GetReferenceCells().All; ++Yvoxel) {
+					for (int Zvoxel = 0; Zvoxel < GetReferenceCells().All; ++Zvoxel) {
+						SetBlick(Xvoxel, Yvoxel, Zvoxel, this->m_CellBase[GetReferenceCells().GetCellNum(Xvoxel, Yvoxel, Zvoxel)], false);
 					}
 				}
 			}
 		}
 		void		VoxelControl::SaveCellsFile(std::string_view Path) noexcept {
 			this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
-			for (int xm = 0; xm < GetReferenceCells().All; ++xm) {
-				for (int ym = 0; ym < GetReferenceCells().All; ++ym) {
-					for (int zm = 0; zm < GetReferenceCells().All; ++zm) {
-						this->m_CellBase[GetReferenceCells().GetCellNum(xm, ym, zm)] = GetReferenceCells().GetCellBuf(xm, ym, zm).GetCell();
+			for (int Xvoxel = 0; Xvoxel < GetReferenceCells().All; ++Xvoxel) {
+				for (int Yvoxel = 0; Yvoxel < GetReferenceCells().All; ++Yvoxel) {
+					for (int Zvoxel = 0; Zvoxel < GetReferenceCells().All; ++Zvoxel) {
+						this->m_CellBase[GetReferenceCells().GetCellNum(Xvoxel, Yvoxel, Zvoxel)] = GetReferenceCells().GetCellBuf(Xvoxel, Yvoxel, Zvoxel).GetCell();
 					}
 				}
 			}
@@ -846,7 +851,7 @@ namespace FPS_n2 {
 			fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0])) * 256 * 256 * 256);
 			fout.close(); //ファイルを閉じる
 		}
-		void		VoxelControl::LoadCellsClip(int xbasepos, int ybasepos, int zbasepos, std::string_view Path) noexcept {
+		void		VoxelControl::LoadCellsClip(int Xvoxel, int Yvoxel, int Zvoxel, std::string_view Path) noexcept {
 			int XTotal = 1;
 			int YTotal = 1;
 			int ZTotal = 1;
@@ -859,10 +864,10 @@ namespace FPS_n2 {
 			fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0])) * XTotal * YTotal * ZTotal);
 			fin.close(); //ファイルを閉じる
 
-			for (int xm = 0; xm < XTotal; ++xm) {
-				for (int ym = 0; ym < YTotal; ++ym) {
-					for (int zm = 0; zm < ZTotal; ++zm) {
-						SetBlick(xm + xbasepos, ym + ybasepos, zm + zbasepos, this->m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)], false);
+			for (int Xofs = 0; Xofs < XTotal; ++Xofs) {
+				for (int Yofs = 0; Yofs < YTotal; ++Yofs) {
+					for (int Zofs = 0; Zofs < ZTotal; ++Zofs) {
+						SetBlick(Xofs + Xvoxel, Yofs + Yvoxel, Zofs + Zvoxel, this->m_CellBase[static_cast<size_t>(Xofs * YTotal * ZTotal + Yofs * ZTotal + Zofs)], false);
 					}
 				}
 			}
@@ -889,8 +894,13 @@ namespace FPS_n2 {
 			fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0]) * XTotal * YTotal * ZTotal));
 			fout.close(); //ファイルを閉じる
 		}
+		//
 		void		VoxelControl::SettingChange(void) noexcept {
 			this->m_ShadowRate = 0;
+			auto* OptionParts = OptionManager::Instance();
+			if (OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) {
+				this->m_ShadowRate = -1;
+			}
 			this->m_BaseRate = 1;
 		}
 		void		VoxelControl::SetBlick(int Xvoxel, int Yvoxel, int Zvoxel, int8_t select, bool CalcOther) noexcept {
@@ -956,10 +966,10 @@ namespace FPS_n2 {
 			//簡略版を制作
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
 				CellsData& cellx = this->m_CellxN[loop];
-				for (int xm = 0; xm < cellx.All; ++xm) {
-					for (int ym = 0; ym < cellx.All; ++ym) {
-						for (int zm = 0; zm < cellx.All; ++zm) {
-							cellx.SetCellBuf(xm, ym, zm).SetCell(GetReferenceCells().isFill(xm, ym, zm, cellx.ScaleRate));
+				for (int Xvoxel = 0; Xvoxel < cellx.All; ++Xvoxel) {
+					for (int  Yvoxel = 0;  Yvoxel < cellx.All; ++Yvoxel) {
+						for (int Zvoxel = 0;  Zvoxel < cellx.All; ++Zvoxel) {
+							cellx.SetCellBuf(Xvoxel, Yvoxel, Zvoxel).SetCell(GetReferenceCells().isFill(Xvoxel, Yvoxel, Zvoxel, cellx.ScaleRate));
 						}
 					}
 				}
@@ -981,59 +991,39 @@ namespace FPS_n2 {
 			}
 			this->m_Jobs[0].Init(
 				[this]() { AddCubes(0, 0, true, true); },
-				[this]() {
-					auto* CameraParts = Camera3D::Instance();
-					FlipCubes(0, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
-				}, false);
+				[this]() { FlipCubes(0, this->m_CamPos, this->m_CamVec); }, false);
 			this->m_Jobs[1].Init(
 				[this]() { AddCubes(1, 1, true, true); },
-				[this]() {
-					auto* CameraParts = Camera3D::Instance();
-					FlipCubes(1, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
-				}, false);
+				[this]() { FlipCubes(1, this->m_CamPos, this->m_CamVec); }, false);
 			this->m_Jobs[2].Init(
 				[this]() { AddCubes(2, 2, true, true); },
-				[this]() {
-					auto* CameraParts = Camera3D::Instance();
-					FlipCubes(2, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
-				}, false);
+				[this]() { FlipCubes(2, this->m_CamPos, this->m_CamVec); }, false);
 			this->m_Jobs[3].Init(
 				[this]() { AddCubes(3, 3, true, true); },
-				[this]() {
-					auto* CameraParts = Camera3D::Instance();
-					FlipCubes(3, CameraParts->GetMainCamera().GetCamPos(), (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
-				}, false);
+				[this]() { FlipCubes(3, this->m_CamPos, this->m_CamVec); }, false);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 0)].Init(
-				[this]() { AddCubes(0, TotalCellLayer + 0, false, false); },
+				[this]() { AddCubes(0, static_cast<size_t>(TotalCellLayer + 0), false, false); },
 				[this]() {
-					auto* PostPassParts = PostPassEffect::Instance();
-					auto* SceneParts = SceneControl::Instance();
-					FlipCubes(TotalCellLayer + 0, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
-					SceneParts->SetIsUpdateFarShadowActive();
+					FlipCubes(static_cast<size_t>(TotalCellLayer + 0), this->m_ShadowCamPos, this->m_ShadowCamVec);
+					SceneControl::Instance()->SetIsUpdateFarShadowActive();
 				}, true);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 1)].Init(
-				[this]() { AddCubes(1, TotalCellLayer + 1, false, false); },
+				[this]() { AddCubes(1, static_cast<size_t>(TotalCellLayer + 1), false, false); },
 				[this]() {
-					auto* PostPassParts = PostPassEffect::Instance();
-					auto* SceneParts = SceneControl::Instance();
-					FlipCubes(TotalCellLayer + 1, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
-					SceneParts->SetIsUpdateFarShadowActive();
+					FlipCubes(static_cast<size_t>(TotalCellLayer + 1), this->m_ShadowCamPos, this->m_ShadowCamVec);
+					SceneControl::Instance()->SetIsUpdateFarShadowActive();
 				}, true);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 2)].Init(
-				[this]() { AddCubes(2, TotalCellLayer + 2, false, false); },
+				[this]() { AddCubes(2, static_cast<size_t>(TotalCellLayer + 2), false, false); },
 				[this]() {
-					auto* PostPassParts = PostPassEffect::Instance();
-					auto* SceneParts = SceneControl::Instance();
-					FlipCubes(TotalCellLayer + 2, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
-					SceneParts->SetIsUpdateFarShadowActive();
+					FlipCubes(static_cast<size_t>(TotalCellLayer + 2), this->m_ShadowCamPos, this->m_ShadowCamVec);
+					SceneControl::Instance()->SetIsUpdateFarShadowActive();
 				}, true);
 			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 3)].Init(
-				[this]() { AddCubes(3, TotalCellLayer + 3, false, false); },
+				[this]() { AddCubes(3, static_cast<size_t>(TotalCellLayer + 3), false, false); },
 				[this]() {
-					auto* PostPassParts = PostPassEffect::Instance();
-					auto* SceneParts = SceneControl::Instance();
-					FlipCubes(TotalCellLayer + 3, Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate, PostPassParts->GetShadowDir());
-					SceneParts->SetIsUpdateFarShadowActive();
+					FlipCubes(static_cast<size_t>(TotalCellLayer + 3), this->m_ShadowCamPos, this->m_ShadowCamVec);
+					SceneControl::Instance()->SetIsUpdateFarShadowActive();
 				}, true);
 			this->m_ThreadCounter = 0;
 			this->m_isChangeBlock = false;
@@ -1041,14 +1031,18 @@ namespace FPS_n2 {
 			SettingChange();
 		}
 		void		VoxelControl::Update(void) noexcept {
+			auto* CameraParts = Camera3D::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
+			this->m_CamPos = CameraParts->GetMainCamera().GetCamPos();
+			this->m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized();
+			this->m_ShadowCamPos = Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate;
+			this->m_ShadowCamVec = PostPassParts->GetShadowDir();
 			if (this->m_isChangeBlock) {
 				this->m_isChangeBlock = false;
-				//UpdateOnce
 				for (int loop = 0; loop < TotalCellLayer; ++loop) {
 					this->m_Jobs[static_cast<size_t>(TotalCellLayer + loop)].JobStart();
 				}
 			}
-			auto* OptionParts = OptionManager::Instance();
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
 				CellsData& cellx = this->m_CellxN[loop];
@@ -1061,7 +1055,7 @@ namespace FPS_n2 {
 				}
 				//
 				int threadID = TotalCellLayer + loop;
-				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cellx.GetScale())) {
+				if ((this->m_ShadowRate < cellx.GetScale())) {
 					this->m_DrawThreadDatas[threadID].Reset();
 					this->m_Jobs[threadID].UpdateDisable();
 				}

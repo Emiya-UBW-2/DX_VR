@@ -5,91 +5,90 @@
 
 namespace FPS_n2 {
 	namespace BackGround {
-		class BackGroundControl : public SingletonBase<BackGroundControl> {
-		private:
-			friend class SingletonBase<BackGroundControl>;
+
+		class WayPoint {
 		public:
 			class Builds {
-				int						m_mesh{ -1 };
-				Vector3DX				m_MinPos;
-				Vector3DX				m_Pos;
-				Vector3DX				m_MaxPos;
-
+				struct LinkBuffer {
+					bool isActive{ false };
+					Vector3DX Pos{};
+					int ID;
+				};
+			private:
+				int							m_mesh{ -1 };
+				Vector3DX					m_MinPos;
+				Vector3DX					m_Pos;
+				Vector3DX					m_MaxPos;
 				int							MyIndex{ 0 };
-				int							LinkPolyIndex[4]{ -1,-1,-1,-1 };
+			public:
+				std::array<LinkBuffer, 4>	m_LinkPosBuffer{};
 			public:
 				const int	GetIndex() const noexcept { return MyIndex; }
-				const int	GetLinkPolyIndex(int ID) const noexcept { return LinkPolyIndex[ID]; }
-				void		SetLink(int tris, int index) { LinkPolyIndex[tris] = index; }
+				const int	GetLinkPolyIndex(int ID) const noexcept { return m_LinkPosBuffer[ID].ID; }
+				void		SetLinkBuffer(int tris, const Vector3DX& pos) noexcept {
+					m_LinkPosBuffer[tris].isActive = true;
+					m_LinkPosBuffer[tris].Pos = pos;
+				}
 			public:
 				const Vector3DX& GetMinPos(void) const noexcept { return m_MinPos; }
 				const Vector3DX& GetPos(void) const noexcept { return m_Pos; }
 				const Vector3DX& GetMaxPos(void) const noexcept { return m_MaxPos; }
 			public:
-				void		Set(int index) {
+				void		Set(int index) noexcept {
 					this->MyIndex = index;
-					for (int i = 0; i < 4; i++) {
-						LinkPolyIndex[i] = -1;
+					for (auto& L : this->m_LinkPosBuffer) {
+						L.isActive = false;
+						L.ID = -1;
 					}
 				}
-				void		SetPosition(Vector3DX MinPos, Vector3DX MaxPos) {
+				void		SetPosition(Vector3DX MinPos, Vector3DX MaxPos) noexcept {
 					this->m_MinPos = MinPos;
 					this->m_MaxPos = MaxPos;
 					this->m_Pos = (MinPos + MaxPos) / 2;
 				}
 			};
 		private:
-			std::vector<Builds>				m_ObjBuilds;
-			std::unique_ptr<VoxelControl>	m_VoxelControl;
-			MV1								m_ObjSky;
-			bool							m_GrenadeBomb{ false };
-			std::shared_ptr<BaseObject>		m_ItemContainerObj;
-			std::vector<const MV1*>			m_AddonColObj;
-		private:
-			BackGroundControl(void) noexcept { Load(); }
-			BackGroundControl(const BackGroundControl&) = delete;
-			BackGroundControl(BackGroundControl&&) = delete;
-			BackGroundControl& operator=(const BackGroundControl&) = delete;
-			BackGroundControl& operator=(BackGroundControl&&) = delete;
-
-			virtual ~BackGroundControl(void) noexcept { Dispose_Load(); }
+			std::vector<Builds>				m_WayPoints;
+			int								m_SeekPoint{ 0 };
 		public:
-			const std::vector<Builds>&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
+			std::vector<Builds>& SetWayPoints(void) noexcept { return this->m_WayPoints; }
+			const std::vector<Builds>& GetWayPoints(void) const noexcept { return this->m_WayPoints; }
+		public:
 			//所定の位置からNm未満かNm以上の座標を取得する
-			Vector3DX		GetRandomPoint(const Vector3DX& Pos, float RangeSmaller = InvalidID, float RangeOver = InvalidID, bool IsPutGround = false) const noexcept {
+			Vector3DX		GetRandomPoint(const Vector3DX& Pos, float RangeSmaller = InvalidID, float RangeOver = InvalidID) const noexcept {
 				std::vector<int> SelList;
 				SelList.clear();
-				for (auto& C : this->m_ObjBuilds) {
-					int index = static_cast<int>(&C - &this->m_ObjBuilds.front());
+				for (auto& C : this->m_WayPoints) {
+					int index = static_cast<int>(&C - &this->m_WayPoints.front());
 					Vector3DX Vec = C.GetPos() - Pos; Vec.y = (0.f);
-					if (RangeSmaller != InvalidID && Vec.IsRangeSmaller(RangeSmaller)) {
-						SelList.emplace_back(index);
+					if (RangeSmaller != InvalidID && RangeOver != InvalidID) {
+						if (Vec.IsRangeSmaller(RangeSmaller) && !Vec.IsRangeSmaller(RangeOver)) {
+							SelList.emplace_back(index);
+						}
 					}
-					if (RangeOver != InvalidID && !Vec.IsRangeSmaller(RangeOver)) {
-						SelList.emplace_back(index);
+					else {
+						if (RangeSmaller != InvalidID && Vec.IsRangeSmaller(RangeSmaller)) {
+							SelList.emplace_back(index);
+						}
+						if (RangeOver != InvalidID && !Vec.IsRangeSmaller(RangeOver)) {
+							SelList.emplace_back(index);
+						}
 					}
 				}
 				Vector3DX Answer;
 				if (SelList.size() == 0) {
 					Answer = Pos;
 				}
-				Answer = this->m_ObjBuilds.at(SelList.at(GetRand((int)SelList.size() - 1))).GetPos();
-				if (IsPutGround) {
-					Vector3DX EndPos = Answer - Vector3DX::up() * 40.0f * Scale3DRate;
-					if (CheckLinetoMap(Answer + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-						Answer = EndPos;
-					}
-				}
-				return Answer;
+				return this->m_WayPoints.at(SelList.at(GetRand((int)SelList.size() - 1))).GetPos();
 			}
 
 			const int		GetNearestBuilds(const Vector3DX& NowPosition) const noexcept {
-				for (auto& bu : this->m_ObjBuilds) {
+				for (auto& bu : this->m_WayPoints) {
 					if (
 						(bu.GetMaxPos().x >= NowPosition.x && NowPosition.x >= bu.GetMinPos().x) &&
 						(bu.GetMaxPos().z >= NowPosition.z && NowPosition.z >= bu.GetMinPos().z)
 						) {
-						return static_cast<int>(&bu - &this->m_ObjBuilds.front());
+						return static_cast<int>(&bu - &this->m_WayPoints.front());
 					}
 				}
 				return -1;
@@ -97,12 +96,12 @@ namespace FPS_n2 {
 			const int		GetNearestBuilds2(const Vector3DX& NowPosition) const noexcept {
 				float Len = 1000000.f;
 				int Answer = -1;
-				for (auto& bu : this->m_ObjBuilds) {
+				for (auto& bu : this->m_WayPoints) {
 					Vector3DX Length = bu.GetPos() - NowPosition;
 					Length.y = 0.f;
 					if (Len >= Length.sqrMagnitude()) {
 						Len = Length.sqrMagnitude();
-						Answer = static_cast<int>(&bu - &this->m_ObjBuilds.front());
+						Answer = static_cast<int>(&bu - &this->m_WayPoints.front());
 					}
 				}
 				return Answer;
@@ -141,10 +140,10 @@ namespace FPS_n2 {
 					for (int i = 0; i < CheckPolyNum; i++) {
 						int Index = CheckPoly[i];
 						// チェック対象のポリゴンの３座標を取得 y座標を0.0にして、平面的な判定を行うようにする
-						Vector3DX Pos = this->m_ObjBuilds.at(Index).GetPos(); Pos.y = (0.f);
+						Vector3DX Pos = this->m_WayPoints.at(Index).GetPos(); Pos.y = (0.f);
 
 						for (int K = 0; K < 4; K++) {
-							int LinkIndex = this->m_ObjBuilds.at(Index).GetLinkPolyIndex(K);
+							int LinkIndex = this->m_WayPoints.at(Index).GetLinkPolyIndex(K);
 
 							;
 
@@ -216,7 +215,7 @@ namespace FPS_n2 {
 			}
 			bool			CheckPolyMoveWidth(Vector3DX StartPos, int TargetIndex, float Width) const {
 				// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )( 幅指定版 )
-				Vector3DX TargetPos = this->m_ObjBuilds.at(TargetIndex).GetPos();
+				Vector3DX TargetPos = this->m_WayPoints.at(TargetIndex).GetPos();
 				// 最初に開始座標から目標座標に直線的に移動できるかどうかをチェック
 				if (CheckPolyMove(StartPos, TargetPos) == false) { return false; }
 
@@ -241,6 +240,79 @@ namespace FPS_n2 {
 				}
 				return true;		// ここまできたら指定の幅があっても直線的に移動できるということなので true を返す
 			}
+		public:
+			void			Init(int Count) noexcept {
+				this->m_WayPoints.resize(Count);
+				this->m_SeekPoint = 0;
+			}
+			auto&			AddWayPoint(Vector3DX MinPos, Vector3DX MaxPos) noexcept {
+				auto& w = this->m_WayPoints.at(this->m_SeekPoint);
+				w.Set(this->m_SeekPoint);
+				w.SetPosition(MinPos, MaxPos);
+				++this->m_SeekPoint;
+				return w;
+			}
+			void			Setup() noexcept {
+				for (auto& w : this->m_WayPoints) {
+					for (auto& L : w.m_LinkPosBuffer) {
+						if (L.isActive) {
+							L.ID = GetNearestBuilds(L.Pos);
+						}
+					}
+				}
+			}
+		};
+
+		class BackGroundControl : public SingletonBase<BackGroundControl> {
+		private:
+			friend class SingletonBase<BackGroundControl>;
+		public:
+			class Builds {
+				int						m_mesh{ -1 };
+				Vector3DX				m_MinPos;
+				Vector3DX				m_Pos;
+				Vector3DX				m_MaxPos;
+
+				int							MyIndex{ 0 };
+				int							LinkPolyIndex[4]{ -1,-1,-1,-1 };
+			public:
+				const int	GetIndex() const noexcept { return MyIndex; }
+				const int	GetLinkPolyIndex(int ID) const noexcept { return LinkPolyIndex[ID]; }
+				void		SetLink(int tris, int index) noexcept { LinkPolyIndex[tris] = index; }
+			public:
+				const Vector3DX& GetMinPos(void) const noexcept { return m_MinPos; }
+				const Vector3DX& GetPos(void) const noexcept { return m_Pos; }
+				const Vector3DX& GetMaxPos(void) const noexcept { return m_MaxPos; }
+			public:
+				void		Set(int index) noexcept {
+					this->MyIndex = index;
+					for (int i = 0; i < 4; i++) {
+						LinkPolyIndex[i] = -1;
+					}
+				}
+				void		SetPosition(Vector3DX MinPos, Vector3DX MaxPos) noexcept {
+					this->m_MinPos = MinPos;
+					this->m_MaxPos = MaxPos;
+					this->m_Pos = (MinPos + MaxPos) / 2;
+				}
+			};
+		private:
+			std::unique_ptr<WayPoint>		m_WayPoint;
+			std::unique_ptr<VoxelControl>	m_VoxelControl;
+			MV1								m_ObjSky;
+			bool							m_GrenadeBomb{ false };
+			std::shared_ptr<BaseObject>		m_ItemContainerObj;
+			std::vector<const MV1*>			m_AddonColObj;
+		private:
+			BackGroundControl(void) noexcept { Load(); }
+			BackGroundControl(const BackGroundControl&) = delete;
+			BackGroundControl(BackGroundControl&&) = delete;
+			BackGroundControl& operator=(const BackGroundControl&) = delete;
+			BackGroundControl& operator=(BackGroundControl&&) = delete;
+
+			virtual ~BackGroundControl(void) noexcept { Dispose_Load(); }
+		public:
+			const auto&		GetWayPoint(void) const noexcept { return this->m_WayPoint; }
 
 			void			SetGrenadeBomb() noexcept {
 				m_GrenadeBomb = true;
@@ -260,15 +332,15 @@ namespace FPS_n2 {
 				return CheckLinetoMap(StartPos, &pEndPos);
 			}
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
-				return m_VoxelControl->CheckWall(StartPos, EndPos, AddCapsuleMin, AddCapsuleMax, Radius, m_AddonColObj);
+				return this->m_VoxelControl->CheckWall(StartPos, EndPos, AddCapsuleMin, AddCapsuleMax, Radius, m_AddonColObj);
 			}
 		public:
-			const Vector3Int GetVoxelPoint(const Vector3DX& pos) const noexcept { return m_VoxelControl->GetReferenceCells().GetVoxelPoint(pos); }
-			const Vector3DX GetWorldPos(const Vector3Int& VoxelPoint) const noexcept { return m_VoxelControl->GetReferenceCells().GetWorldPos(VoxelPoint); }
+			const Vector3Int GetVoxelPoint(const Vector3DX& pos) const noexcept { return this->m_VoxelControl->GetReferenceCells().GetVoxelPoint(pos); }
+			const Vector3DX GetWorldPos(const Vector3Int& VoxelPoint) const noexcept { return this->m_VoxelControl->GetReferenceCells().GetWorldPos(VoxelPoint); }
 			//ブロックにダメージを与える
-			bool			DamageCell(int Xvoxel, int Yvoxel, int Zvoxel, int8_t Damage) noexcept { return m_VoxelControl->DamageCell(Xvoxel, Yvoxel, Zvoxel, Damage); }
-			void			SettingChange(void) noexcept { m_VoxelControl->SettingChange(); }
-			constexpr float GetDrawFarMax() const noexcept { return m_VoxelControl->GetDrawFarMax(); }
+			bool			DamageCell(int Xvoxel, int Yvoxel, int Zvoxel, int8_t Damage) noexcept { return this->m_VoxelControl->DamageCell(Xvoxel, Yvoxel, Zvoxel, Damage); }
+			void			SettingChange(void) noexcept { this->m_VoxelControl->SettingChange(); }
+			constexpr float GetDrawFarMax() const noexcept { return this->m_VoxelControl->GetDrawFarMax(); }
 		public://
 			void			Load(void) noexcept;
 			//
