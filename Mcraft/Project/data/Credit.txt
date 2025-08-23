@@ -2,13 +2,15 @@
 敵兵士(Russian Soldier)=Bzovius様
 
 Howa Type 89 Assault Rifle=8sianDude様
+9mm機関けん銃=8sianDude様
 Howa Type 20=Hung Do様
 AKS-74=Armored Wave様
 AK-12=lolmaniamsohandsome様
 Remington 870 Shotgun=Andrei Milin様
 M700=CannonMonkey様
-MP443=​QUAPPA-EL様
+MP443=QUAPPA-EL様
 Sig Sauer P226=calico16様
+SVD Dragunov=Pieter Ferreira様
 ACOG Scope=GC_3D_ART様
 Aim Point Pro Red Dot Sight=Armored Wave様
 Vortex Viper Red Dot=epavlenko様

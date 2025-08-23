@@ -1,0 +1,10 @@
+Name=SVD 10Round Magazine
+Info=SVD標準の10連マガジン。
+Info_Eng=SVD標準の10連マガジン。
+
+capacity=10
+useammo0=762x54R
+
+Weight=700
+
+end
