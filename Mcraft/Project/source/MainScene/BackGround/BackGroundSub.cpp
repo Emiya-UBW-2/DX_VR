@@ -368,6 +368,154 @@ namespace FPS_n2 {
 				}
 			}
 		}
+
+		void		VoxelControl::AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, const CellsData& cellx, const Vector3Int& center, int Xvoxel, int Yvoxel, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) noexcept {
+			int zmin = 0;
+			int zmax = 0;
+			bool CheckFillXYZ = false;
+			bool isHitmin = true;
+			int8_t selectBlock = s_EmptyBlick;
+			bool CanDrawXPlus = false;
+			bool CanDrawXMinus = false;
+			bool CanDrawYPlus = false;
+			bool CanDrawYMinus = false;
+			for (int Zvoxel = zMaxminT; Zvoxel <= zMaxmaxT; ++Zvoxel) {
+				auto& CellBuff = cellx.GetCellBuf(center.x + Xvoxel, center.y + Yvoxel, center.z + Zvoxel);
+				bool CheckInsideXYZ = CheckInsideXY && ((DrawMinZMinus < Zvoxel) && (Zvoxel < DrawMinZPlus));
+				bool CheckBlockID = IsCalcUV && (selectBlock != CellBuff.GetCell());
+				if (
+					(Zvoxel == zMaxmaxT)
+					|| CheckInsideXYZ
+					|| (!isHitmin && CheckBlockID)
+					|| !CellBuff.CanDraw()
+					) {
+					//置けない部分なので今まで置けていた分をまとめてポリゴン化
+					if (!isHitmin) {
+						isHitmin = true;
+						if (camVecX < 0.0f) {
+							if (CheckFillXYZ || CanDrawXPlus) {
+								AddPlaneXPlus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+							}
+						}
+						else {
+							if (CheckFillXYZ || CanDrawXMinus) {
+								AddPlaneXMinus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+							}
+						}
+						if (camVecY < 0.0f) {
+							if (CheckFillXYZ || CanDrawYPlus) {
+								AddPlaneYPlus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+							}
+						}
+						else {
+							if (CheckFillXYZ || CanDrawYMinus) {
+								AddPlaneYMinus(pTarget, cellx, center, Xvoxel, Yvoxel, zmin, zmax, IsCalcUV);
+							}
+						}
+						//この場合だけもう一回判定させるドン
+						if (CheckBlockID) {
+							--Zvoxel;
+						}
+					}
+				}
+				else {
+					//ブロックが置ける部分
+					if (isHitmin) {
+						isHitmin = false;
+						zmin = Zvoxel;
+						selectBlock = CellBuff.GetCell();
+						CanDrawXPlus = false;
+						CanDrawXMinus = false;
+						CanDrawYPlus = false;
+						CanDrawYMinus = false;
+					}
+					zmax = Zvoxel;
+					CheckFillXYZ = CheckFillXY && (zmin <= DrawMinZPlus && DrawMinZMinus <= zmax);
+					if (!CanDrawXPlus) {
+						if (!CellBuff.IsOcclusion(0)) {
+							CanDrawXPlus = true;
+						}
+					}
+					if (!CanDrawXMinus) {
+						if (!CellBuff.IsOcclusion(1)) {
+							CanDrawXMinus = true;
+						}
+					}
+					if (!CanDrawYPlus) {
+						if (!CellBuff.IsOcclusion(2)) {
+							CanDrawYPlus = true;
+						}
+					}
+					if (!CanDrawYMinus) {
+						if (!CellBuff.IsOcclusion(3)) {
+							CanDrawYMinus = true;
+						}
+					}
+				}
+			}
+		}
+		void		VoxelControl::AddPlanesZ(vert32* pTarget, float camVecZ, const CellsData& cellx, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int Yvoxel, int Zvoxel, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) noexcept {
+			int xmin = 0;
+			int xmax = 0;
+			bool CheckFillXYZ = false;
+			bool isHitmin = true;
+			int8_t selectBlock = s_EmptyBlick;
+			bool CanDrawZPlus = false;
+			bool CanDrawZMinus = false;
+			for (int Xvoxel = xMaxminT; Xvoxel <= xMaxmaxT; ++Xvoxel) {
+				auto& CellBuff = cellx.GetCellBuf(center.x + Xvoxel, center.y + Yvoxel, center.z + Zvoxel);
+				bool CheckInsideXYZ = CheckInsideYZ && ((DrawMinXMinus < Xvoxel) && (Xvoxel < DrawMinXPlus));
+				bool CheckBlockID = IsCalcUV && (selectBlock != CellBuff.GetCell());
+				if (
+					(Xvoxel == xMaxmaxT)
+					|| CheckInsideXYZ
+					|| (!isHitmin && CheckBlockID)
+					|| !CellBuff.CanDraw()
+					) {
+					//置けない部分なので今まで置けていた分をまとめてポリゴン化
+					if (!isHitmin) {
+						isHitmin = true;
+						if (camVecZ < 0) {
+							if (CheckFillXYZ || CanDrawZPlus) {
+								AddPlaneZPlus(pTarget, cellx, center, xmin, xmax, Yvoxel, Zvoxel, IsCalcUV);
+							}
+						}
+						else {
+							if (CheckFillXYZ || CanDrawZMinus) {
+								AddPlaneZMinus(pTarget, cellx, center, xmin, xmax, Yvoxel, Zvoxel, IsCalcUV);
+							}
+						}
+						//この場合だけもう一回判定させるドン
+						if (CheckBlockID) {
+							--Xvoxel;
+						}
+					}
+				}
+				else {
+					//ブロックが置ける部分
+					if (isHitmin) {
+						isHitmin = false;
+						xmin = Xvoxel;
+						selectBlock = CellBuff.GetCell();
+						CanDrawZPlus = false;
+						CanDrawZMinus = false;
+					}
+					xmax = Xvoxel;
+					CheckFillXYZ = CheckFillYZ && (xmin <= DrawMinXPlus && DrawMinXMinus <= xmax);
+					if (!CanDrawZPlus) {
+						if (!CellBuff.IsOcclusion(4)) {
+							CanDrawZPlus = true;
+						}
+					}
+					if (!CanDrawZMinus) {
+						if (!CellBuff.IsOcclusion(5)) {
+							CanDrawZMinus = true;
+						}
+					}
+				}
+			}
+		}
+
 		void		VoxelControl::AddCubes(size_t id) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
 			DrawThreadData& Draws = this->m_DrawThreadDatas[id];
@@ -381,6 +529,39 @@ namespace FPS_n2 {
 			float CamZMinZ = Draws.GetCamVec().z * (static_cast<float>(DrawMaxZMinus) + 0.5f);
 			float CamZMaxZ = Draws.GetCamVec().z * (static_cast<float>(DrawMaxZPlus) + 0.5f);
 			//X
+			auto PX = [&](int* MaxminT, int* MaxmaxT, float dTa, float dTb) {
+				bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
+				bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
+				if (Onbehind && !OnFront) {
+					return false;
+				}
+				if (!OnFront && !Onbehind) {
+					if (dTa < 0.0f) {
+						*MaxminT = std::max(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) - 1, *MaxminT);
+					}
+					else {
+						*MaxmaxT = std::min(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) + 1, *MaxmaxT);
+					}
+				}
+				return true;
+				};
+			auto PZ = [&](int* MaxminT, int* MaxmaxT, float dTa, float dTb) {
+				bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
+				bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
+				if (Onbehind && !OnFront) {
+					return false;
+				}
+				if (!OnFront && !Onbehind) {
+					if (dTa < 0.0f) {
+						*MaxminT = std::max(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) - 1, *MaxminT);
+					}
+					else {
+						*MaxmaxT = std::min(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) + 1, *MaxmaxT);
+					}
+				}
+				return true;
+				};
+
 			for (int Zvoxel = DrawMaxZMinus; Zvoxel <= DrawMaxZPlus; ++Zvoxel) {
 				float CamZZ = Draws.GetCamVec().z * (static_cast<float>(Zvoxel) + 0.5f);
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
@@ -398,28 +579,16 @@ namespace FPS_n2 {
 
 				for (int Yvoxel = DrawMaxYMinus; Yvoxel <= DrawMaxYPlus; ++Yvoxel) {
 					if (!cellx.isInside(center.y + Yvoxel)) { continue; }
+
 					float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
+					float dTa = (CamXMinX + CamYY + CamZZ);//Dot
+					float dTb = (CamXMaxX + CamYY + CamZZ);//Dot
 
 					int xMaxminT = DrawMaxXMinus;
 					int xMaxmaxT = DrawMaxXPlus;
-					{
-						float dTa = (CamXMinX + CamYY + CamZZ);//Dot
-						float dTb = (CamXMaxX + CamYY + CamZZ);//Dot
-						bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
-						bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
-						if (Onbehind && !OnFront) {
-							continue;
-						}
-						if (!OnFront && !Onbehind) {
-							if (dTa < 0.0f) {
-								xMaxminT = std::max(DrawMaxXMinus + static_cast<int>((DrawMaxXPlus - DrawMaxXMinus) * (dTa / (dTa - dTb))) - 1, DrawMaxXMinus);
-							}
-							else {
-								xMaxmaxT = std::min(DrawMaxXMinus + static_cast<int>((DrawMaxXPlus - DrawMaxXMinus) * (dTa / (dTa - dTb))) + 1, DrawMaxXPlus);
-							}
-						}
+					if (!PX(&xMaxminT, &xMaxmaxT, dTa, dTb)) {
+						continue;
 					}
-
 					bool CheckFillYZ = CheckFillZ && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
 					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < Yvoxel) && (Yvoxel < DrawMinYPlus));
 					AddPlanesZ(&Draws.Vert32, static_cast<float>(Zvoxel), cellx, center, xMaxminT, xMaxmaxT, Yvoxel, Zvoxel, CheckInsideYZ, CheckFillYZ, true);
@@ -443,26 +612,15 @@ namespace FPS_n2 {
 
 				for (int Yvoxel = DrawMaxYMinus; Yvoxel <= DrawMaxYPlus; ++Yvoxel) {
 					if (!cellx.isInside(center.y + Yvoxel)) { continue; }
+
 					float CamYY = Draws.GetCamVec().y * (static_cast<float>(Yvoxel) + 0.5f);
+					float dTa = (CamXX + CamYY + CamZMinZ);//Dot
+					float dTb = (CamXX + CamYY + CamZMaxZ);//Dot
 
 					int zMaxminT = DrawMaxZMinus;
 					int zMaxmaxT = DrawMaxZPlus;
-					{
-						float dTa = (CamXX + CamYY + CamZMinZ);//Dot
-						float dTb = (CamXX + CamYY + CamZMaxZ);//Dot
-						bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
-						bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
-						if (Onbehind && !OnFront) {
-							continue;
-						}
-						if (!OnFront && !Onbehind) {
-							if (dTa < 0.0f) {
-								zMaxminT = std::max(DrawMaxZMinus + static_cast<int>((DrawMaxZPlus - DrawMaxZMinus) * (dTa / (dTa - dTb))) - 1, DrawMaxZMinus);
-							}
-							else {
-								zMaxmaxT = std::min(DrawMaxZMinus + static_cast<int>((DrawMaxZPlus - DrawMaxZMinus) * (dTa / (dTa - dTb))) + 1, DrawMaxZPlus);
-							}
-						}
+					if (!PZ(&zMaxminT, &zMaxmaxT, dTa, dTb)) {
+						continue;
 					}
 					bool CheckFillXY = CheckFillX && ((DrawMinYMinus <= Yvoxel) && (Yvoxel <= DrawMinYPlus));
 					bool CheckInsideXY = CheckInsideX && ((DrawMinYMinus < Yvoxel) && (Yvoxel < DrawMinYPlus));
