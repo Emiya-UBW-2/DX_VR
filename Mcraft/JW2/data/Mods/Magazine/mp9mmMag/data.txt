@@ -1,0 +1,8 @@
+Name=9mm MP 25Round Magazine
+
+capacity=25
+useammo0=9x19
+
+Weight=500
+
+end
