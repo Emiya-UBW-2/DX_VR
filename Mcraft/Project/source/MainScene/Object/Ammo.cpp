@@ -101,12 +101,12 @@ namespace FPS_n2 {
 						yput = 5;
 						zput = 8;
 					}
-					auto Put = BackGroundParts->GetPoint(pos_tmp);
+					auto VoxelPoint = BackGroundParts->GetVoxelPoint(pos_tmp);
 					bool IsChanged = false;
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
 						for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
 							for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
-								if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, damage)) {
+								if (BackGroundParts->DamageCell(VoxelPoint.x + xp, VoxelPoint.y + yp, VoxelPoint.z + zp, damage)) {
 									IsChanged = true;
 								}
 							}
@@ -115,7 +115,7 @@ namespace FPS_n2 {
 					if (IsChanged) {
 						auto* OptionParts = OptionManager::Instance();
 						if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
-							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z), Vector3DX::forward(), 3.0f, 3.0f);
+							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetWorldPos(VoxelPoint), Vector3DX::forward(), 3.0f, 3.0f);
 						}
 					}
 				}

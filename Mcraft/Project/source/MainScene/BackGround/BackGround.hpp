@@ -8,20 +8,6 @@ namespace FPS_n2 {
 		class BackGroundControl : public SingletonBase<BackGroundControl> {
 		private:
 			friend class SingletonBase<BackGroundControl>;
-		private:
-			std::unique_ptr<VoxelControl>	m_VoxelControl;
-			MV1								m_ObjSky;
-			bool							m_GrenadeBomb{ false };
-			std::shared_ptr<BaseObject>		m_ItemContainerObj;
-			std::vector<const MV1*>			m_AddonColObj;
-		private:
-			BackGroundControl(void) noexcept { Load(); }
-			BackGroundControl(const BackGroundControl&) = delete;
-			BackGroundControl(BackGroundControl&&) = delete;
-			BackGroundControl& operator=(const BackGroundControl&) = delete;
-			BackGroundControl& operator=(BackGroundControl&&) = delete;
-
-			virtual ~BackGroundControl(void) noexcept { Dispose_Load(); }
 		public:
 			class Builds {
 				int						m_mesh{ -1 };
@@ -36,9 +22,9 @@ namespace FPS_n2 {
 				const int	GetLinkPolyIndex(int ID) const noexcept { return LinkPolyIndex[ID]; }
 				void		SetLink(int tris, int index) { LinkPolyIndex[tris] = index; }
 			public:
-				const auto& GetMinPos(void) const noexcept { return m_MinPos; }
-				const auto& GetPos(void) const noexcept { return m_Pos; }
-				const auto& GetMaxPos(void) const noexcept { return m_MaxPos; }
+				const Vector3DX& GetMinPos(void) const noexcept { return m_MinPos; }
+				const Vector3DX& GetPos(void) const noexcept { return m_Pos; }
+				const Vector3DX& GetMaxPos(void) const noexcept { return m_MaxPos; }
 			public:
 				void		Set(int index) {
 					this->MyIndex = index;
@@ -52,16 +38,30 @@ namespace FPS_n2 {
 					this->m_Pos = (MinPos + MaxPos) / 2;
 				}
 			};
-			std::vector<Builds>			m_ObjBuilds;
+		private:
+			std::vector<Builds>				m_ObjBuilds;
+			std::unique_ptr<VoxelControl>	m_VoxelControl;
+			MV1								m_ObjSky;
+			bool							m_GrenadeBomb{ false };
+			std::shared_ptr<BaseObject>		m_ItemContainerObj;
+			std::vector<const MV1*>			m_AddonColObj;
+		private:
+			BackGroundControl(void) noexcept { Load(); }
+			BackGroundControl(const BackGroundControl&) = delete;
+			BackGroundControl(BackGroundControl&&) = delete;
+			BackGroundControl& operator=(const BackGroundControl&) = delete;
+			BackGroundControl& operator=(BackGroundControl&&) = delete;
+
+			virtual ~BackGroundControl(void) noexcept { Dispose_Load(); }
 		public:
-			const auto&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
+			const std::vector<Builds>&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
 			//所定の位置からNm未満かNm以上の座標を取得する
 			Vector3DX		GetRandomPoint(const Vector3DX& Pos, float RangeSmaller = InvalidID, float RangeOver = InvalidID, bool IsPutGround = false) const noexcept {
 				std::vector<int> SelList;
 				SelList.clear();
 				for (auto& C : this->m_ObjBuilds) {
 					int index = static_cast<int>(&C - &this->m_ObjBuilds.front());
-					auto Vec = C.GetPos() - Pos; Vec.y = (0.f);
+					Vector3DX Vec = C.GetPos() - Pos; Vec.y = (0.f);
 					if (RangeSmaller != InvalidID && Vec.IsRangeSmaller(RangeSmaller)) {
 						SelList.emplace_back(index);
 					}
@@ -246,13 +246,13 @@ namespace FPS_n2 {
 				m_GrenadeBomb = true;
 			}
 			bool			PopGrenadeBomb() noexcept {
-				auto G = m_GrenadeBomb;
+				bool Prev = m_GrenadeBomb;
 				m_GrenadeBomb = false;
-				return G;
+				return Prev;
 			}
 		public:
 			void			SetItemContainerObj(const std::shared_ptr<BaseObject>& pObj) noexcept { this->m_ItemContainerObj = pObj; }
-			auto&			GetItemContainerObj(void) noexcept { return this->m_ItemContainerObj; }
+			std::shared_ptr<BaseObject>& GetItemContainerObj(void) noexcept { return this->m_ItemContainerObj; }
 
 			int				CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			int				CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
@@ -263,10 +263,10 @@ namespace FPS_n2 {
 				return m_VoxelControl->CheckWall(StartPos, EndPos, AddCapsuleMin, AddCapsuleMax, Radius, m_AddonColObj);
 			}
 		public:
-			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return m_VoxelControl->GetPoint(pos); }
-			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return m_VoxelControl->GetPos(xpos, ypos, zpos); }
+			const Vector3Int GetVoxelPoint(const Vector3DX& pos) const noexcept { return m_VoxelControl->GetReferenceCells().GetVoxelPoint(pos); }
+			const Vector3DX GetWorldPos(const Vector3Int& VoxelPoint) const noexcept { return m_VoxelControl->GetReferenceCells().GetWorldPos(VoxelPoint); }
 			//ブロックにダメージを与える
-			bool			DamageCell(int xpos, int ypos, int zpos, int8_t Damage) noexcept { return m_VoxelControl->DamageCell(xpos, ypos, zpos, Damage); }
+			bool			DamageCell(int Xvoxel, int Yvoxel, int Zvoxel, int8_t Damage) noexcept { return m_VoxelControl->DamageCell(Xvoxel, Yvoxel, Zvoxel, Damage); }
 			void			SettingChange(void) noexcept { m_VoxelControl->SettingChange(); }
 			constexpr float GetDrawFarMax() const noexcept { return m_VoxelControl->GetDrawFarMax(); }
 		public://

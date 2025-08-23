@@ -336,7 +336,7 @@ namespace FPS_n2 {
 				int								xput = 24;
 				int								yput = 12;
 				int								zput = 24;
-				auto Put = BackGroundParts->GetPoint(GetMove().GetPos());
+				auto Put = BackGroundParts->GetVoxelPoint(GetMove().GetPos());
 				int IsBreak = 0;
 				for (int xp = -xput / 2; xp < xput / 2; ++xp) {
 					for (int yp = 0 - 4; yp < yput; ++yp) {
