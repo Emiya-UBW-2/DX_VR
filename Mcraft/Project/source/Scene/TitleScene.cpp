@@ -210,8 +210,10 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), LocalizeParts->Get(9980));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), LocalizeParts->Get(9981));
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9982));
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9991));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::SHOT), LocalizeParts->Get(9982));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::AIM), LocalizeParts->Get(9991));
 						break;
 					case TitleWindow::CustomizeGun:
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), "");
@@ -219,7 +221,8 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), LocalizeParts->Get(9983));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), LocalizeParts->Get(9984));
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9991));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::AIM), LocalizeParts->Get(9991));
 						break;
 					default:
 						break;
@@ -356,7 +359,7 @@ namespace FPS_n2 {
 			}
 			break;
 			case TitleWindow::Custom:
-				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().trigger()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 					this->m_TitleWindow = TitleWindow::Main;
 					KeyGuideParts->SetGuideFlip();
@@ -414,23 +417,28 @@ namespace FPS_n2 {
 						this->m_GunSelect.at(this->m_GunTypeSel) = LowestID;
 					}
 				}
-				if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
-					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-					this->m_GunTypeSel++;
-					if (this->m_GunTypeSel > 3 - 1) {
-						this->m_GunTypeSel = 0;
+				{
+					int Wheel = -PadControl::Instance()->GetMouseWheelRot();
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
+						Wheel++;
 					}
-					this->m_CamTimer = 0.f;
-				}
-				if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
-					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-					this->m_GunTypeSel--;
-					if (this->m_GunTypeSel < 0) {
-						this->m_GunTypeSel = 3 - 1;
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
+						Wheel--;
 					}
-					this->m_CamTimer = 0.f;
+					Wheel = std::clamp(Wheel, -2, 2);
+					if (Wheel != 0) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
+						this->m_GunTypeSel += Wheel;
+						if (this->m_GunTypeSel > 3 - 1) {
+							this->m_GunTypeSel -= 3;
+						}
+						if (this->m_GunTypeSel < 0) {
+							this->m_GunTypeSel += 3;
+						}
+						this->m_CamTimer = 0.f;
+					}
 				}
-				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().trigger()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 					auto& slot = this->m_GunPtr.at(GetNowEditWeaponID())->GetModifySlot();
 					auto& slotdata = slot->GetMyData();
@@ -449,7 +457,7 @@ namespace FPS_n2 {
 				auto& slot = guns->GetModifySlot();
 				auto& slotdata = slot->GetMyData();
 
-				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().trigger()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 					this->m_TitleWindow = TitleWindow::Custom;
 					KeyGuideParts->SetGuideFlip();
@@ -460,18 +468,21 @@ namespace FPS_n2 {
 					mod->SaveSlots(PresetPath.c_str());
 				}
 
-				if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
-					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-					this->m_SlotSel = (this->m_SlotSel == Guns::GunSlot::Magazine) ? Guns::GunSlot::Sight : Guns::GunSlot::Magazine;
-					SetSelectOnSlot();
-					this->m_SelAlpha = 2.f;
-				}
+				int Wheel = -PadControl::Instance()->GetMouseWheelRot();
 				if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
+					Wheel++;
+				}
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
+					Wheel--;
+				}
+				Wheel = std::clamp(Wheel, -1, 1);
+				if (Wheel != 0) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 					this->m_SlotSel = (this->m_SlotSel == Guns::GunSlot::Magazine) ? Guns::GunSlot::Sight : Guns::GunSlot::Magazine;
 					SetSelectOnSlot();
 					this->m_SelAlpha = 2.f;
 				}
+
 				if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
 					if (slotdata->GetSlotInfo(this->m_SlotSel)) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
@@ -792,6 +803,60 @@ namespace FPS_n2 {
 				}
 				break;
 			case TitleWindow::Custom:
+			{
+				int xp1 = 1920 - 256 / 2;
+				int yp1 = 1080 - 90 - 90 * 3;
+				{
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM,
+						xp1 + 256 / 2 - 16, yp1 + 90 / 2 - 5, Yellow, Black, "My Equip");
+					yp1 += 90;
+				}
+				for (int loop = 0, Max = static_cast<int>(this->m_GunSelect.size()); loop < Max; ++loop) {
+					const GraphHandle* Ptr = nullptr;
+					auto& guns = this->m_GunPtr.at(this->m_GunSelect.at(loop));
+					auto& slot = guns->GetModifySlot();
+					auto& slotdata = slot->GetMyData();
+					if (slotdata->GetIconGraph().IsActive()) {
+						Ptr = &slotdata->GetIconGraph();
+					}
+					if (Ptr) {
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							Ptr, xp1, yp1, 0.25f, 0.f, true);
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+					}
+					std::string CustomPoint = "";
+					switch (loop) {
+					case 0:
+						CustomPoint = "Main";
+						break;
+					case 1:
+						CustomPoint = "Sub";
+						break;
+					case 2:
+						CustomPoint = "Gadget";
+						break;
+					default:
+						break;
+					}
+
+					CustomPoint += " : ";
+					CustomPoint += slotdata->GetName();
+
+					int Len = FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, (24), 3)->GetStringWidth(CustomPoint);
+					//
+					if (loop == this->m_GunTypeSel) {
+						DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 256 / 2 - 16 - Len - 16, yp1 - 90 / 2 + 2, xp1 + 256 / 2 - 2, yp1 + 90 / 2 - 2, Yellow, false, 2);
+					}
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM,
+						xp1 + 256 / 2 - 16, yp1 + 90 / 2 - 5, Green, Black, CustomPoint);
+
+
+					yp1 += 90;
+				}
+			}
 				break;
 			case TitleWindow::CustomizeGun:
 				break;
@@ -822,7 +887,7 @@ namespace FPS_n2 {
 						}
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
 							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP,
-							XPos + Len / 2, (48) + 48, Green, Black, CustomPoint.c_str());
+							XPos + Len / 2, (48) + 48, Green, Black, CustomPoint);
 					}
 					XPos += Len;
 				}
@@ -846,7 +911,7 @@ namespace FPS_n2 {
 						}
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
 							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP,
-							XPos + Len / 2, (48) + 48, Green, Black, CustomPoint.c_str());
+							XPos + Len / 2, (48) + 48, Green, Black, CustomPoint);
 					}
 					XPos += Len;
 				}
