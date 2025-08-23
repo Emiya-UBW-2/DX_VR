@@ -47,12 +47,25 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+			auto* OptionParts = OptionManager::Instance();
 			//
 			Objects::AmmoPool::Create();
 			Objects::AmmoLinePool::Create();
 			Objects::ItemObjPool::Create();
 			Player::SkillList::Create();			//スキルをセーブから読み取り
-			PlayerMngr->Init(NetWork::Player_num);
+			if (this->m_IsTutorial) {
+				PlayerMngr->Init(NetWork::Player_num);
+			}
+			else {
+				if (OptionParts->GetParamBoolean(EnumSaveParam::HardMode)) {
+					int round = std::max(static_cast<int>(SaveData::Instance()->GetParam("round")), 0);
+					round = std::clamp(round, 0, 12);
+					PlayerMngr->Init(5 + round);
+				}
+				else {
+					PlayerMngr->Init(NetWork::Player_num);
+				}
+			}
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {

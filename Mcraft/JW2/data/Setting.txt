@@ -26,4 +26,4 @@ DrawScale=1.000000
 FlatEarth=false
 GodRay=true
 ActiveLockOn=true
-
+HardMode=false

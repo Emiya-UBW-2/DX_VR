@@ -73,6 +73,7 @@
 1138=Adds GodRay to shadow(with the shadow settings)
 1139=Flat terrain at initialization
 1146=Lock on Enemy When Aim Down Sight
+1147=Increases enemy spawn count (decreases performance)
 
 1140=Change X Sensitivity
 1141=Change Y Sensitivity

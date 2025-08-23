@@ -672,14 +672,14 @@ namespace FPS_n2 {
 					int xp = 64;
 					int yp = 1080 - 92;
 					{
-						auto prev = OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth);
-						OptionParts->SetParamBoolean(EnumSaveParam::FlatEarth, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)));
-						if (prev != OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
+						auto prev = OptionParts->GetParamBoolean(EnumSaveParam::HardMode);
+						OptionParts->SetParamBoolean(EnumSaveParam::HardMode, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::HardMode)));
+						if (prev != OptionParts->GetParamBoolean(EnumSaveParam::HardMode)) {
 							OptionParts->Save();
 						}
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
-							White, Black, LocalizeParts->Get(1139));
+							White, Black, LocalizeParts->Get(1147));
 						yp -= LineHeight + 12;
 					}
 					{
@@ -691,6 +691,17 @@ namespace FPS_n2 {
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
 							White, Black, LocalizeParts->Get(1146));
+						yp -= LineHeight + 12;
+					}
+					{
+						auto prev = OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth);
+						OptionParts->SetParamBoolean(EnumSaveParam::FlatEarth, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)));
+						if (prev != OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
+							OptionParts->Save();
+						}
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
+							White, Black, LocalizeParts->Get(1139));
 						yp -= LineHeight + 12;
 					}
 					{

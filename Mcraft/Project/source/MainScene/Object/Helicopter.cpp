@@ -180,20 +180,21 @@ namespace FPS_n2 {
 					SetAction(HelicopterMove::Intercept);
 				}
 				else {
-					bool IsDeadAll = true;
-					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-						if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
-						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-						if (chara->IsAlive()) {
-							IsDeadAll = false;
-							break;
+					int count = 0;
+					if (this->m_Timer > 10.0f) {
+						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+							if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
+							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+							if (!chara->IsAlive()) {
+								++count;
+							}
 						}
 					}
-					if (IsDeadAll) {
+					if (count >= 4) {
 						SetAction(HelicopterMove::Rappelling);
 					}
 				}
-				if (this->m_Timer > 10.0f) {
+				if (this->m_Timer > 15.0f) {
 					SetAction(HelicopterMove::Random);
 				}
 				m_NowPos = Lerp(this->m_PrevPos, m_TargetPos, std::clamp(this->m_Timer / 8.0f, 0.0f, 1.0f));
