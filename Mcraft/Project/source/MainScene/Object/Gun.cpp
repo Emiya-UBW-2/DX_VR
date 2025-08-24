@@ -83,6 +83,17 @@ namespace FPS_n2 {
 		//
 		void				GunObj::SetShotStart(void) noexcept {
 			if (!IsInChamber()) { return; }
+			switch (GetModifySlot()->GetMyData()->GetMoveType()) {
+			case MOVETYPE::ClosedBolt:
+				break;
+			case MOVETYPE::OpenBolt:
+				if (GetAmmoNumTotal() == 0) {
+					return;
+				}
+				break;
+			default:
+				break;
+			}
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) { return; }
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -161,6 +172,17 @@ namespace FPS_n2 {
 			}
 			//チャンバーを空にする
 			this->m_InChamber = false;
+			switch (GetModifySlot()->GetMyData()->GetMoveType()) {
+			case MOVETYPE::ClosedBolt:
+				break;
+			case MOVETYPE::OpenBolt:
+				if (this->m_Capacity != 0) {
+					--this->m_Capacity;
+				}
+				break;
+			default:
+				break;
+			}
 			//銃口煙の追加
 			this->m_MuzzleSmokeControl.AddMuzzleSmokePower();
 			//撃ちアニメに移行
@@ -186,8 +208,19 @@ namespace FPS_n2 {
 				}
 				switch (GetGunAnime()) {
 				case Charas::GunAnimeID::Base:
-					if (!IsInChamber() && this->m_Capacity != 0) {
-						SetGunAnime(Charas::GunAnimeID::Cocking);//チャンバーが空で弾倉が空でないなら
+					switch (GetModifySlot()->GetMyData()->GetMoveType()) {
+					case MOVETYPE::ClosedBolt:
+						if (!IsInChamber() && this->m_Capacity != 0) {
+							SetGunAnime(Charas::GunAnimeID::Cocking);//チャンバーが空で弾倉が空でないなら
+						}
+						break;
+					case MOVETYPE::OpenBolt:
+						if (!IsInChamber() && this->m_Capacity != 0) {
+							SetGunAnime(Charas::GunAnimeID::Cocking);//チャンバーが空で弾倉が空でないなら
+						}
+						break;
+					default:
+						break;
 					}
 					break;
 				case Charas::GunAnimeID::Shot:
@@ -284,7 +317,7 @@ namespace FPS_n2 {
 			if (!IsFirstLoop()) {
 				Vector3DX Target = Vector3DX::zero();
 				if ((GetGunAnime() == Charas::GunAnimeID::Shot) && (GetNowAnimTimePerCache() <= 0.4f) && GetGunAnimBlendPer(Charas::GunAnimeID::ADS) < 0.5f) {
-					switch (GetStockType()) {
+					switch (GetModifySlot()->GetMyData()->GetStockType()) {
 					case Guns::STOCKTYPE::none:
 						Target.x += deg2rad(15);
 						break;
@@ -859,6 +892,20 @@ namespace FPS_n2 {
 					{
 						//射撃時のボルトアニメを行わせる
 						switch (GetGunAnime()) {
+						case Charas::GunAnimeID::Base:
+							switch (GetModifySlot()->GetMyData()->GetMoveType()) {
+							case MOVETYPE::OpenBolt:
+								if (GetAmmoNumTotal() != 0) {
+									SetObj().SetAnim(ID).SetPer(1.f);
+								}
+								else {
+									SetObj().SetAnim(ID).SetPer(0.f);
+								}
+								break;
+							default:
+								break;
+							}
+							break;
 						case Charas::GunAnimeID::Shot:
 							if (GetShotType() == SHOTTYPE::FULL || GetShotType() == SHOTTYPE::SEMI) {
 								float Per = 0.6f;

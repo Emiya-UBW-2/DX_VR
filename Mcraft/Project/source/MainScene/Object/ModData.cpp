@@ -64,6 +64,15 @@ namespace FPS_n2 {
 				}
 			}
 
+			else if (LEFT == "MoveType") {
+				for (int loop = 0; loop < static_cast<int>(MOVETYPE::Max); ++loop) {
+					if (RIGHT == MOVETYPEName[loop]) {
+						this->m_MoveType = (MOVETYPE)loop;
+						break;
+					}
+				}
+			}
+
 			else if (LEFT == "GunShootSound") {
 				for (int loop = 0; loop < static_cast<int>(EnumGunSound::Max); ++loop) {
 					if (RIGHT == EnumGunSoundName[loop]) {

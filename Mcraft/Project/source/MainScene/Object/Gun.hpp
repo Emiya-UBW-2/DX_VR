@@ -129,9 +129,20 @@ namespace FPS_n2 {
 			void				ChamberIn(void) noexcept {
 				if (!this->m_IsChamberOn) {
 					this->m_IsChamberOn = true;
-					if (this->m_Capacity != 0) {
-						--this->m_Capacity;
-						this->m_InChamber = true;
+					switch (GetModifySlot()->GetMyData()->GetMoveType()) {
+					case MOVETYPE::ClosedBolt:
+						if (this->m_Capacity != 0) {
+							--this->m_Capacity;
+							this->m_InChamber = true;
+						}
+						break;
+					case MOVETYPE::OpenBolt:
+						if (this->m_Capacity != 0) {
+							this->m_InChamber = true;
+						}
+						break;
+					default:
+						break;
 					}
 				}
 			}
@@ -222,9 +233,6 @@ namespace FPS_n2 {
 					return (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetShotType();
 				}
 				return GetModifySlot()->GetMyData()->GetShotType();
-			}
-			const auto& GetStockType(void) const noexcept {
-				return GetModifySlot()->GetMyData()->GetStockType();
 			}
 
 			const auto			IsNeedCalcSling(void) const noexcept { return this->m_SlingPer < 1.0f; }
@@ -386,7 +394,18 @@ namespace FPS_n2 {
 					return Mat;
 				}
 			}
-			const auto			GetAmmoNumTotal(void) const noexcept { return this->m_Capacity + (IsInChamber() ? 1 : 0); }
+			const auto			GetAmmoNumTotal(void) const noexcept {
+				switch (GetModifySlot()->GetMyData()->GetMoveType()) {
+				case MOVETYPE::ClosedBolt:
+					return this->m_Capacity + (IsInChamber() ? 1 : 0);
+					break;
+				case MOVETYPE::OpenBolt:
+					return this->m_Capacity;
+					break;
+				default:
+					break;
+				}
+			}
 			const auto			GetNowGunAnimePer(void) const noexcept {
 				if (GetGunAnime() >= Charas::GunAnimeID::Max) {
 					return 1.0f;

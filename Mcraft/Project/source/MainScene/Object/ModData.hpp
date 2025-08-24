@@ -34,6 +34,7 @@ namespace FPS_n2 {
 			int								m_UnlockScore{ 0 };
 
 			STOCKTYPE						m_StockType{ STOCKTYPE::none };
+			MOVETYPE						m_MoveType{ MOVETYPE::ClosedBolt };
 
 			EnumGunSound					m_GunShootSound{ EnumGunSound::ShotNormal };
 
@@ -117,6 +118,7 @@ namespace FPS_n2 {
 			}
 
 			const auto& GetStockType(void) const noexcept { return this->m_StockType; }
+			const auto& GetMoveType(void) const noexcept { return this->m_MoveType; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
 
 			const auto& GetWeight_gram(void) const noexcept { return this->m_Weight; }

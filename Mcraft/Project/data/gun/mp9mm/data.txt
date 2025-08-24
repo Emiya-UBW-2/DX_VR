@@ -22,6 +22,7 @@ reloadType=MAG
 CanSwitch=False
 stockType=none
 MoveType=OpenBolt
+isHoldOpen=false
 
 Slot0Type=Magazine
 Slot0IsNeed=true

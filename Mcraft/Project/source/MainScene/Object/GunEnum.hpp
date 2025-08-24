@@ -124,6 +124,15 @@ namespace FPS_n2 {
 			"curve",
 			"straight",
 		};
+		enum class MOVETYPE {
+			ClosedBolt,
+			OpenBolt,
+			Max,
+		};
+		static const char* MOVETYPEName[static_cast<int>(MOVETYPE::Max)] = {
+			"ClosedBolt",
+			"OpenBolt",
+		};
 
 		enum class EnumGunSound {
 			CockingPull,
