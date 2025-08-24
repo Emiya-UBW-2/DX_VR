@@ -21,6 +21,7 @@ soundsel=2
 reloadType=MAG
 CanSwitch=False
 stockType=none
+MoveType=OpenBolt
 
 Slot0Type=Magazine
 Slot0IsNeed=true

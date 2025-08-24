@@ -1256,7 +1256,7 @@ namespace FPS_n2 {
 			Str += " ]";
 			DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 18,
 				(1920 / 2 - 520), (1080 - 128),
-				(1920 / 2 + 520), (1080 - 128 + 18 * 3),
+				(1920 / 2 + 520), (1080 - 128 + 18 * 4),
 				White, Black, Str);
 		}
 		//
