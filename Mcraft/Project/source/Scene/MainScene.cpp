@@ -460,6 +460,7 @@ namespace FPS_n2 {
 					if (this->m_StartMovie->Update()) {
 						this->m_IsStartMoviePlay = false;
 						KeyGuideParts->SetGuideFlip();
+						CameraParts->StopCamShake();
 					}
 				}
 				return true;

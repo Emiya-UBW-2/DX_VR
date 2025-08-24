@@ -992,6 +992,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			this->m_Reticle_on = false;
 		}
 		void				GunObj::DrawShadow(void) noexcept {
 			if (!IsActive()) { return; }
@@ -1014,10 +1015,7 @@ namespace FPS_n2 {
 						this->m_LensSizeLen = static_cast<float>(std::hypot(this->m_Lens.XPos() - this->m_LensSize.XPos(), this->m_Lens.YPos() - this->m_LensSize.YPos()));
 					}
 					if (this->m_Reticle.Calc(LensPos + (LensPos - GetPartsFrameMatParent(GunFrame::Eyepos).pos()).normalized() * (1.0f * Scale3DRate))) {
-						this->m_Reticle_on = (this->m_LensSizeLen > std::hypot(this->m_Lens.XPos() - this->m_Reticle.XPos(), this->m_Lens.YPos() - this->m_Reticle.YPos()));
-					}
-					else {
-						this->m_Reticle_on = false;
+						this->m_Reticle_on |= (this->m_LensSizeLen > std::hypot(this->m_Lens.XPos() - this->m_Reticle.XPos(), this->m_Lens.YPos() - this->m_Reticle.YPos()));
 					}
 				}
 				//レンズ表示機能への反映

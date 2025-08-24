@@ -534,8 +534,8 @@ namespace FPS_n2 {
 			}
 			else {
 				this->m_RepopTimer += DXLib_refParts->GetDeltaTime();
-				if (this->m_RepopTimer > 5.0f) {
-					this->m_RepopTimer -= 5.0f;
+				if (this->m_RepopTimer > 1.0f) {
+					this->m_RepopTimer -= 1.0f;
 					if (PlayerMngr->GetHelicopter()->GetIsActiveRappelling()) {
 						this->m_IsLeftHeli = (PlayerMngr->GetHelicopter()->PopSpawnPoint() % 2) == 0;
 						Repop();
