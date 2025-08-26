@@ -405,6 +405,7 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
+				return 0;
 			}
 			const auto			GetNowGunAnimePer(void) const noexcept {
 				if (GetGunAnime() >= Charas::GunAnimeID::Max) {
