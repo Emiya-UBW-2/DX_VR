@@ -38,6 +38,11 @@ namespace FPS_n2 {
 			int y{};
 			int z{};
 		public:
+			Vector3Int()noexcept {
+				this->x = 0;
+				this->y = 0;
+				this->z = 0;
+			}
 			Vector3Int(int X, int Y, int Z)noexcept {
 				this->x = X;
 				this->y = Y;
@@ -81,6 +86,7 @@ namespace FPS_n2 {
 				const int			GetAxisIndex(int axis) const noexcept { return (axis % this->All + this->All) % this->All; }
 			public:
 				const CellBuffer&	GetCellBuf(int Xvoxel, int Yvoxel, int Zvoxel) const noexcept { return this->m_CellBuffer[GetCellNum(Xvoxel, Yvoxel, Zvoxel)]; }
+				const CellBuffer&	GetCellBuf(const Vector3Int& VoxelPoint) const noexcept { return GetCellBuf(VoxelPoint.x, VoxelPoint.y, VoxelPoint.z); }
 				CellBuffer&			SetCellBuf(int Xvoxel, int Yvoxel, int Zvoxel) noexcept { return this->m_CellBuffer[GetCellNum(Xvoxel, Yvoxel, Zvoxel)]; }
 				const int&			GetScale(void) const noexcept { return this->m_ScaleInt; }
 			public:
@@ -321,12 +327,12 @@ namespace FPS_n2 {
 			class DrawThreadData {
 			public:
 				vert32				Vert32;
-				Vector3DX			CamPos;
+				Vector3DX			DrawCenterPos;
 				Vector3DX			CamVec;
 			public:
 				const vert32& GetVert32(void) const noexcept { return this->Vert32; }
-				const Vector3DX& GetCamPos(void) const noexcept { return this->CamPos; }
-				void SetCamPos(const Vector3DX& value) noexcept { this->CamPos = value; }
+				const Vector3DX& GetDrawCenterPos(void) const noexcept { return this->DrawCenterPos; }
+				void SetDrawCenterPos(const Vector3DX& value) noexcept { this->DrawCenterPos = value; }
 				const Vector3DX& GetCamVec(void) const noexcept { return this->CamVec; }
 				void SetCamVec(const Vector3DX& value) noexcept { this->CamVec = value; }
 			public:
@@ -358,9 +364,9 @@ namespace FPS_n2 {
 			std::array<DrawThreadData, TotalCellLayer + TotalCellLayer>	m_DrawThreadDatas;
 			std::array<ThreadJobs, TotalCellLayer + TotalCellLayer>	m_Jobs;
 
-			Vector3DX						m_CamPos;
+			Vector3DX						m_DrawCenterPos;
 			Vector3DX						m_CamVec;
-			Vector3DX						m_ShadowCamPos;
+			Vector3DX						m_ShadowDrawCenterPos;
 			Vector3DX						m_ShadowCamVec;
 		private:
 			//ブレゼンハムアルゴリズムで線分上にボクセルを走査
@@ -541,17 +547,17 @@ namespace FPS_n2 {
 				return true;
 			}
 			//各方向に向いているポリゴンの追加
-			void			AddPlaneXPlus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneXMinus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneYPlus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneYMinus(vert32* pTarget, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zmin, int zmax, bool IsCalcUV) noexcept;
-			void			AddPlaneZPlus(vert32* pTarget, size_t id, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept;
-			void			AddPlaneZMinus(vert32* pTarget, size_t id, const Vector3Int& center, int xmin, int xmax, int Yvoxel, int Zvoxel, bool IsCalcUV) noexcept;
+			void			AddPlaneXPlus(vert32* pTarget, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int zmin, int zmax, bool useTexture) noexcept;
+			void			AddPlaneXMinus(vert32* pTarget, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int zmin, int zmax, bool useTexture) noexcept;
+			void			AddPlaneYPlus(vert32* pTarget, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int zmin, int zmax, bool useTexture) noexcept;
+			void			AddPlaneYMinus(vert32* pTarget, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int zmin, int zmax, bool useTexture) noexcept;
+			void			AddPlaneZPlus(vert32* pTarget, size_t id, const Vector3Int& VCenter, int xmin, int xmax, const Vector3Int& Vofs, bool useTexture) noexcept;
+			void			AddPlaneZMinus(vert32* pTarget, size_t id, const Vector3Int& VCenter, int xmin, int xmax, const Vector3Int& Vofs, bool useTexture) noexcept;
 			//XZ方向に走査してポリゴンをなるべく少ないポリゴン数で表示する
-			void			AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, size_t id, const Vector3Int& center, int Xvoxel, int Yvoxel, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) noexcept;
-			void			AddPlanesZ(vert32* pTarget, float camVecZ, size_t id, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int Yvoxel, int Zvoxel, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) noexcept;
+			void			AddPlanesXY(vert32* pTarget, bool isDrawXPlus, bool isDrawYPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, int Minmin, int Minmax, bool CheckInsideXY, bool CheckFillXY, bool useTexture) noexcept;
+			void			AddPlanesZ(vert32* pTarget, bool isDrawZPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, int Minmin, int Minmax, bool CheckInsideYZ, bool CheckFillYZ, bool useTexture) noexcept;
 			//視界から見て映るものだけをテクスチャ関係込みで更新
-			void			AddCubes(size_t id, size_t threadID, bool CheckCamPosition, bool IsCalcUV) noexcept;
+			void			AddCubes(size_t id, size_t threadID, bool UseFrustumCulling, bool useTexture) noexcept;
 			//AddCubesした情報を反映する
 			void			FlipCubes(size_t threadID, const Vector3DX& camPos, const Vector3DX& camVec) noexcept;
 		public:
