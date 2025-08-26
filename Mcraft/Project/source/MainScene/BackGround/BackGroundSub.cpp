@@ -363,7 +363,7 @@ namespace FPS_n2 {
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
 			for (Vofset.z = MaxminT; Vofset.z <= MaxmaxT; ++Vofset.z) {
-				auto& CellBuff = cellx.GetCellBuf(VCenter.x + Vofset.x, VCenter.y + Vofset.y, VCenter.z + Vofset.z);
+				auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
 				bool CheckInside = false;
 				if (!cellx.isReferenceCell()) {
 					bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
@@ -385,27 +385,30 @@ namespace FPS_n2 {
 						PrevPut = false;
 						Vector3Int V1 = Vofset; V1.z = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.z = Max; V2 += VCenter;
-						bool CheckFillX = (DrawMinXMinus <= Vofset.x) && (Vofset.x <= DrawMinXPlus);
-						bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
-						bool CheckFillZ = Min <= DrawMinZPlus && DrawMinZMinus <= Max;
-						bool CheckFillXYZ = !cellx.isReferenceCell() && CheckFillX && CheckFillY && CheckFillZ;
+						bool CheckFill = false;//埋まっている判定であろうと絶対埋めないといけないフラグ
+						if (!cellx.isReferenceCell()) {
+							bool CheckFillX = (DrawMinXMinus <= Vofset.x) && (Vofset.x <= DrawMinXPlus);
+							bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
+							bool CheckFillZ = Min <= DrawMinZPlus && DrawMinZMinus <= Max;
+							CheckFill = CheckFillX && CheckFillY && CheckFillZ;
+						}
 						if (isDrawXPlus) {
-							if (CheckFillXYZ || CanDrawXYZ[0]) {
+							if (CheckFill || CanDrawXYZ[0]) {
 								AddPlaneXPlus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						else {
-							if (CheckFillXYZ || CanDrawXYZ[1]) {
+							if (CheckFill || CanDrawXYZ[1]) {
 								AddPlaneXMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						if (isDrawYPlus) {
-							if (CheckFillXYZ || CanDrawXYZ[2]) {
+							if (CheckFill || CanDrawXYZ[2]) {
 								AddPlaneYPlus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						else {
-							if (CheckFillXYZ || CanDrawXYZ[3]) {
+							if (CheckFill || CanDrawXYZ[3]) {
 								AddPlaneYMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
@@ -454,7 +457,7 @@ namespace FPS_n2 {
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
 			for (Vofset.x = MaxminT; Vofset.x <= MaxmaxT; ++Vofset.x) {
-				auto& CellBuff = cellx.GetCellBuf(VCenter.x + Vofset.x, VCenter.y + Vofset.y, VCenter.z + Vofset.z);
+				auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
 				bool CheckInside = false;
 				if (!cellx.isReferenceCell()) {
 					bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
@@ -474,19 +477,22 @@ namespace FPS_n2 {
 					//置けない部分なので今まで置けていた分をまとめてポリゴン化
 					if (PrevPut) {
 						PrevPut = false;
-						bool CheckFillX = Min <= DrawMinXPlus && DrawMinXMinus <= Max;
-						bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
-						bool CheckFillZ = (DrawMinZMinus <= Vofset.z) && (Vofset.z <= DrawMinZPlus);
-						bool CheckFillXYZ = !cellx.isReferenceCell() && CheckFillX && CheckFillY && CheckFillZ;
+						bool CheckFill = false;//埋まっている判定であろうと絶対埋めないといけないフラグ
+						if (!cellx.isReferenceCell()) {
+							bool CheckFillX = Min <= DrawMinXPlus && DrawMinXMinus <= Max;
+							bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
+							bool CheckFillZ = (DrawMinZMinus <= Vofset.z) && (Vofset.z <= DrawMinZPlus);
+							CheckFill = CheckFillX && CheckFillY && CheckFillZ;
+						}
 						Vector3Int V1 = Vofset; V1.x = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.x = Max; V2 += VCenter;
 						if (isDrawZPlus) {
-							if (CheckFillXYZ || CanDrawXYZ[4]) {
+							if (CheckFill || CanDrawXYZ[4]) {
 								AddPlaneZPlus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						else {
-							if (CheckFillXYZ || CanDrawXYZ[5]) {
+							if (CheckFill || CanDrawXYZ[5]) {
 								AddPlaneZMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
