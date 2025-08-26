@@ -381,7 +381,6 @@ namespace FPS_n2 {
 					);
 				if (!IsPutPoint) {
 					if (PrevPut) {
-						PrevPut = IsPutPoint;
 						//置けない部分なので今まで置けていた分をまとめてポリゴン化
 						Vector3Int V1 = Vofset; V1.z = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.z = Max; V2 += VCenter;
@@ -421,7 +420,6 @@ namespace FPS_n2 {
 				else {
 					//ブロックが置ける部分
 					if (!PrevPut) {
-						PrevPut = IsPutPoint;
 						Min = Vofset.z;
 						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[0] = false;
@@ -443,6 +441,7 @@ namespace FPS_n2 {
 						CanDrawXYZ[3] = true;
 					}
 				}
+				PrevPut = IsPutPoint;
 			}
 		}
 		void		VoxelControl::AddPlanesZ(vert32* pTarget,
@@ -475,7 +474,6 @@ namespace FPS_n2 {
 					);
 				if (!IsPutPoint) {
 					if (PrevPut) {
-						PrevPut = IsPutPoint;
 						//置けない部分なので今まで置けていた分をまとめてポリゴン化
 						bool CheckFill = false;//埋まっている判定であろうと絶対埋めないといけないフラグ
 						if (!cellx.isReferenceCell()) {
@@ -505,7 +503,6 @@ namespace FPS_n2 {
 				else {
 					//ブロックが置ける部分
 					if (!PrevPut) {
-						PrevPut = IsPutPoint;
 						Min = Vofset.x;
 						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[4] = false;
@@ -519,6 +516,7 @@ namespace FPS_n2 {
 						CanDrawXYZ[5] = true;
 					}
 				}
+				PrevPut = IsPutPoint;
 			}
 		}
 
