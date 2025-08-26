@@ -379,8 +379,33 @@ namespace FPS_n2 {
 					|| (PrevPut && CheckBlockID)//置けるところだがテクスチャが変わった
 					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入った
 					);
-				if (!IsPutPoint) {
+				if (IsPutPoint) {
+					if (!PrevPut) {
+						//ブロックが置ける部分なので観測開始
+						Min = Vofset.z;
+						PutBlockID = CellBuff.GetID();
+						CanDrawXYZ[0] = false;
+						CanDrawXYZ[1] = false;
+						CanDrawXYZ[2] = false;
+						CanDrawXYZ[3] = false;
+					}
+					//置ける地点中は全ブロックが隠れていないか確認
+					if (!CanDrawXYZ[0] && !CellBuff.IsOcclusion(0)) {
+						CanDrawXYZ[0] = true;
+					}
+					if (!CanDrawXYZ[1] && !CellBuff.IsOcclusion(1)) {
+						CanDrawXYZ[1] = true;
+					}
+					if (!CanDrawXYZ[2] && !CellBuff.IsOcclusion(2)) {
+						CanDrawXYZ[2] = true;
+					}
+					if (!CanDrawXYZ[3] && !CellBuff.IsOcclusion(3)) {
+						CanDrawXYZ[3] = true;
+					}
+				}
+				else {
 					if (PrevPut) {
+						Max = Vofset.z - 1;
 						//置けない部分なので今まで置けていた分をまとめてポリゴン化
 						Vector3Int V1 = Vofset; V1.z = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.z = Max; V2 += VCenter;
@@ -417,30 +442,6 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				else {
-					//ブロックが置ける部分
-					if (!PrevPut) {
-						Min = Vofset.z;
-						PutBlockID = CellBuff.GetID();
-						CanDrawXYZ[0] = false;
-						CanDrawXYZ[1] = false;
-						CanDrawXYZ[2] = false;
-						CanDrawXYZ[3] = false;
-					}
-					Max = Vofset.z;
-					if (!CanDrawXYZ[0] && !CellBuff.IsOcclusion(0)) {
-						CanDrawXYZ[0] = true;
-					}
-					if (!CanDrawXYZ[1] && !CellBuff.IsOcclusion(1)) {
-						CanDrawXYZ[1] = true;
-					}
-					if (!CanDrawXYZ[2] && !CellBuff.IsOcclusion(2)) {
-						CanDrawXYZ[2] = true;
-					}
-					if (!CanDrawXYZ[3] && !CellBuff.IsOcclusion(3)) {
-						CanDrawXYZ[3] = true;
-					}
-				}
 				PrevPut = IsPutPoint;
 			}
 		}
@@ -472,9 +473,26 @@ namespace FPS_n2 {
 					|| (PrevPut && CheckBlockID)//置けるところだがテクスチャが変わったので置けない
 					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入ったので置けない
 					);
-				if (!IsPutPoint) {
+				if (IsPutPoint) {
+					if (!PrevPut) {
+						//ブロックが置ける部分なので観測開始
+						Min = Vofset.x;
+						PutBlockID = CellBuff.GetID();
+						CanDrawXYZ[4] = false;
+						CanDrawXYZ[5] = false;
+					}
+					//置ける地点中は全ブロックが隠れていないか確認
+					if (!CanDrawXYZ[4] && !CellBuff.IsOcclusion(4)) {
+						CanDrawXYZ[4] = true;
+					}
+					if (!CanDrawXYZ[5] && !CellBuff.IsOcclusion(5)) {
+						CanDrawXYZ[5] = true;
+					}
+				}
+				else {
 					if (PrevPut) {
 						//置けない部分なので今まで置けていた分をまとめてポリゴン化
+						Max = Vofset.x - 1;
 						bool CheckFill = false;//埋まっている判定であろうと絶対埋めないといけないフラグ
 						if (!cellx.isReferenceCell()) {
 							bool CheckFillX = Min <= DrawMinXPlus && DrawMinXMinus <= Max;
@@ -498,22 +516,6 @@ namespace FPS_n2 {
 						if (CheckBlockID) {
 							--Vofset.x;
 						}
-					}
-				}
-				else {
-					//ブロックが置ける部分
-					if (!PrevPut) {
-						Min = Vofset.x;
-						PutBlockID = CellBuff.GetID();
-						CanDrawXYZ[4] = false;
-						CanDrawXYZ[5] = false;
-					}
-					Max = Vofset.x;
-					if (!CanDrawXYZ[4] && !CellBuff.IsOcclusion(4)) {
-						CanDrawXYZ[4] = true;
-					}
-					if (!CanDrawXYZ[5] && !CellBuff.IsOcclusion(5)) {
-						CanDrawXYZ[5] = true;
 					}
 				}
 				PrevPut = IsPutPoint;
