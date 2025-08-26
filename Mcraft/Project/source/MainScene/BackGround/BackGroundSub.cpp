@@ -358,8 +358,8 @@ namespace FPS_n2 {
 			CellsData& cellx = this->m_CellxN[id];
 			int Min = 0;
 			int Max = 0;
-			bool isHitmin = true;
-			int8_t selectBlock = s_EmptyBlick;
+			bool PrevPut = true;
+			int8_t PutBlockID = s_EmptyBlick;
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
 			for (Vofset.z = MaxminT; Vofset.z <= MaxmaxT; ++Vofset.z) {
@@ -367,16 +367,16 @@ namespace FPS_n2 {
 				bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
 				bool CheckInsideY = (DrawMinYMinus < Vofset.y) && (Vofset.y < DrawMinYPlus);
 				bool CheckInsideZ = (DrawMinZMinus < Vofset.z) && (Vofset.z < DrawMinZPlus);
-				bool CheckBlockID = useTexture && (selectBlock != CellBuff.GetID());
+				bool CheckBlockID = useTexture && (PutBlockID != CellBuff.GetID());
 				if (
 					(Vofset.z == MaxmaxT)
 					|| (!cellx.isReferenceCell() && CheckInsideX && CheckInsideY && CheckInsideZ)
-					|| (!isHitmin && CheckBlockID)
+					|| (!PrevPut && CheckBlockID)
 					|| !CellBuff.CanDraw()
 					) {
 					//置けない部分なので今まで置けていた分をまとめてポリゴン化
-					if (!isHitmin) {
-						isHitmin = true;
+					if (!PrevPut) {
+						PrevPut = true;
 						Vector3Int V1 = Vofset; V1.z = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.z = Max; V2 += VCenter;
 						bool CheckFillX = (DrawMinXMinus <= Vofset.x) && (Vofset.x <= DrawMinXPlus);
@@ -411,10 +411,10 @@ namespace FPS_n2 {
 				}
 				else {
 					//ブロックが置ける部分
-					if (isHitmin) {
-						isHitmin = false;
+					if (PrevPut) {
+						PrevPut = false;
 						Min = Vofset.z;
-						selectBlock = CellBuff.GetID();
+						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[0] = false;
 						CanDrawXYZ[1] = false;
 						CanDrawXYZ[2] = false;
@@ -443,8 +443,8 @@ namespace FPS_n2 {
 			CellsData& cellx = this->m_CellxN[id];
 			int Min = 0;
 			int Max = 0;
-			bool isHitmin = true;
-			int8_t selectBlock = s_EmptyBlick;
+			bool PrevPut = true;
+			int8_t PutBlockID = s_EmptyBlick;
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
 			for (Vofset.x = MaxminT; Vofset.x <= MaxmaxT; ++Vofset.x) {
@@ -452,16 +452,16 @@ namespace FPS_n2 {
 				bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
 				bool CheckInsideY = (DrawMinYMinus < Vofset.y) && (Vofset.y < DrawMinYPlus);
 				bool CheckInsideZ = (DrawMinZMinus < Vofset.z) && (Vofset.z < DrawMinZPlus);
-				bool CheckBlockID = useTexture && (selectBlock != CellBuff.GetID());
+				bool CheckBlockID = useTexture && (PutBlockID != CellBuff.GetID());
 				if (
 					(Vofset.x == MaxmaxT)
 					|| (!cellx.isReferenceCell() && CheckInsideX && CheckInsideY && CheckInsideZ)
-					|| (!isHitmin && CheckBlockID)
+					|| (!PrevPut && CheckBlockID)
 					|| !CellBuff.CanDraw()
 					) {
 					//置けない部分なので今まで置けていた分をまとめてポリゴン化
-					if (!isHitmin) {
-						isHitmin = true;
+					if (!PrevPut) {
+						PrevPut = true;
 						bool CheckFillX = Min <= DrawMinXPlus && DrawMinXMinus <= Max;
 						bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
 						bool CheckFillZ = (DrawMinZMinus <= Vofset.z) && (Vofset.z <= DrawMinZPlus);
@@ -486,10 +486,10 @@ namespace FPS_n2 {
 				}
 				else {
 					//ブロックが置ける部分
-					if (isHitmin) {
-						isHitmin = false;
+					if (PrevPut) {
+						PrevPut = false;
 						Min = Vofset.x;
-						selectBlock = CellBuff.GetID();
+						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[4] = false;
 						CanDrawXYZ[5] = false;
 					}
