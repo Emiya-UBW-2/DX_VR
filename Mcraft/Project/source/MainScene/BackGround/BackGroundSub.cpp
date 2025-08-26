@@ -364,16 +364,22 @@ namespace FPS_n2 {
 			Vector3Int Vofset = Vofs;
 			for (Vofset.z = MaxminT; Vofset.z <= MaxmaxT; ++Vofset.z) {
 				auto& CellBuff = cellx.GetCellBuf(VCenter.x + Vofset.x, VCenter.y + Vofset.y, VCenter.z + Vofset.z);
-				bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
-				bool CheckInsideY = (DrawMinYMinus < Vofset.y) && (Vofset.y < DrawMinYPlus);
-				bool CheckInsideZ = (DrawMinZMinus < Vofset.z) && (Vofset.z < DrawMinZPlus);
+				bool CheckInside = false;
+				if (!cellx.isReferenceCell()) {
+					bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
+					bool CheckInsideY = (DrawMinYMinus < Vofset.y) && (Vofset.y < DrawMinYPlus);
+					bool CheckInsideZ = (DrawMinZMinus < Vofset.z) && (Vofset.z < DrawMinZPlus);
+					CheckInside = CheckInsideX && CheckInsideY && CheckInsideZ;
+				}
 				bool CheckBlockID = useTexture && (PutBlockID != CellBuff.GetID());
-				if (
-					(Vofset.z == MaxmaxT)
-					|| (!cellx.isReferenceCell() && CheckInsideX && CheckInsideY && CheckInsideZ)
-					|| (!PrevPut && CheckBlockID)
-					|| !CellBuff.CanDraw()
-					) {
+
+				bool IsPutPoint = !(
+					(Vofset.z == MaxmaxT)//操作の端っこについた
+					|| CheckInside//描画してはならない地点に入った
+					|| (!PrevPut && CheckBlockID)//置けるところだがテクスチャが変わった
+					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入った
+					);
+				if (!IsPutPoint) {
 					//置けない部分なので今まで置けていた分をまとめてポリゴン化
 					if (!PrevPut) {
 						PrevPut = true;
@@ -449,16 +455,22 @@ namespace FPS_n2 {
 			Vector3Int Vofset = Vofs;
 			for (Vofset.x = MaxminT; Vofset.x <= MaxmaxT; ++Vofset.x) {
 				auto& CellBuff = cellx.GetCellBuf(VCenter.x + Vofset.x, VCenter.y + Vofset.y, VCenter.z + Vofset.z);
-				bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
-				bool CheckInsideY = (DrawMinYMinus < Vofset.y) && (Vofset.y < DrawMinYPlus);
-				bool CheckInsideZ = (DrawMinZMinus < Vofset.z) && (Vofset.z < DrawMinZPlus);
+				bool CheckInside = false;
+				if (!cellx.isReferenceCell()) {
+					bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
+					bool CheckInsideY = (DrawMinYMinus < Vofset.y) && (Vofset.y < DrawMinYPlus);
+					bool CheckInsideZ = (DrawMinZMinus < Vofset.z) && (Vofset.z < DrawMinZPlus);
+					CheckInside = CheckInsideX && CheckInsideY && CheckInsideZ;
+				}
 				bool CheckBlockID = useTexture && (PutBlockID != CellBuff.GetID());
-				if (
-					(Vofset.x == MaxmaxT)
-					|| (!cellx.isReferenceCell() && CheckInsideX && CheckInsideY && CheckInsideZ)
-					|| (!PrevPut && CheckBlockID)
-					|| !CellBuff.CanDraw()
-					) {
+
+				bool IsPutPoint = !(
+					(Vofset.x == MaxmaxT)//操作の端っこについたので置けない
+					|| CheckInside//描画してはならない地点に入ったので置けない
+					|| (!PrevPut && CheckBlockID)//置けるところだがテクスチャが変わったので置けない
+					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入ったので置けない
+					);
+				if (!IsPutPoint) {
 					//置けない部分なので今まで置けていた分をまとめてポリゴン化
 					if (!PrevPut) {
 						PrevPut = true;
