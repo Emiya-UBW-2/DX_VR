@@ -363,7 +363,7 @@ namespace FPS_n2 {
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
 			for (Vofset.z = MaxminT; Vofset.z <= MaxmaxT; ++Vofset.z) {
-				auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
+				const auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
 				bool CheckInside = false;
 				if (!cellx.isReferenceCell()) {
 					bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
@@ -380,9 +380,9 @@ namespace FPS_n2 {
 					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入った
 					);
 				if (!IsPutPoint) {
-					//置けない部分なので今まで置けていた分をまとめてポリゴン化
 					if (PrevPut) {
-						PrevPut = false;
+						PrevPut = IsPutPoint;
+						//置けない部分なので今まで置けていた分をまとめてポリゴン化
 						Vector3Int V1 = Vofset; V1.z = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.z = Max; V2 += VCenter;
 						bool CheckFill = false;//埋まっている判定であろうと絶対埋めないといけないフラグ
@@ -412,7 +412,7 @@ namespace FPS_n2 {
 								AddPlaneYMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
-						//この場合だけもう一回判定させるドン
+						//テクスチャ変化の場合だけもう一回判定させるドン
 						if (CheckBlockID) {
 							--Vofset.z;
 						}
@@ -421,7 +421,7 @@ namespace FPS_n2 {
 				else {
 					//ブロックが置ける部分
 					if (!PrevPut) {
-						PrevPut = true;
+						PrevPut = IsPutPoint;
 						Min = Vofset.z;
 						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[0] = false;
@@ -457,7 +457,7 @@ namespace FPS_n2 {
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
 			for (Vofset.x = MaxminT; Vofset.x <= MaxmaxT; ++Vofset.x) {
-				auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
+				const auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
 				bool CheckInside = false;
 				if (!cellx.isReferenceCell()) {
 					bool CheckInsideX = (DrawMinXMinus < Vofset.x) && (Vofset.x < DrawMinXPlus);
@@ -474,9 +474,9 @@ namespace FPS_n2 {
 					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入ったので置けない
 					);
 				if (!IsPutPoint) {
-					//置けない部分なので今まで置けていた分をまとめてポリゴン化
 					if (PrevPut) {
-						PrevPut = false;
+						PrevPut = IsPutPoint;
+						//置けない部分なので今まで置けていた分をまとめてポリゴン化
 						bool CheckFill = false;//埋まっている判定であろうと絶対埋めないといけないフラグ
 						if (!cellx.isReferenceCell()) {
 							bool CheckFillX = Min <= DrawMinXPlus && DrawMinXMinus <= Max;
@@ -496,7 +496,7 @@ namespace FPS_n2 {
 								AddPlaneZMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
-						//この場合だけもう一回判定させるドン
+						//テクスチャ変化の場合だけもう一回判定させるドン
 						if (CheckBlockID) {
 							--Vofset.x;
 						}
@@ -505,7 +505,7 @@ namespace FPS_n2 {
 				else {
 					//ブロックが置ける部分
 					if (!PrevPut) {
-						PrevPut = true;
+						PrevPut = IsPutPoint;
 						Min = Vofset.x;
 						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[4] = false;
