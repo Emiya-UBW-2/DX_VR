@@ -351,7 +351,10 @@ namespace FPS_n2 {
 			}
 		}
 
-		void		VoxelControl::AddPlanesXY(vert32* pTarget, bool isDrawXPlus, bool isDrawYPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept {
+		void		VoxelControl::AddPlanesXY(vert32* pTarget,
+			bool isDrawXPlus, bool isDrawYPlus,
+			size_t id,
+			const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
 			int Min = 0;
 			int Max = 0;
@@ -433,7 +436,10 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		VoxelControl::AddPlanesZ(vert32* pTarget, bool isDrawZPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept {
+		void		VoxelControl::AddPlanesZ(vert32* pTarget,
+			bool isDrawZPlus,
+			size_t id,
+			const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
 			int Min = 0;
 			int Max = 0;
