@@ -358,7 +358,7 @@ namespace FPS_n2 {
 			CellsData& cellx = this->m_CellxN[id];
 			int Min = 0;
 			int Max = 0;
-			bool PrevPut = true;
+			bool PrevPut = false;
 			int8_t PutBlockID = s_EmptyBlick;
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
@@ -376,13 +376,13 @@ namespace FPS_n2 {
 				bool IsPutPoint = !(
 					(Vofset.z == MaxmaxT)//操作の端っこについた
 					|| CheckInside//描画してはならない地点に入った
-					|| (!PrevPut && CheckBlockID)//置けるところだがテクスチャが変わった
+					|| (PrevPut && CheckBlockID)//置けるところだがテクスチャが変わった
 					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入った
 					);
 				if (!IsPutPoint) {
 					//置けない部分なので今まで置けていた分をまとめてポリゴン化
-					if (!PrevPut) {
-						PrevPut = true;
+					if (PrevPut) {
+						PrevPut = false;
 						Vector3Int V1 = Vofset; V1.z = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.z = Max; V2 += VCenter;
 						bool CheckFillX = (DrawMinXMinus <= Vofset.x) && (Vofset.x <= DrawMinXPlus);
@@ -417,8 +417,8 @@ namespace FPS_n2 {
 				}
 				else {
 					//ブロックが置ける部分
-					if (PrevPut) {
-						PrevPut = false;
+					if (!PrevPut) {
+						PrevPut = true;
 						Min = Vofset.z;
 						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[0] = false;
@@ -449,7 +449,7 @@ namespace FPS_n2 {
 			CellsData& cellx = this->m_CellxN[id];
 			int Min = 0;
 			int Max = 0;
-			bool PrevPut = true;
+			bool PrevPut = false;
 			int8_t PutBlockID = s_EmptyBlick;
 			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
 			Vector3Int Vofset = Vofs;
@@ -467,13 +467,13 @@ namespace FPS_n2 {
 				bool IsPutPoint = !(
 					(Vofset.x == MaxmaxT)//操作の端っこについたので置けない
 					|| CheckInside//描画してはならない地点に入ったので置けない
-					|| (!PrevPut && CheckBlockID)//置けるところだがテクスチャが変わったので置けない
+					|| (PrevPut && CheckBlockID)//置けるところだがテクスチャが変わったので置けない
 					|| !CellBuff.CanDraw()//描画してはいけないブロックの地点に入ったので置けない
 					);
 				if (!IsPutPoint) {
 					//置けない部分なので今まで置けていた分をまとめてポリゴン化
-					if (!PrevPut) {
-						PrevPut = true;
+					if (PrevPut) {
+						PrevPut = false;
 						bool CheckFillX = Min <= DrawMinXPlus && DrawMinXMinus <= Max;
 						bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
 						bool CheckFillZ = (DrawMinZMinus <= Vofset.z) && (Vofset.z <= DrawMinZPlus);
@@ -498,8 +498,8 @@ namespace FPS_n2 {
 				}
 				else {
 					//ブロックが置ける部分
-					if (PrevPut) {
-						PrevPut = false;
+					if (!PrevPut) {
+						PrevPut = true;
 						Min = Vofset.x;
 						PutBlockID = CellBuff.GetID();
 						CanDrawXYZ[4] = false;
