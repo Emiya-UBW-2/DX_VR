@@ -4,12 +4,12 @@ namespace FPS_n2 {
 	namespace BackGround {
 		//プラスマイナスの3ビット式
 		static constexpr int GetXYZPM(bool isPlusX, bool isPlusY, bool isPlusZ) noexcept {
-			return ((1 << 2) & isPlusX) | ((1 << 1) & isPlusY) | ((1 << 0) & isPlusZ);
+			return (isPlusX ? (1 << 2) : 0) | (isPlusY ? (1 << 1) : 0) | (isPlusZ ? (1 << 0) : 0);
 		}
 
 		void		VoxelControl::AddPlaneXPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			size_t Now = pTarget->RegistPlane();
+			int Now = static_cast<int>(pTarget->RegistPlane());
 
 			int zscale{};
 			int Xofs{};
@@ -26,7 +26,7 @@ namespace FPS_n2 {
 		}
 		void		VoxelControl::AddPlaneXMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			size_t Now = pTarget->RegistPlane();
+			int Now = static_cast<int>(pTarget->RegistPlane());
 
 			int zscale{};
 			int Xofs{};
@@ -43,7 +43,7 @@ namespace FPS_n2 {
 		}
 		void		VoxelControl::AddPlaneYPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			size_t Now = pTarget->RegistPlane();
+			int Now = static_cast<int>(pTarget->RegistPlane());
 
 			int zscale{};
 			int Xofs{};
@@ -60,7 +60,7 @@ namespace FPS_n2 {
 		}
 		void		VoxelControl::AddPlaneYMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			size_t Now = pTarget->RegistPlane();
+			int Now = static_cast<int>(pTarget->RegistPlane());
 
 			int zscale{};
 			int Xofs{};
@@ -77,7 +77,7 @@ namespace FPS_n2 {
 		}
 		void		VoxelControl::AddPlaneZPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			size_t Now = pTarget->RegistPlane();
+			int Now = static_cast<int>(pTarget->RegistPlane());
 
 			int xscale{};
 			int Xofs{};
@@ -94,7 +94,7 @@ namespace FPS_n2 {
 		}
 		void		VoxelControl::AddPlaneZMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			size_t Now = pTarget->RegistPlane();
+			int Now = static_cast<int>(pTarget->RegistPlane());
 
 			int xscale{};
 			int Xofs{};
@@ -756,12 +756,6 @@ namespace FPS_n2 {
 			SettingChange();
 		}
 		void		VoxelControl::Update(void) noexcept {
-			auto* CameraParts = Camera3D::Instance();
-			auto* PostPassParts = PostPassEffect::Instance();
-			this->m_DrawCenterPos = CameraParts->GetMainCamera().GetCamPos();
-			this->m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized();
-			this->m_ShadowDrawCenterPos = Vector3DX::vget(0.0f, -25.0f * Scale3DRate, 0.0f);
-			this->m_ShadowCamVec = PostPassParts->GetShadowDir();
 			if (this->m_isChangeBlock) {
 				this->m_isChangeBlock = false;
 				//ジョブを強制開始させる

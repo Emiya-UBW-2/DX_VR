@@ -528,6 +528,13 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundControl::Update(void) noexcept {
+			auto* CameraParts = Camera3D::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
+
+			this->m_VoxelControl->SetDrawPosition(
+				CameraParts->GetMainCamera().GetCamPos(),
+				(CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized());
+			this->m_VoxelControl->SetShadowDrawPosition(Vector3DX::vget(0.0f, -25.0f * Scale3DRate, 0.0f), PostPassParts->GetShadowDir());
 			this->m_VoxelControl->Update();
 		}
 		void		BackGroundControl::BG_Draw(void) const noexcept {

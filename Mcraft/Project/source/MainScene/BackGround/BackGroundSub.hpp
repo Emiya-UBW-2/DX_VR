@@ -675,6 +675,16 @@ namespace FPS_n2 {
 			constexpr float GetDrawFarMax() const noexcept {
 				return std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 			}
+
+			void			SetDrawPosition(const Vector3DX& CenterPos, const Vector3DX& CamVec) noexcept {
+				this->m_DrawCenterPos = CenterPos;
+				this->m_CamVec = CamVec;
+			}
+
+			void			SetShadowDrawPosition(const Vector3DX& CenterPos, const Vector3DX& CamVec) noexcept {
+				this->m_ShadowDrawCenterPos = CenterPos;
+				this->m_ShadowCamVec = CamVec;
+			}
 		public:
 			VoxelControl(void) noexcept {}
 			VoxelControl(const VoxelControl&) = delete;
