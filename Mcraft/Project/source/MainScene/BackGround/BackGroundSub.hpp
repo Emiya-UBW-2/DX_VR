@@ -7,7 +7,7 @@ namespace FPS_n2 {
 	namespace BackGround {
 		//設定パラメーター
 		static constexpr int TotalCellLayer = 4;//LOD段階
-		static constexpr int MulPer = 2;//LODに伴う竜度の粗さ指定
+		static constexpr int MulPer = 2;//LODに伴う粒度指定
 		static constexpr float CellScale = 0.25f * Scale3DRate;//1個のブロックの実際のサイズ設定
 
 		//ブロックの最大描画範囲
@@ -64,24 +64,24 @@ namespace FPS_n2 {
 			class CellsData {
 				//セル一つ一つに含まれる情報
 				class CellBuffer {
-					int8_t					Life{};//耐久
-					int8_t					ID{};//ID
-					int8_t					FillInfo{};//周りの遮蔽データのbitフラグ
+					int8_t					m_Life{};//耐久
+					int8_t					m_ID{};//ID
+					int8_t					m_FillInfo{};//周りの遮蔽データのbitフラグ
 				public:
 					//壊れるまでの耐久を設定/取得
-					void SetLife(int8_t id) noexcept { Life = id; }
-					const int8_t& GetLife(void) const noexcept { return this->Life; }
+					void SetLife(int8_t id) noexcept { this->m_Life = id; }
+					const int8_t& GetLife(void) const noexcept { return this->m_Life; }
 					//ブロックIDを1～で指定/取得
-					void SetID(int8_t id) noexcept { ID = id; }
-					const int8_t& GetID(void) const noexcept { return this->ID; }
+					void SetID(int8_t id) noexcept { this->m_ID = id; }
+					const int8_t& GetID(void) const noexcept { return this->m_ID; }
 					const int8_t GetCellTexID(void) const noexcept { return ((GetID() - 1) * 3); }
 					//ブロック間の遮蔽を設定/取得
-					void ResetOcclusion(void) noexcept { FillInfo = 0; }
-					void SetOcclusion(int id) noexcept { FillInfo |= (1 << id); }
+					void ResetOcclusion(void) noexcept { this->m_FillInfo = 0; }
+					void SetOcclusion(int id) noexcept { this->m_FillInfo |= (1 << id); }
 				public:
 					const bool IsEmpty(void) const noexcept { return GetID() == s_EmptyBlick; }
-					const bool IsHidden(void) const noexcept { return this->FillInfo == 0b111111; }
-					const bool IsOcclusion(int id) const noexcept { return (this->FillInfo & (1 << id)) != 0; }
+					const bool IsHidden(void) const noexcept { return this->m_FillInfo == 0b111111; }
+					const bool IsOcclusion(int id) const noexcept { return (this->m_FillInfo & (1 << id)) != 0; }
 					const bool CanDraw(void) const noexcept { return !IsEmpty() && !IsHidden(); }
 				};
 			private:
@@ -146,16 +146,27 @@ namespace FPS_n2 {
 				const bool			isInside(int Yvoxel) const noexcept { return ((0 <= Yvoxel) && (Yvoxel < this->All)); }
 				//ボクセル座標から描画座標の最小範囲に変換
 				const Vector3DX		GetWorldPos(int Xvoxel, int Yvoxel, int Zvoxel) const noexcept {
-					return Vector3DX::vget(static_cast<float>(Xvoxel - this->Half), static_cast<float>(Yvoxel - this->Half), static_cast<float>(Zvoxel - this->Half)) * this->Scale;
+					return Vector3DX::vget(
+						static_cast<float>(Xvoxel - this->Half),
+						static_cast<float>(Yvoxel - this->Half),
+						static_cast<float>(Zvoxel - this->Half)
+					) * this->Scale;
 				}
-				const Vector3DX		GetWorldPos(const Vector3Int& VoxelPoint) const noexcept { return GetWorldPos(VoxelPoint.x, VoxelPoint.y, VoxelPoint.z); }
+				const Vector3DX		GetWorldPos(const Vector3Int& VoxelPoint) const noexcept {
+					return GetWorldPos(VoxelPoint.x, VoxelPoint.y, VoxelPoint.z);
+				}
 				//ボクセル座標から描画座標のXYZ各範囲に変換
-				const Vector3DX		GetWorldPosOffset(int Xvoxel, int Yvoxel, int Zvoxel, int ID) const noexcept { return GetWorldPos(Xvoxel + ((ID >> 2) & 1), Yvoxel + ((ID >> 1) & 1), Zvoxel + (ID & 1)); }
-				const Vector3DX		GetWorldPosOffset(const Vector3Int& VoxelPoint, int ID) const noexcept { return GetWorldPosOffset(VoxelPoint.x, VoxelPoint.y, VoxelPoint.z, ID); }
+				const Vector3DX		GetWorldPosOffset(const Vector3Int& VoxelPoint, int Xofs, int Yofs, int Zofs) const noexcept {
+					return GetWorldPos(VoxelPoint.x + Xofs, VoxelPoint.y + Yofs, VoxelPoint.z + Zofs);
+				}
 				//指定の描画座標が入っている範囲のボクセル座標に変換
 				const Vector3Int	GetVoxelPoint(const Vector3DX& pos) const noexcept {
-					Vector3DX Start = pos / this->Scale;
-					return Vector3Int(static_cast<int>(Start.x) + this->Half, static_cast<int>(Start.y) + this->Half, static_cast<int>(Start.z) + this->Half);
+					Vector3DX Point = pos / this->Scale;
+					return Vector3Int(
+						static_cast<int>(Point.x) + this->Half,
+						static_cast<int>(Point.y) + this->Half,
+						static_cast<int>(Point.z) + this->Half
+					);
 				}
 				void				CalcOcclusion(int Xvoxel, int Yvoxel, int Zvoxel) noexcept {
 					if (!isInside(Yvoxel)) { return; }
@@ -273,20 +284,24 @@ namespace FPS_n2 {
 				}
 			};
 			//
-			class vert32 {
+			class VERTEX3DData {
 				int												m_Now{ 0 };
-
 				size_t											m_32Size{ 0 };
 				std::array<std::vector<VERTEX3D>, 2>			m_vert32;
 				std::array<std::vector<uint32_t>, 2>			m_index32;
 				std::array<size_t, 2>							m_32Num{ 0 };
-			public:
+			private:
 				const size_t& GetInNum(void) const noexcept { return this->m_32Num[this->m_Now]; }
-				std::vector<VERTEX3D>& SetInVert(void) noexcept { return this->m_vert32[this->m_Now]; }
-			public:
 				const size_t& GetOutNum(void) const noexcept { return this->m_32Num[static_cast<size_t>(1 - this->m_Now)]; }
 				const std::vector<VERTEX3D>& GetOutVert(void) const noexcept { return this->m_vert32[static_cast<size_t>(1 - this->m_Now)]; }
 				const std::vector<uint32_t>& GetOutindex(void) const noexcept { return this->m_index32[static_cast<size_t>(1 - this->m_Now)]; }
+			public:
+				//元データをリセットせず表示状だけ破棄する
+				void		Reset(void) noexcept {
+					for (int loop = 0; loop < 2; ++loop) {
+						this->m_32Num[loop] = 0;
+					}
+				}
 			public:
 				void		Init(size_t size) noexcept {
 					for (int loop = 0; loop < 2; ++loop) {
@@ -298,17 +313,20 @@ namespace FPS_n2 {
 					this->m_32Size = size;
 				}
 				void		Dispose(void) noexcept {
+					Reset();
+					//データも破棄する
 					for (int loop = 0; loop < 2; ++loop) {
 						this->m_vert32[loop].clear();
 						this->m_index32[loop].clear();
-						this->m_32Num[loop] = 0;
 					}
 					this->m_32Size = 0;
 				}
-				void		ResetNum(void) noexcept {
+				//登録数をリセット
+				void		StartRegist(void) noexcept {
 					this->m_32Num[this->m_Now] = 0;
 				}
-				void		AllocatePlane(void) noexcept {
+				//1枚確保
+				size_t		RegistPlane(void) noexcept {
 					++this->m_32Num[this->m_Now];
 					if (GetInNum() > this->m_32Size) {
 						this->m_32Size = GetInNum();
@@ -317,22 +335,31 @@ namespace FPS_n2 {
 							this->m_index32[loop].resize(this->m_32Size * 6);
 						}
 					}
-					uint32_t ZERO = static_cast<uint32_t>(GetInNum() * 4 - 4);
-					this->m_index32[this->m_Now][GetInNum() * 6 - 6] = ZERO;
-					this->m_index32[this->m_Now][GetInNum() * 6 - 5] = ZERO + 1;
-					this->m_index32[this->m_Now][GetInNum() * 6 - 4] = ZERO + 2;
-					this->m_index32[this->m_Now][GetInNum() * 6 - 3] = ZERO + 3;
-					this->m_index32[this->m_Now][GetInNum() * 6 - 2] = ZERO + 2;
-					this->m_index32[this->m_Now][GetInNum() * 6 - 1] = ZERO + 1;
+					size_t Now = GetInNum() - 1;
+					uint32_t ZERO = static_cast<uint32_t>(Now * 4);
+					this->m_index32[this->m_Now][Now * 6 + 0] = ZERO;
+					this->m_index32[this->m_Now][Now * 6 + 1] = ZERO + 1;
+					this->m_index32[this->m_Now][Now * 6 + 2] = ZERO + 2;
+					this->m_index32[this->m_Now][Now * 6 + 3] = ZERO + 3;
+					this->m_index32[this->m_Now][Now * 6 + 4] = ZERO + 2;
+					this->m_index32[this->m_Now][Now * 6 + 5] = ZERO + 1;
+					return Now;
 				}
-				void		FlipVerts(void) noexcept {
+				//確保済の1枚について1角の情報を書き込む
+				void		SetParamToPlane(int index, const Vector3DX& pos, const Vector3DX& norm, int Uoffset, int Voffset) noexcept {
+					VERTEX3D& Vert = this->m_vert32[this->m_Now][index];
+					Vert.pos = pos.get();
+					Vert.norm = norm.get();
+					Vert.dif = GetColorU8(128, 128, 128, 255);
+					Vert.spc = GetColorU8(64, 64, 64, 255);
+					Vert.u = TexTileU * static_cast<float>(Uoffset);
+					Vert.v = TexTileV * static_cast<float>(Voffset);
+				}
+				//登録を完了し出力する
+				void		EndRegist(void) noexcept {
 					this->m_Now = 1 - this->m_Now;
 				}
-				void		Disable(void) noexcept {
-					for (int loop = 0; loop < 2; ++loop) {
-						this->m_32Num[loop] = 0;
-					}
-				}
+				//描画する
 				void		DrawByShader(void) const noexcept {
 					if (GetOutNum() == 0) { return; }
 					DrawPolygon32bitIndexed3DToShader2(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3));
@@ -347,30 +374,30 @@ namespace FPS_n2 {
 				Vector3DX			m_DrawCenterPos;
 				Vector3DX			m_CamVec;
 			public:
-				vert32				m_Vert32;
+				VERTEX3DData		m_Vert32;
 				ThreadJobs			m_Jobs;
 			public:
 				const Vector3DX&	GetDrawCenterPos(void) const noexcept { return this->m_DrawCenterPos; }
 				const Vector3DX&	GetCamVec(void) const noexcept { return this->m_CamVec; }
 #if defined(DEBUG) && FALSE
 			public:
-				const vert32& GetVert32(void) const noexcept { return this->m_Vert32; }
+				const VERTEX3DData& GetVert32(void) const noexcept { return this->m_Vert32; }
 #endif
 			public:
 				void		Init(size_t size) noexcept {
 					this->m_Vert32.Init(size);
 				}
 				void		StartRegist() noexcept {
-					this->m_Vert32.ResetNum();
+					this->m_Vert32.StartRegist();
 				}
 				void		EndRegist(const Vector3DX& camPos, const Vector3DX& camVec) noexcept {
-					this->m_Vert32.FlipVerts();
+					this->m_Vert32.EndRegist();
 					this->m_DrawCenterPos = camPos;
 					this->m_CamVec = camVec;
 				}
 				void		Update(bool value) noexcept {
 					if (!value) {
-						this->m_Vert32.Disable();//生成データ自体を破棄
+						this->m_Vert32.Reset();//生成データ自体を破棄
 					}
 					this->m_Jobs.Update(value);
 				}
@@ -575,16 +602,33 @@ namespace FPS_n2 {
 
 				return true;
 			}
+			//線分をDotaDotbの結果から縮める
+			inline static bool		CullingLine(int* MaxminT, int* MaxmaxT, float dTa, float dTb) noexcept {
+				bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
+				bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
+				if (Onbehind && !OnFront) {
+					return false;
+				}
+				if (!OnFront && !Onbehind) {
+					if (dTa < 0.0f) {
+						*MaxminT = std::max(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) - 1, *MaxminT);
+					}
+					else {
+						*MaxmaxT = std::min(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) + 1, *MaxmaxT);
+					}
+				}
+				return true;
+			};
 			//各方向に向いているポリゴンの追加
-			void			AddPlaneXPlus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
-			void			AddPlaneXMinus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
-			void			AddPlaneYPlus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
-			void			AddPlaneYMinus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
-			void			AddPlaneZPlus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
-			void			AddPlaneZMinus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
+			void			AddPlaneXPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
+			void			AddPlaneXMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
+			void			AddPlaneYPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
+			void			AddPlaneYMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
+			void			AddPlaneZPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
+			void			AddPlaneZMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept;
 			//XZ方向に走査してポリゴンをなるべく少ないポリゴン数で表示する
-			void			AddPlanesXY(vert32* pTarget, bool isDrawXPlus, bool isDrawYPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept;
-			void			AddPlanesZ(vert32* pTarget, bool isDrawZPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept;
+			void			AddPlanesXY(VERTEX3DData* pTarget, bool isDrawXPlus, bool isDrawYPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept;
+			void			AddPlanesZ(VERTEX3DData* pTarget, bool isDrawZPlus, size_t id, const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept;
 			//視界から見て映るものだけをテクスチャ関係込みで更新
 			void			AddCubes(size_t id, size_t threadID, bool UseFrustumCulling, bool useTexture) noexcept;
 		public:

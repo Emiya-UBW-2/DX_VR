@@ -2,9 +2,14 @@
 
 namespace FPS_n2 {
 	namespace BackGround {
-		void		VoxelControl::AddPlaneXPlus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
+		//プラスマイナスの3ビット式
+		static constexpr int GetXYZPM(bool isPlusX, bool isPlusY, bool isPlusZ) noexcept {
+			return ((1 << 2) & isPlusX) | ((1 << 1) & isPlusY) | ((1 << 0) & isPlusZ);
+		}
+
+		void		VoxelControl::AddPlaneXPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			pTarget->AllocatePlane();
+			size_t Now = pTarget->RegistPlane();
 
 			int zscale{};
 			int Xofs{};
@@ -14,55 +19,14 @@ namespace FPS_n2 {
 				Xofs = Voxel1.z % 2 == 0;
 				Yofs = cellx.GetCellBuf(Voxel1).GetCellTexID() + 1;
 			}
-			size_t ZERO = pTarget->GetInNum() * 4 - 4;
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b101).get();
-				Vert.norm = Vector3DX::right().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b100).get();
-				Vert.norm = Vector3DX::right().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b111).get();
-				Vert.norm = Vector3DX::right().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b110).get();
-				Vert.norm = Vector3DX::right().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
+			pTarget->SetParamToPlane(Now * 4 + 0, cellx.GetWorldPosOffset(Voxel2, 1, 0, 1), Vector3DX::right(), Xofs + zscale, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 1, cellx.GetWorldPosOffset(Voxel1, 1, 0, 0), Vector3DX::right(), Xofs + 0, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 2, cellx.GetWorldPosOffset(Voxel2, 1, 1, 1), Vector3DX::right(), Xofs + zscale, Yofs + 1);
+			pTarget->SetParamToPlane(Now * 4 + 3, cellx.GetWorldPosOffset(Voxel1, 1, 1, 0), Vector3DX::right(), Xofs + 0, Yofs + 1);
 		}
-		void		VoxelControl::AddPlaneXMinus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
+		void		VoxelControl::AddPlaneXMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			pTarget->AllocatePlane();
+			size_t Now = pTarget->RegistPlane();
 
 			int zscale{};
 			int Xofs{};
@@ -72,55 +36,14 @@ namespace FPS_n2 {
 				Xofs = Voxel1.z % 2 == 0;
 				Yofs = cellx.GetCellBuf(Voxel1).GetCellTexID() + 1;
 			}
-			size_t ZERO = pTarget->GetInNum() * 4 - 4;
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b011).get();
-				Vert.norm = Vector3DX::left().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b010).get();
-				Vert.norm = Vector3DX::left().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b001).get();
-				Vert.norm = Vector3DX::left().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b000).get();
-				Vert.norm = Vector3DX::left().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
+			pTarget->SetParamToPlane(Now * 4 + 0, cellx.GetWorldPosOffset(Voxel2, 0, 1, 1), Vector3DX::left(), Xofs + zscale, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 1, cellx.GetWorldPosOffset(Voxel1, 0, 1, 0), Vector3DX::left(), Xofs + 0, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 2, cellx.GetWorldPosOffset(Voxel2, 0, 0, 1), Vector3DX::left(), Xofs + zscale, Yofs + 1);
+			pTarget->SetParamToPlane(Now * 4 + 3, cellx.GetWorldPosOffset(Voxel1, 0, 0, 0), Vector3DX::left(), Xofs + 0, Yofs + 1);
 		}
-		void		VoxelControl::AddPlaneYPlus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
+		void		VoxelControl::AddPlaneYPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			pTarget->AllocatePlane();
+			size_t Now = pTarget->RegistPlane();
 
 			int zscale{};
 			int Xofs{};
@@ -130,55 +53,14 @@ namespace FPS_n2 {
 				Xofs = Voxel1.z % 2 == 0;
 				Yofs = cellx.GetCellBuf(Voxel1).GetCellTexID() + 0;
 			}
-			size_t ZERO = pTarget->GetInNum() * 4 - 4;
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b111).get();
-				Vert.norm = Vector3DX::up().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b110).get();
-				Vert.norm = Vector3DX::up().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b011).get();
-				Vert.norm = Vector3DX::up().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b010).get();
-				Vert.norm = Vector3DX::up().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
+			pTarget->SetParamToPlane(Now * 4 + 0, cellx.GetWorldPosOffset(Voxel2, 1, 1, 1), Vector3DX::up(), Xofs + zscale, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 1, cellx.GetWorldPosOffset(Voxel1, 1, 1, 0), Vector3DX::up(), Xofs + 0, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 2, cellx.GetWorldPosOffset(Voxel2, 0, 1, 1), Vector3DX::up(), Xofs + zscale, Yofs + 1);
+			pTarget->SetParamToPlane(Now * 4 + 3, cellx.GetWorldPosOffset(Voxel1, 0, 1, 0), Vector3DX::up(), Xofs + 0, Yofs + 1);
 		}
-		void		VoxelControl::AddPlaneYMinus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
+		void		VoxelControl::AddPlaneYMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			pTarget->AllocatePlane();
+			size_t Now = pTarget->RegistPlane();
 
 			int zscale{};
 			int Xofs{};
@@ -188,55 +70,14 @@ namespace FPS_n2 {
 				Xofs = Voxel1.z % 2 == 0;
 				Yofs = cellx.GetCellBuf(Voxel1).GetCellTexID() + 2;
 			}
-			size_t ZERO = pTarget->GetInNum() * 4 - 4;
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b001).get();
-				Vert.norm = Vector3DX::down().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b000).get();
-				Vert.norm = Vector3DX::down().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b101).get();
-				Vert.norm = Vector3DX::down().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + zscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b100).get();
-				Vert.norm = Vector3DX::down().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
+			pTarget->SetParamToPlane(Now * 4 + 0, cellx.GetWorldPosOffset(Voxel2, 0, 0, 1), Vector3DX::down(), Xofs + zscale, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 1, cellx.GetWorldPosOffset(Voxel1, 0, 0, 0), Vector3DX::down(), Xofs + 0, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 2, cellx.GetWorldPosOffset(Voxel2, 1, 0, 1), Vector3DX::down(), Xofs + zscale, Yofs + 1);
+			pTarget->SetParamToPlane(Now * 4 + 3, cellx.GetWorldPosOffset(Voxel1, 1, 0, 0), Vector3DX::down(), Xofs + 0, Yofs + 1);
 		}
-		void		VoxelControl::AddPlaneZPlus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
+		void		VoxelControl::AddPlaneZPlus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			pTarget->AllocatePlane();
+			size_t Now = pTarget->RegistPlane();
 
 			int xscale{};
 			int Xofs{};
@@ -246,55 +87,14 @@ namespace FPS_n2 {
 				Xofs = Voxel2.x % 2 == 0;
 				Yofs = cellx.GetCellBuf(Voxel1).GetCellTexID() + 1;
 			}
-			size_t ZERO = pTarget->GetInNum() * 4 - 4;
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b001).get();
-				Vert.norm = Vector3DX::forward().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + xscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b101).get();
-				Vert.norm = Vector3DX::forward().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b011).get();
-				Vert.norm = Vector3DX::forward().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + xscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b111).get();
-				Vert.norm = Vector3DX::forward().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
+			pTarget->SetParamToPlane(Now * 4 + 0, cellx.GetWorldPosOffset(Voxel1, 0, 0, 1), Vector3DX::forward(), Xofs + xscale, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 1, cellx.GetWorldPosOffset(Voxel2, 1, 0, 1), Vector3DX::forward(), Xofs + 0, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 2, cellx.GetWorldPosOffset(Voxel1, 0, 1, 1), Vector3DX::forward(), Xofs + xscale, Yofs + 1);
+			pTarget->SetParamToPlane(Now * 4 + 3, cellx.GetWorldPosOffset(Voxel2, 1, 1, 1), Vector3DX::forward(), Xofs + 0, Yofs + 1);
 		}
-		void		VoxelControl::AddPlaneZMinus(vert32* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
+		void		VoxelControl::AddPlaneZMinus(VERTEX3DData* pTarget, size_t id, const Vector3Int& Voxel1, const Vector3Int& Voxel2, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
-			pTarget->AllocatePlane();
+			size_t Now = pTarget->RegistPlane();
 
 			int xscale{};
 			int Xofs{};
@@ -304,54 +104,13 @@ namespace FPS_n2 {
 				Xofs = Voxel2.x % 2 == 0;
 				Yofs = cellx.GetCellBuf(Voxel1).GetCellTexID() + 1;
 			}
-			size_t ZERO = pTarget->GetInNum() * 4 - 4;
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 0];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b010).get();
-				Vert.norm = Vector3DX::back().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + xscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 1];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b110).get();
-				Vert.norm = Vector3DX::back().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 0);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 2];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel1, 0b000).get();
-				Vert.norm = Vector3DX::back().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + xscale);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
-			{
-				VERTEX3D& Vert = pTarget->SetInVert()[ZERO + 3];
-				Vert.pos = cellx.GetWorldPosOffset(Voxel2, 0b100).get();
-				Vert.norm = Vector3DX::back().get();
-				Vert.dif = GetColorU8(128, 128, 128, 255);
-				Vert.spc = GetColorU8(64, 64, 64, 255);
-				if (useTexture) {
-					Vert.u = TexTileU * static_cast<float>(Xofs + 0);
-					Vert.v = TexTileV * static_cast<float>(Yofs + 1);
-				}
-			}
+			pTarget->SetParamToPlane(Now * 4 + 0, cellx.GetWorldPosOffset(Voxel1, 0, 1, 0), Vector3DX::back(), Xofs + xscale, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 1, cellx.GetWorldPosOffset(Voxel2, 1, 1, 0), Vector3DX::back(), Xofs + 0, Yofs + 0);
+			pTarget->SetParamToPlane(Now * 4 + 2, cellx.GetWorldPosOffset(Voxel1, 0, 0, 0), Vector3DX::back(), Xofs + xscale, Yofs + 1);
+			pTarget->SetParamToPlane(Now * 4 + 3, cellx.GetWorldPosOffset(Voxel2, 1, 0, 0), Vector3DX::back(), Xofs + 0, Yofs + 1);
 		}
 
-		void		VoxelControl::AddPlanesXY(vert32* pTarget,
+		void		VoxelControl::AddPlanesXY(VERTEX3DData* pTarget,
 			bool isDrawXPlus, bool isDrawYPlus,
 			size_t id,
 			const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept {
@@ -360,7 +119,7 @@ namespace FPS_n2 {
 			int Max = 0;
 			bool PrevPut = false;
 			int8_t PutBlockID = s_EmptyBlick;
-			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
+			int8_t CanDrawXYZ = 0b000000;
 			Vector3Int Vofset = Vofs;
 			for (Vofset.z = MaxminT; Vofset.z <= MaxmaxT; ++Vofset.z) {
 				const auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
@@ -384,23 +143,20 @@ namespace FPS_n2 {
 						//ブロックが置ける部分なので観測開始
 						Min = Vofset.z;
 						PutBlockID = CellBuff.GetID();
-						CanDrawXYZ[0] = false;
-						CanDrawXYZ[1] = false;
-						CanDrawXYZ[2] = false;
-						CanDrawXYZ[3] = false;
+						CanDrawXYZ = 0b000000;
 					}
 					//置ける地点中は全ブロックが隠れていないか確認
-					if (!CanDrawXYZ[0] && !CellBuff.IsOcclusion(0)) {
-						CanDrawXYZ[0] = true;
+					if (!((CanDrawXYZ & (1 << 0)) != 0) && !CellBuff.IsOcclusion(0)) {
+						CanDrawXYZ |= (1 << 0);
 					}
-					if (!CanDrawXYZ[1] && !CellBuff.IsOcclusion(1)) {
-						CanDrawXYZ[1] = true;
+					if (!((CanDrawXYZ & (1 << 1)) != 0) && !CellBuff.IsOcclusion(1)) {
+						CanDrawXYZ |= (1 << 1);
 					}
-					if (!CanDrawXYZ[2] && !CellBuff.IsOcclusion(2)) {
-						CanDrawXYZ[2] = true;
+					if (!((CanDrawXYZ & (1 << 2)) != 0) && !CellBuff.IsOcclusion(2)) {
+						CanDrawXYZ |= (1 << 2);
 					}
-					if (!CanDrawXYZ[3] && !CellBuff.IsOcclusion(3)) {
-						CanDrawXYZ[3] = true;
+					if (!((CanDrawXYZ & (1 << 3)) != 0) && !CellBuff.IsOcclusion(3)) {
+						CanDrawXYZ |= (1 << 3);
 					}
 				}
 				else {
@@ -413,26 +169,26 @@ namespace FPS_n2 {
 						if (!cellx.isReferenceCell()) {
 							bool CheckFillX = (DrawMinXMinus <= Vofset.x) && (Vofset.x <= DrawMinXPlus);
 							bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
-							bool CheckFillZ = Min <= DrawMinZPlus && DrawMinZMinus <= Max;
+							bool CheckFillZ = (Min <= DrawMinZPlus) && (DrawMinZMinus <= Max);
 							CheckFill = CheckFillX && CheckFillY && CheckFillZ;
 						}
 						if (isDrawXPlus) {
-							if (CheckFill || CanDrawXYZ[0]) {
+							if (CheckFill || ((CanDrawXYZ & (1 << 0)) != 0)) {
 								AddPlaneXPlus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						else {
-							if (CheckFill || CanDrawXYZ[1]) {
+							if (CheckFill || ((CanDrawXYZ & (1 << 1)) != 0)) {
 								AddPlaneXMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						if (isDrawYPlus) {
-							if (CheckFill || CanDrawXYZ[2]) {
+							if (CheckFill || ((CanDrawXYZ & (1 << 2)) != 0)) {
 								AddPlaneYPlus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						else {
-							if (CheckFill || CanDrawXYZ[3]) {
+							if (CheckFill || ((CanDrawXYZ & (1 << 3)) != 0)) {
 								AddPlaneYMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
@@ -445,7 +201,7 @@ namespace FPS_n2 {
 				PrevPut = IsPutPoint;
 			}
 		}
-		void		VoxelControl::AddPlanesZ(vert32* pTarget,
+		void		VoxelControl::AddPlanesZ(VERTEX3DData* pTarget,
 			bool isDrawZPlus,
 			size_t id,
 			const Vector3Int& VCenter, const Vector3Int& Vofs, int MaxminT, int MaxmaxT, bool useTexture) noexcept {
@@ -454,7 +210,7 @@ namespace FPS_n2 {
 			int Max = 0;
 			bool PrevPut = false;
 			int8_t PutBlockID = s_EmptyBlick;
-			bool CanDrawXYZ[6] = { false, false, false, false, false, false };
+			int8_t CanDrawXYZ = 0b000000;
 			Vector3Int Vofset = Vofs;
 			for (Vofset.x = MaxminT; Vofset.x <= MaxmaxT; ++Vofset.x) {
 				const auto& CellBuff = cellx.GetCellBuf(VCenter + Vofset);
@@ -478,15 +234,14 @@ namespace FPS_n2 {
 						//ブロックが置ける部分なので観測開始
 						Min = Vofset.x;
 						PutBlockID = CellBuff.GetID();
-						CanDrawXYZ[4] = false;
-						CanDrawXYZ[5] = false;
+						CanDrawXYZ = 0b000000;
 					}
 					//置ける地点中は全ブロックが隠れていないか確認
-					if (!CanDrawXYZ[4] && !CellBuff.IsOcclusion(4)) {
-						CanDrawXYZ[4] = true;
+					if (!((CanDrawXYZ & (1 << 4)) != 0) && !CellBuff.IsOcclusion(4)) {
+						CanDrawXYZ |= (1 << 4);
 					}
-					if (!CanDrawXYZ[5] && !CellBuff.IsOcclusion(5)) {
-						CanDrawXYZ[5] = true;
+					if (!((CanDrawXYZ & (1 << 5)) != 0) && !CellBuff.IsOcclusion(5)) {
+						CanDrawXYZ |= (1 << 5);
 					}
 				}
 				else {
@@ -495,7 +250,7 @@ namespace FPS_n2 {
 						Max = Vofset.x - 1;
 						bool CheckFill = false;//埋まっている判定であろうと絶対埋めないといけないフラグ
 						if (!cellx.isReferenceCell()) {
-							bool CheckFillX = Min <= DrawMinXPlus && DrawMinXMinus <= Max;
+							bool CheckFillX = (Min <= DrawMinXPlus) && (DrawMinXMinus <= Max);
 							bool CheckFillY = (DrawMinYMinus <= Vofset.y) && (Vofset.y <= DrawMinYPlus);
 							bool CheckFillZ = (DrawMinZMinus <= Vofset.z) && (Vofset.z <= DrawMinZPlus);
 							CheckFill = CheckFillX && CheckFillY && CheckFillZ;
@@ -503,12 +258,12 @@ namespace FPS_n2 {
 						Vector3Int V1 = Vofset; V1.x = Min; V1 += VCenter;
 						Vector3Int V2 = Vofset; V2.x = Max; V2 += VCenter;
 						if (isDrawZPlus) {
-							if (CheckFill || CanDrawXYZ[4]) {
+							if (CheckFill || ((CanDrawXYZ & (1 << 4)) != 0)) {
 								AddPlaneZPlus(pTarget, id, V1, V2, useTexture);
 							}
 						}
 						else {
-							if (CheckFill || CanDrawXYZ[5]) {
+							if (CheckFill || ((CanDrawXYZ & (1 << 5)) != 0)) {
 								AddPlaneZMinus(pTarget, id, V1, V2, useTexture);
 							}
 						}
@@ -521,24 +276,6 @@ namespace FPS_n2 {
 				PrevPut = IsPutPoint;
 			}
 		}
-
-
-		static bool CullingLine(int* MaxminT, int* MaxmaxT, float dTa, float dTb) noexcept {
-			bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
-			bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
-			if (Onbehind && !OnFront) {
-				return false;
-			}
-			if (!OnFront && !Onbehind) {
-				if (dTa < 0.0f) {
-					*MaxminT = std::max(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) - 1, *MaxminT);
-				}
-				else {
-					*MaxmaxT = std::min(*MaxminT + static_cast<int>((*MaxmaxT - *MaxminT) * (dTa / (dTa - dTb))) + 1, *MaxmaxT);
-				}
-			}
-			return true;
-		};
 
 		void		VoxelControl::AddCubes(size_t id, size_t threadID, bool UseFrustumCulling, bool useTexture) noexcept {
 			CellsData& cellx = this->m_CellxN[id];
@@ -583,8 +320,7 @@ namespace FPS_n2 {
 					}
 					AddPlanesZ(&Draws.m_Vert32,
 						UseFrustumCulling ? (Vofs.z < 0) : (Draws.GetCamVec().z < 0.0f),
-						id,
-						VCenter, Vofs, xMaxminT, xMaxmaxT, useTexture);
+						id, VCenter, Vofs, xMaxminT, xMaxmaxT, useTexture);
 				}
 				//Z
 				for (Vofs.x = DrawMaxXMinus; Vofs.x <= DrawMaxXPlus; ++Vofs.x) {
@@ -634,8 +370,8 @@ namespace FPS_n2 {
 							[&](const Vector3Int& Voxel) {
 								if (!GetReferenceCells().isInside(Voxel.y)) { return false; }
 								if (!GetReferenceCells().GetCellBuf(Voxel).CanDraw()) { return false; }
-								Vector3DX MinPos = GetReferenceCells().GetWorldPosOffset(Voxel, 0b000) + Vector3DX::one() * -0.1f * Scale3DRate;
-								Vector3DX MaxPos = GetReferenceCells().GetWorldPosOffset(Voxel, 0b111) + Vector3DX::one() * 0.1f * Scale3DRate;
+								Vector3DX MinPos = GetReferenceCells().GetWorldPosOffset(Voxel, 0, 0, 0) + Vector3DX::one() * -0.1f * Scale3DRate;
+								Vector3DX MaxPos = GetReferenceCells().GetWorldPosOffset(Voxel, 1, 1, 1) + Vector3DX::one() * 0.1f * Scale3DRate;
 								Vector3DX tmpEndPos = *EndPos;
 								Vector3DX tmpNormal;
 								if (ColRayBox(StartPos, &tmpEndPos, MinPos, MaxPos, &tmpNormal)) {
@@ -675,8 +411,8 @@ namespace FPS_n2 {
 								if (!GetReferenceCells().isInside(Voxel.y)) { return false; }
 								const auto& CellBuff = GetReferenceCells().GetCellBuf(Voxel);
 								if (!CellBuff.CanDraw()) { return false; }
-								Vector3DX MinPos = GetReferenceCells().GetWorldPosOffset(Voxel, 0b000);
-								Vector3DX MaxPos = GetReferenceCells().GetWorldPosOffset(Voxel, 0b111);
+								Vector3DX MinPos = GetReferenceCells().GetWorldPosOffset(Voxel, 0, 0, 0);
+								Vector3DX MaxPos = GetReferenceCells().GetWorldPosOffset(Voxel, 1, 1, 1);
 
 								MV1_COLL_RESULT_POLY tmp{};
 								// Left
@@ -1046,8 +782,7 @@ namespace FPS_n2 {
 #if defined(DEBUG) && FALSE
 			{
 				for (int loop = 0; loop < TotalCellLayer; ++loop) {
-					const vert32& Vert = this->m_DrawThreadDatas[loop].GetVert32();
-					const CellsData& cellx = this->m_CellxN[loop];
+					const VERTEX3DData& Vert = this->m_DrawThreadDatas[loop].GetVert32();
 					if (Vert.GetOutNum() == 0) { continue; }
 					printfDx("Vertex[%d]\n", Vert.GetOutNum() * 4);
 				}
