@@ -789,12 +789,12 @@ namespace FPS_n2 {
 			}
 #endif
 		}
-		void		VoxelControl::Shadow_Draw(void) const noexcept {
+		void		VoxelControl::DrawShadow(void) const noexcept {
 			for (int threadID = TotalCellLayer; threadID < TotalCellLayer + TotalCellLayer; ++threadID) {
 				this->m_DrawThreadDatas[threadID].Draw(this->m_tex);
 			}
 		}
-		void		VoxelControl::SetShadow_Draw_Rigid(void) const noexcept {
+		void		VoxelControl::DrawByShader(void) const noexcept {
 			constexpr int MinLimit = std::min(std::min(DrawMinXPlus, DrawMinZPlus), DrawMinYPlus) * 3 / 4;
 			constexpr int MaxLimit = std::min(std::min(DrawMaxXPlus, DrawMaxZPlus), DrawMaxYPlus) * 5 / 4;
 			float Near = GetCameraNear() / MaxLimit;

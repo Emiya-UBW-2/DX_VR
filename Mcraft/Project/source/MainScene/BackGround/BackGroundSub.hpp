@@ -688,8 +688,8 @@ namespace FPS_n2 {
 			void			Init(void) noexcept;
 			void			Setup(void) noexcept;
 			void			Update(void) noexcept;
-			void			Shadow_Draw(void) const noexcept;
-			void			SetShadow_Draw_Rigid(void) const noexcept;
+			void			DrawShadow(void) const noexcept;
+			void			DrawByShader(void) const noexcept;
 			void			Draw(void) const noexcept;
 			void			Dispose(void) noexcept;
 			void			Dispose_Load(void) noexcept;

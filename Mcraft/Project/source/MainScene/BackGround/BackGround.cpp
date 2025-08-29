@@ -542,10 +542,10 @@ namespace FPS_n2 {
 			SetVerticalFogEnable(VFog);
 		}
 		void		BackGroundControl::Shadow_Draw(void) const noexcept {
-			this->m_VoxelControl->Shadow_Draw();
+			this->m_VoxelControl->DrawShadow();
 		}
 		void		BackGroundControl::SetShadow_Draw_Rigid(void) const noexcept {
-			this->m_VoxelControl->SetShadow_Draw_Rigid();
+			this->m_VoxelControl->DrawByShader();
 		}
 		void		BackGroundControl::Draw(void) const noexcept {
 			this->m_VoxelControl->Draw();
