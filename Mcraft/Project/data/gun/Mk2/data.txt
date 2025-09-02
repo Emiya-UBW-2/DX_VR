@@ -1,0 +1,31 @@
+Name=Mk2 HandGrenade
+
+Info=”j•ĞèÖ’eB
+Info=“Š‚°‚½‚ ‚Æ3.5•bŒã‚É”š”­‚µA”j•Ğ‚ğ‚Ü‚«U‚ç‚·B
+Info=ˆÀ‰¿‚È‚ª‚ç‚àŒø‰Ê“I‚È•ºŠíB
+
+Info_Eng=Soviet fragmentation grenade.
+Info_Eng=Explodes 3.5 seconds after being thrown, scattering shrapnel.
+Info_Eng=A cheap but effective weapon.
+
+Weight=310
+WeaponType=Gadget
+UnlockScore=0
+IsCustomize=false
+
+usehumanAnim=3
+IsThrowWeapon=True
+CanADS=False
+CanSwitch=False
+stockType=none
+
+ThrowReady=0
+Throw=1
+
+useammo0=FragRGD
+
+Slot0Type=Magazine
+Slot0IsNeed=true
+Slot0Item=HasGrenade
+
+end
