@@ -9,6 +9,7 @@ namespace FPS_n2 {
 			Cart,
 			Magazine,
 			Grenade,
+			BuildGrenade,
 		};
 
 		class FallObjChildBase {

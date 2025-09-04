@@ -214,5 +214,15 @@ namespace FPS_n2 {
 			"Sight",
 			"MuzzleAdapter",
 		};
+
+		enum class ThrowWeaponType {
+			Frag,
+			Build,
+			Max,
+		};
+		static const char* ThrowWeaponTypeName[static_cast<int>(ThrowWeaponType::Max)] = {
+			"Frag",
+			"Build",
+		};
 	}
 }

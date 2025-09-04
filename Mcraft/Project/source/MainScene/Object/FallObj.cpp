@@ -67,6 +67,37 @@ namespace FPS_n2 {
 			bool IsDrawFar(void) const noexcept override { return true; }
 		};
 
+		class FallObjBuildGrenade : public FallObjChildBase {
+		public:
+			FallObjBuildGrenade(void) noexcept {}
+			virtual ~FallObjBuildGrenade(void) noexcept {}
+		public:
+			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::FallGrenade; }
+		public:
+			void RotateOnAir(moves* objMove) noexcept override {
+				//テキトーに飛び回る
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.0f * 60.0f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
+			}
+			void RotateOnGround(moves* objMove) noexcept override {
+				Vector3DX Vec = objMove->GetVec();
+				Vec.x = 0.f;
+				Vec.z = 0.f;
+				objMove->SetVec(Vec);
+			}//なにもしない
+			void OnTimeEnd(const moves& objMove) noexcept override {
+				/*
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.0f);
+				}
+				auto* SE = SoundPool::Instance();
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.0f);
+				//*/
+			}
+		public:
+			bool IsDrawFar(void) const noexcept override { return true; }
+		};
 
 		void			FallObj::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float time, FallObjectType Type) noexcept {
 			this->m_Timer = time;
@@ -76,6 +107,9 @@ namespace FPS_n2 {
 				break;
 			case FallObjectType::Grenade:
 				this->m_FallObject = std::make_unique<FallObjGrenade>();
+				break;
+			case FallObjectType::BuildGrenade:
+				this->m_FallObject = std::make_unique<FallObjBuildGrenade>();
 				break;
 			case FallObjectType::Magazine:
 				this->m_FallObject = std::make_unique<FallObjMagazine>();

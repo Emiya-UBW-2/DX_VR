@@ -339,6 +339,7 @@ namespace FPS_n2 {
 			const Vector3DX GetWorldPos(const Vector3Int& VoxelPoint) const noexcept { return this->m_VoxelControl->GetReferenceCells().GetWorldPos(VoxelPoint); }
 			//ブロックにダメージを与える
 			bool			DamageCell(int Xvoxel, int Yvoxel, int Zvoxel, int8_t Damage) noexcept { return this->m_VoxelControl->DamageCell(Xvoxel, Yvoxel, Zvoxel, Damage); }
+			void			SetCell(int Xvoxel, int Yvoxel, int Zvoxel, int8_t ID) noexcept { this->m_VoxelControl->SetBlick(Xvoxel, Yvoxel, Zvoxel, ID); }
 			void			SettingChange(void) noexcept { this->m_VoxelControl->SettingChange(); }
 			constexpr float GetDrawFarMax() const noexcept { return this->m_VoxelControl->GetDrawFarMax(); }
 		public://

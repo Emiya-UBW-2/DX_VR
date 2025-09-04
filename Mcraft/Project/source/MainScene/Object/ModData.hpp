@@ -51,6 +51,7 @@ namespace FPS_n2 {
 			int								m_SoundSelect{ 0 };
 			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };
 			bool							m_IsThrowWeapon{ false };
+			ThrowWeaponType					m_ThrowWeaponType{ ThrowWeaponType::Frag };
 			bool							m_CanADS{ true };
 			bool							m_CanSwitch{ true };
 			bool							m_isHoldOpen{ true };
@@ -85,6 +86,7 @@ namespace FPS_n2 {
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType; }
 			//性能
 			const auto& GetIsThrowWeapon(void) const noexcept { return this->m_IsThrowWeapon; }
+			const auto& GetThrowWeaponType(void) const noexcept { return this->m_ThrowWeaponType; }
 			const auto& GetCanADS(void) const noexcept { return this->m_CanADS; }
 			const auto& GetCanSwitch(void) const noexcept { return this->m_CanSwitch; }
 			const auto& GetisHoldOpen(void) const noexcept { return this->m_isHoldOpen; }

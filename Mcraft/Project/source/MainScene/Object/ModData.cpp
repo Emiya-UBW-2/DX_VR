@@ -144,6 +144,14 @@ namespace FPS_n2 {
 			else if (LEFT == "IsThrowWeapon") {
 				this->m_IsThrowWeapon = RIGHT == "True";
 			}
+			else if (LEFT == "ThrowWeaponType") {
+				for (int loop = 0; loop < static_cast<int>(ThrowWeaponType::Max); ++loop) {
+					if (RIGHT == ThrowWeaponTypeName[loop]) {
+						this->m_ThrowWeaponType=static_cast<ThrowWeaponType>(loop);
+						break;
+					}
+				}
+			}
 			else if (LEFT == "CanADS") {
 				this->m_CanADS = RIGHT == "True";
 			}

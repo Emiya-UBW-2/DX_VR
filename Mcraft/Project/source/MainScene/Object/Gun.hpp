@@ -30,7 +30,8 @@ namespace FPS_n2 {
 			float												m_GunShotZrand{};
 			float												m_GunShotZrandR{};
 
-			FallControl											m_Grenade{};
+			FallControl											m_FragGrenade{};
+			FallControl											m_BuildGrenade{};
 			bool												m_InChamber{ false };
 			std::array<ArmMovePer, static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax)>	m_GunAnimePer{};
 			std::array<float, static_cast<int>(Charas::GunAnimeID::Max)>	m_GunAnimeTime{};

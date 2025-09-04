@@ -696,7 +696,16 @@ namespace FPS_n2 {
 						if (IsActive()) {
 							SetActiveAll(false);//手にあるものは非表示にする
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.0f);
-							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.0f / 60.0f), 3.5f, Objects::FallObjectType::Grenade);
+							switch (GetModifySlot()->GetMyData()->GetThrowWeaponType()) {
+							case ThrowWeaponType::Frag:
+								this->m_FragGrenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.0f / 60.0f), 3.5f, Objects::FallObjectType::Grenade);
+								break;
+							case ThrowWeaponType::Build:
+								this->m_BuildGrenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.0f / 60.0f), 3.5f, Objects::FallObjectType::BuildGrenade);
+								break;
+							default:
+								break;
+							}
 
 							this->m_IsChamberOn = false;
 							if (this->m_Capacity != 0) {
@@ -728,7 +737,7 @@ namespace FPS_n2 {
 		//グレネード更新
 		void				GunObj::UpdateGrenade(void) noexcept {
 
-			for (const auto& grenade : this->m_Grenade.GetPtrList()) {
+			for (const auto& grenade : this->m_FragGrenade.GetPtrList()) {
 				if (grenade->PopIsEndFall()) {
 					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 					auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get(GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
@@ -763,6 +772,24 @@ namespace FPS_n2 {
 						}
 					}
 					BackGroundParts->SetGrenadeBomb();
+				}
+			}
+
+			for (const auto& grenade : this->m_BuildGrenade.GetPtrList()) {
+				if (grenade->PopIsEndFall()) {
+					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+					//ビルド
+					int								xput = 8;
+					int								yput = 8;
+					int								zput = 8;
+					auto VoxelPoint = BackGroundParts->GetVoxelPoint(grenade->GetMove().GetPos());
+					for (int xp = -xput / 2; xp < xput / 2; ++xp) {
+						for (int yp = 0; yp < yput; ++yp) {
+							for (int zp = -zput / 2; zp < zput / 2; ++zp) {
+								BackGroundParts->SetCell(VoxelPoint.x + xp, VoxelPoint.y + yp, VoxelPoint.z + zp, 3);
+							}
+						}
+					}
 				}
 			}
 		}
@@ -816,7 +843,16 @@ namespace FPS_n2 {
 				(*this->m_MagazinePtr)->SetAmmoActive(false);
 			}
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
-				this->m_Grenade.Init(GetFilePath(), 2);
+				switch (GetModifySlot()->GetMyData()->GetThrowWeaponType()) {
+				case ThrowWeaponType::Frag:
+					this->m_FragGrenade.Init(GetFilePath(), 2);
+					break;
+				case ThrowWeaponType::Build:
+					this->m_BuildGrenade.Init(GetFilePath(), 2);
+					break;
+				default:
+					break;
+				}
 			}
 			for (auto& speed : this->m_GunAnimeSpeed) {
 				speed = 1.0f;
@@ -1098,7 +1134,8 @@ namespace FPS_n2 {
 			this->m_ModifySlot.reset();
 			this->m_MagFall.Dispose();
 			this->m_CartFall.Dispose();
-			this->m_Grenade.Dispose();
+			this->m_FragGrenade.Dispose();
+			this->m_BuildGrenade.Dispose();
 			if (this->m_AmmoInChamberObj) {
 				ObjectManager::Instance()->DelObj(this->m_AmmoInChamberObj);
 				this->m_AmmoInChamberObj.reset();
