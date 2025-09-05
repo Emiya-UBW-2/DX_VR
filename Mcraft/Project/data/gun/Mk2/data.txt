@@ -1,12 +1,10 @@
 Name=Mk2 HandGrenade
 
-Info=破片手榴弾。
-Info=投げたあと3.5秒後に爆発し、破片をまき散らす。
-Info=安価ながらも効果的な兵器。
+Info=遮蔽生成手榴弾。
+Info=投げたあと3.5秒後に起動し、遮蔽物を形成する。
 
-Info_Eng=Soviet fragmentation grenade.
-Info_Eng=Explodes 3.5 seconds after being thrown, scattering shrapnel.
-Info_Eng=A cheap but effective weapon.
+Info_Eng=Shield-generating grenade.
+Info_Eng=Activates 3.5 seconds after being thrown, creating a shield.
 
 Weight=310
 WeaponType=Gadget
