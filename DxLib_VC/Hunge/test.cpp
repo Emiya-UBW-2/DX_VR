@@ -248,7 +248,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					drawcontrol->SetTileData(x, y)->FloorID = 2;
 				}
 				else {
-					drawcontrol->SetTileData(x, y)->FloorID = 0;
+					drawcontrol->SetTileData(x, y)->FloorID = (GetRand(100) > 50) ? 3 : 0;
 				}
 				drawcontrol->SetTileData(x, y)->WayPointRad = -1;
 				if ((r == 128 && g == 128 && b == 128) || (r == 192 && g == 192 && b == 192)) {
@@ -420,7 +420,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				}
 				if (!CheckTarget) { continue; }
 				int X{}, Y{};
-				float LengthReq = 15.f;
+				float LengthReq = 12.f;
 				for (int x = 0; x < Width; x++) {
 					for (int y = 0; y < Height; y++) {
 						if ((drawcontrol->SetTileData(x, y)->Height == 0) && (drawcontrol->SetTileData(x, y)->WayPointRad != -1)) {
@@ -481,7 +481,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 						}
 					}
 				}
-				if (LengthReq != 15.f) {
+				if (LengthReq != 12.f) {
 					for (int loop = static_cast<int>(en.m_WayPointList.size()) - 1; loop >= 1; --loop) {
 						en.m_WayPointList.at(loop) = en.m_WayPointList.at(loop - 1);
 					}
@@ -512,7 +512,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 							break;
 						}
 					}
-					bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && NearCharaID == -1 || NearCharaID == m_NowMoveCharacter);
+					float Len = std::hypotf(MousePos.x - Chara.at(m_NowMoveCharacter).GetPos().x, MousePos.y - Chara.at(m_NowMoveCharacter).GetPos().y);
+					bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && (NearCharaID == -1 || NearCharaID == m_NowMoveCharacter));
 
 					if (GetWindowActiveFlag() && (GetMouseInput() & MOUSE_INPUT_RIGHT) != 0) {
 						LeftPressCancel = true;
@@ -520,14 +521,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					bool LMP = (GetWindowActiveFlag() && (GetMouseInput() & MOUSE_INPUT_LEFT) != 0);
 					if (LMP && !LeftPressCancel) {
 						if (!PrevMouseLeftPress) {
+							if (!IsActivePlace || Len > 12.f) {
+								LeftPressCancel = true;
+							}
 							MouseLeftHoldPos = MousePos;
 						}
-						Chara.at(m_NowMoveCharacter).SetAimPos(MousePos);
 					}
 					else {
 						if (PrevMouseLeftPress) {
 							if (!LeftPressCancel) {
 								if (IsActivePlace) {
+									Chara.at(m_NowMoveCharacter).SetAimPos(MousePos);
 									Chara.at(m_NowMoveCharacter).SetTargetPos(MouseLeftHoldPos);
 									m_MovingCharacter = true;
 								}
@@ -566,7 +570,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 								break;
 							}
 						}
-						bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && NearCharaID == -1 || NearCharaID == m_NowMoveCharacter);
+						float Len = std::hypotf(MousePos.x - Chara.at(m_NowMoveCharacter).GetPos().x, MousePos.y - Chara.at(m_NowMoveCharacter).GetPos().y);
+						bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && (NearCharaID == -1 || NearCharaID == m_NowMoveCharacter));
 
 
 						if (PrevMouseLeftPress && !LeftPressCancel) {
@@ -588,9 +593,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 							DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), 3);
 						}
 						else {
-							if (IsActivePlace) {
+							if (IsActivePlace && Len < 12.f) {
 								VECTOR MP = drawcontrol->Get2DPos(MousePos.x, MousePos.y, 0.f);
 								DrawCircle((int)MP.x, (int)MP.y, 16, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
+							}
+							{
+								VECTOR MP = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y, 0.f);
+								VECTOR MP2 = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y + 12.f, 0.f);
+								DrawCircle((int)MP.x, (int)MP.y, (MP2.y- MP.y), IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
 							}
 						}
 						/*
