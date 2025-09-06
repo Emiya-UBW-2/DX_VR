@@ -91,6 +91,7 @@ struct VECTOR2D
 struct TileData {
 	int Height{ 0 };
 	int FloorID{ 0 };
+	int WayPointRad{ -1 };
 private:
 	struct LinkBuffer {
 		bool isActive{ false };
@@ -161,6 +162,10 @@ private:
 	//タイルごとのデータを取得
 	const auto GetTileData(int x, int y) const noexcept { return m_TileData.at(static_cast<size_t>(std::clamp(x, 0, m_MapXsize - 1) * m_MapYsize + std::clamp(y, 0, m_MapYsize - 1))); }
 public:
+	const auto GetMapXsize() const noexcept { return m_MapXsize; }
+	const auto GetMapYsize() const noexcept { return m_MapYsize; }
+
+
 	const auto GetTileData(int index) const noexcept { return m_TileData.at(index); }
 	const auto GetTileSize() const noexcept { return m_TileData.size(); }
 	const int		GetNearestBuilds(const VECTOR2D& NowPosition) const noexcept {
@@ -339,11 +344,11 @@ public:
 		int						SeekPoint{ 0 };
 		for (int x = 0; x < m_MapXsize; x++) {
 			for (int y = 0; y < m_MapYsize; y++) {
+				auto& bu = *SetTileData(x, y);
+				bu.Set(SeekPoint);
+				++SeekPoint;
 				if (GetTileData(x, y).Height == 0) {
-					auto& bu = this->m_TileData.at(SeekPoint);
-					bu.Set(SeekPoint);
 					bu.SetPosition(VECTOR2D((float)x - 0.5f, (float)y - 0.5f), VECTOR2D((float)(x + 0.5f), (float)(y + 0.5f)));
-					++SeekPoint;
 
 					if (GetTileData(x + 1, y).Height == 0) {
 						bu.SetLinkBuffer(0, x + 1, y);
