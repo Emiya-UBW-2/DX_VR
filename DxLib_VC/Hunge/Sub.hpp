@@ -154,7 +154,6 @@ private:
 	std::vector<VECTOR>		m_PointLightPos{};
 
 	std::vector<TileData>	m_TileData{};
-	int								m_SeekPoint{ 0 };
 
 	int						m_MapXsize{ 0 };
 	int						m_MapYsize{ 0 };
@@ -293,9 +292,8 @@ public:
 			CheckPolyPrevNum = NextCheckPolyPrevNum;
 		}
 	}
-	bool			CheckPolyMoveWidth(VECTOR2D StartPos, int TargetIndex, float Width) const {
+	bool			CheckPolyMoveWidth(VECTOR2D StartPos, VECTOR2D TargetPos, float Width) const {
 		// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )( 幅指定版 )
-		VECTOR2D TargetPos = this->m_TileData.at(TargetIndex).GetPos();
 		// 最初に開始座標から目標座標に直線的に移動できるかどうかをチェック
 		if (CheckPolyMove(StartPos, TargetPos) == false) { return false; }
 
@@ -337,17 +335,32 @@ public:
 		return true;		// ここまできたら指定の幅があっても直線的に移動できるということなので true を返す
 	}
 
-	void			StartCount() noexcept {
-		this->m_SeekPoint = 0;
-	}
-	auto& AddWayPoint(VECTOR2D MinPos, VECTOR2D MaxPos) noexcept {
-		auto& w = this->m_TileData.at(this->m_SeekPoint);
-		w.Set(this->m_SeekPoint);
-		w.SetPosition(MinPos, MaxPos);
-		++this->m_SeekPoint;
-		return w;
-	}
-	void			Setup() noexcept {
+	void			SetupLink() noexcept {
+		int						SeekPoint{ 0 };
+		for (int x = 0; x < m_MapXsize; x++) {
+			for (int y = 0; y < m_MapYsize; y++) {
+				if (GetTileData(x, y).Height == 0) {
+					auto& bu = this->m_TileData.at(SeekPoint);
+					bu.Set(SeekPoint);
+					bu.SetPosition(VECTOR2D((float)x - 0.5f, (float)y - 0.5f), VECTOR2D((float)(x + 0.5f), (float)(y + 0.5f)));
+					++SeekPoint;
+
+					if (GetTileData(x + 1, y).Height == 0) {
+						bu.SetLinkBuffer(0, x + 1, y);
+					}
+					if (GetTileData(x, y + 1).Height == 0) {
+						bu.SetLinkBuffer(1, x, y + 1);
+					}
+					if (GetTileData(x - 1, y).Height == 0) {
+						bu.SetLinkBuffer(2, x - 1, y);
+					}
+					if (GetTileData(x, y - 1).Height == 0) {
+						bu.SetLinkBuffer(3, x, y - 1);
+					}
+				}
+			}
+		}
+		//リンクを確立
 		for (auto& w : this->m_TileData) {
 			for (auto& L : w.m_LinkPosBuffer) {
 				if (L.isActive) {
@@ -357,13 +370,16 @@ public:
 		}
 	}
 
+	const float GetDrawTileSize() const noexcept {
+		return m_EyePos.z * tile_size;
+	}
 	//座標変換
 	const auto Get2DPos(float x, float y, float z) const noexcept {
-		float tile_scale = m_EyePos.z * (float)tile_size / (m_EyePos.z * (float)tile_size - z) * (float)tile_size;//タイルの表示倍率
+		float tile_scale = (12.f / (float)GetDrawTileSize()) * (float)GetDrawTileSize() / ((12.f / (float)GetDrawTileSize()) * (float)GetDrawTileSize() - z) * (float)GetDrawTileSize();//タイルの表示倍率
 		return VGet((float)(m_draw_x / 2) + (x - m_EyePos.x) * tile_scale, (float)(m_draw_y / 2) + (y - m_EyePos.y) * tile_scale, tile_scale);
 	}
 	const auto GetPos2D(float x2D, float y2D) const noexcept {
-		float tile_scale = m_EyePos.z * (float)tile_size / (m_EyePos.z * (float)tile_size - 0) * (float)tile_size;//タイルの表示倍率
+		float tile_scale = (12.f / (float)GetDrawTileSize()) * (float)GetDrawTileSize() / ((12.f / (float)GetDrawTileSize()) * (float)GetDrawTileSize() - 0) * (float)GetDrawTileSize();//タイルの表示倍率
 		return VGet(
 			(x2D - (float)(m_draw_x / 2)) / tile_scale + m_EyePos.x,
 			(y2D - (float)(m_draw_y / 2)) / tile_scale + m_EyePos.y,
@@ -378,7 +394,7 @@ private:
 	//ポイント影を描画
 	void DrawPointShadow(int x, int y, const VECTOR& light2D) const noexcept {
 		auto Draw = [&](const VECTOR& sidePos, const VECTOR& postmp1, const VECTOR& postmp2, const VECTOR& lightpos, float radsub) {
-			auto centerZ = (Gettile2DPos(x, y, false).z - sidePos.z) / (float)tile_size;
+			auto centerZ = (Gettile2DPos(x, y, false).z - sidePos.z) / (float)GetDrawTileSize();
 			if (centerZ > 0 && std::cos(GetRadVec2Vec(sidePos, lightpos) - radsub) > 0.f) {
 				auto length = 480.f * centerZ;
 				float lightrad1 = GetRadVec2Vec(postmp1, lightpos);
@@ -415,7 +431,7 @@ private:
 	//床を描画
 	void DrawFloor(int x, int y) const noexcept {
 		auto centerPos = Gettile2DPos(x, y, false);
-		if (!(centerPos.z <= (float)tile_size)) { return; }
+		if (!(centerPos.z <= (float)GetDrawTileSize())) { return; }
 		//影をブレンド
 		GraphBlendRectBlt2(
 			m_FloorHandlePtr[GetTileData(x, y).FloorID], m_PointBuffer2, m_WallBuffer,
@@ -424,7 +440,7 @@ private:
 			std::max(0, (int)GetTileMin(centerPos).x), std::max(0, (int)GetTileMin(centerPos).y),
 			std::min(m_draw_x, (int)GetTileMax(centerPos).x), std::min(m_draw_y, (int)GetTileMax(centerPos).y),
 			0, 0,
-			(centerPos.z <= (float)tile_size) ? 128 : 0, DX_GRAPH_BLEND_NORMAL);
+			(centerPos.z <= (float)GetDrawTileSize()) ? 128 : 0, DX_GRAPH_BLEND_NORMAL);
 
 		//最終描画
 		DrawRotaGraph((int)centerPos.x, (int)centerPos.y, (double)(centerPos.z / tile_pic_size), 0.0, m_WallBuffer, false);
@@ -498,11 +514,11 @@ private:
 public://ゲッター
 	//カメラの座標指定
 	void SetCameraPos(const VECTOR& EyePos) noexcept {
-		m_EyePos = VGet(EyePos.x, EyePos.y, EyePos.z / (float)tile_size);
+		m_EyePos = VGet(EyePos.x, EyePos.y, EyePos.z);
 	}
 	//カメラの座標取得
 	const auto GetCameraPos(void) const noexcept {
-		return VGet(m_EyePos.x, m_EyePos.y, m_EyePos.z * (float)tile_size);
+		return VGet(m_EyePos.x, m_EyePos.y, m_EyePos.z);
 	}
 	//ポイントライトの追加
 	const auto AddPointLight(const VECTOR& LightPos) noexcept {
@@ -527,7 +543,7 @@ public://ゲッター
 		m_TileData.resize(static_cast<size_t>(m_MapXsize * m_MapYsize));
 	}
 	//タイルごとのデータポインタを取得
-	auto* SetTileData(int x, int y) noexcept { return &m_TileData.at(static_cast<size_t>(std::clamp(x, 0, m_MapXsize - 1) * m_MapYsize + std::clamp(y, 0, m_MapYsize - 1))); }
+	TileData* SetTileData(int x, int y) noexcept { return &m_TileData.at(static_cast<size_t>(std::clamp(x, 0, m_MapXsize - 1) * m_MapYsize + std::clamp(y, 0, m_MapYsize - 1))); }
 public://シングルトン
 private:
 	static const DrawControl* m_Singleton;
@@ -633,8 +649,6 @@ public:
 	}
 };
 
-const DrawControl* DrawControl::m_Singleton = nullptr;
-
 class PathChecker {
 public:
 	// 経路探索処理用の１ポリゴンの情報
@@ -714,11 +728,10 @@ public:
 		}
 		if (NowIndex != this->GoalUnit->GetPolyIndex()) {																	// 現在乗っているポリゴンがゴール地点にあるポリゴンの場合は処理を分岐
 			if (NowIndex == *TargetPathPlanningIndex) {													// 現在乗っているポリゴンが移動中間地点のポリゴンの場合は次の中間地点を決定する処理を行う
-				const float COLLWIDTH = 0.5f;												// 当たり判定のサイズ
 				while (true) {																				// 次の中間地点が決定するまでループし続ける
 					if (!this->UnitArray.at(*TargetPathPlanningIndex).GetNextPolyUnit()) { break; }
 					auto NextIndex = this->UnitArray.at(*TargetPathPlanningIndex).GetNextPolyUnit()->GetPolyIndex();
-					if (!drawcontrol->CheckPolyMoveWidth(NowPosition, NextIndex, COLLWIDTH)) { break; }		// 経路上の次のポリゴンの中心座標に直線的に移動できない場合はループから抜ける
+					if (!drawcontrol->CheckPolyMoveWidth(NowPosition, drawcontrol->GetTileData(NextIndex).GetPos(), 0.5f)) { break; }		// 経路上の次のポリゴンの中心座標に直線的に移動できない場合はループから抜ける
 					(*TargetPathPlanningIndex) = NextIndex;													// チェック対象を経路上の更に一つ先のポリゴンに変更する
 					if ((*TargetPathPlanningIndex) == this->GoalUnit->GetPolyIndex()) { break; }				// もしゴール地点のポリゴンだったらループを抜ける
 				}
