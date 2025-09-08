@@ -1,3 +1,4 @@
+#pragma once
 #define NOMINMAX
 
 #include "DxLib.h"
@@ -8,6 +9,7 @@
 #include <algorithm>
 #include <functional>
 
+constexpr float BaseFrameRate = 60.f;
 
 static const int tile_size = 64;		//表示上のタイルサイズ
 static const int tile_pic_size = 32;	//画像のタイルサイズ
@@ -78,6 +80,98 @@ public:
 	}
 public:
 
+};
+
+
+enum class SoundEnum {
+	Walk,
+	Shot,
+	Hit,
+	Max,
+};
+
+static const char* SoundPath[static_cast<int>(SoundEnum::Max)] = {
+	"data/Sound/runfoot.wav",
+	"data/Sound/shot.wav",
+	"data/Sound/hit.wav",
+};
+
+class SoundPool {
+private://シングルトン
+	static const SoundPool* m_Singleton;
+public:
+	static void Create(void) noexcept {
+		m_Singleton = new SoundPool();
+	}
+	static SoundPool* Instance(void) noexcept {
+		if (m_Singleton == nullptr) {
+			MessageBox(NULL, "Failed Instance Create", "", MB_OK);
+			exit(-1);
+		}
+		// if (m_Singleton == nullptr) { m_Singleton = new SoundPool(); }
+		return (SoundPool*)m_Singleton;
+	}
+	static void Release(void) noexcept {
+		delete m_Singleton;
+	}
+private:
+	struct Pool {
+		int m_DupricateID{ -1 };
+	public:
+		void Init() {
+			if (m_DupricateID != -1) {
+				DeleteSoundMem(m_DupricateID);
+			}
+			m_DupricateID = -1;
+		}
+	};
+private:
+	std::array<int, static_cast<int>(SoundEnum::Max)> m_Base;
+	std::vector<Pool> m_Pool;
+private:
+	//コンストラクタ
+	SoundPool(void) noexcept {
+		for (auto& b : m_Base) {
+			int index = &b - &m_Base.front();
+			b = LoadSoundMem(SoundPath[index]);
+		}
+		m_Pool.resize(32);
+		for (auto& p : m_Pool) {
+			p.Init();
+		}
+	}
+	//デストラクタ
+	~SoundPool(void) noexcept {
+		for (auto& b : m_Base) {
+			DeleteSoundMem(b);
+		}
+		for (auto& p : m_Pool) {
+			p.Init();
+		}
+		m_Pool.clear();
+	}
+public:
+	void Play(SoundEnum ID, int Pan = -256, int Size = -1) noexcept {
+		for (auto& p : m_Pool) {
+			if (p.m_DupricateID != -1) {
+				if (CheckSoundMem(p.m_DupricateID) == 1) { continue; }
+				p.Init();
+			}
+			p.m_DupricateID = DuplicateSoundMem(m_Base[static_cast<int>(ID)]);
+
+			ChangePanSoundMem((Pan == -256) ? 0 : Pan, p.m_DupricateID);
+			ChangeVolumeSoundMem((Size == -1) ? 255 : Size, p.m_DupricateID);
+			PlaySoundMem(p.m_DupricateID, DX_PLAYTYPE_BACK, TRUE);
+			return;
+		}
+		m_Pool.emplace_back();
+		auto& p = m_Pool.back();
+		p.m_DupricateID = DuplicateSoundMem(m_Base[static_cast<int>(ID)]);
+
+		ChangePanSoundMem((Pan == -256) ? 0 : Pan, p.m_DupricateID);
+		ChangeVolumeSoundMem((Size == -1) ? 255 : Size, p.m_DupricateID);
+		PlaySoundMem(p.m_DupricateID, DX_PLAYTYPE_BACK, TRUE);
+	}
 };
 
 // ベクトルデータ型
@@ -810,3 +904,362 @@ public:
 		this->UnitArray.clear();
 	}
 };
+
+//キャラクター
+enum class CharaType {
+	Team,
+	TeamNPC,
+	Enemy,
+};
+
+class CharacterBase {
+private:
+	CharaType	m_CharaType{};
+	int			m_GraphHandle{};
+	int			m_WatchHandle{};
+
+	bool		m_isDraw{ true };
+	bool		m_isIntercept{ false };
+
+	bool		m_isMoving{ false };
+	float		m_DrawAlpha{ 1.f };
+
+	size_t		m_PointLightID{ SIZE_MAX };
+	VECTOR2D	m_Pos{};
+	VECTOR2D	m_DrawPos{};
+	VECTOR2D	m_MoveAimPos{};
+	VECTOR2D	m_AimPos{};
+	VECTOR2D	m_TargetPos{};
+	float		m_Rad{};
+	float		m_DrawRad{};
+	bool		m_isTargetChanged = false;
+
+	int										TargetPathPlanningIndex{ -1 };		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
+	PathChecker								m_PathChecker{};
+
+	VECTOR2D	m_FogMoveRandom{};
+	float		m_MoveTimer = 0.f;
+	float		m_MoveTimerWave = 0.f;
+
+	float		m_ShotTimer = 0.f;
+	bool		m_IsShot = false;
+
+	bool		m_IsAlive = true;
+public:
+	std::array<int, 5>	m_WayPointList{};
+public:
+	const auto GetCharaType() const noexcept { return m_CharaType; }
+	const auto IsEnemy() const noexcept { return m_CharaType == CharaType::Enemy; }
+	const auto GetPos() const noexcept { return m_DrawPos; }
+	const auto GetRad() const noexcept { return m_DrawRad; }
+	const auto IsDraw() const noexcept { return m_isDraw; }
+	const auto IsMoving() const noexcept { return m_isMoving; }
+	const auto IsIntercept() const noexcept { return m_isIntercept; }
+	const auto IsShot() const noexcept { return m_IsShot; }
+	const auto IsAlive() const noexcept { return m_IsAlive; }
+
+	void SetShotReset() noexcept {
+		m_ShotTimer = 0.f;
+		m_IsShot = false;
+	}
+
+	void Death(int killID) noexcept {
+		m_IsAlive = false;
+	}
+
+	void SetDraw(bool isDraw) noexcept {
+		m_isDraw = isDraw;
+	}
+	void SetIntercept(bool isDraw) noexcept {
+		m_isIntercept = isDraw;
+	}
+	void SetMoveAimPos(VECTOR2D Pos) noexcept {
+		m_MoveAimPos = Pos;
+	}
+	void SetAimPos(VECTOR2D Pos) noexcept {
+		m_AimPos = Pos;
+	}
+	void SetTargetPos(VECTOR2D Pos) noexcept {
+		m_TargetPos = Pos;
+		m_isTargetChanged = true;
+	}
+public:
+	void Init(VECTOR2D Pos, float Yrad, CharaType Type) noexcept {
+		auto* drawcontrol = DrawControl::Instance();
+		m_Pos = Pos;
+		m_DrawPos = Pos;
+
+		m_Rad = Yrad;
+		m_DrawRad = Yrad;
+		SetMoveAimPos(Pos);
+		SetAimPos(Pos);
+		SetTargetPos(Pos);
+		m_CharaType = Type;
+		switch (m_CharaType) {
+		case CharaType::Team:
+			m_PointLightID = drawcontrol->AddPointLight(VGet(Pos.x, Pos.y, 0.f));
+			m_GraphHandle = LoadGraph("data/TeamChara.bmp");
+			break;
+		case CharaType::TeamNPC:
+			m_GraphHandle = LoadGraph("data/TeamCharaNPC.bmp");
+			break;
+		case CharaType::Enemy:
+			m_GraphHandle = LoadGraph("data/EnemyChara.bmp");
+			break;
+		default:
+			break;
+		}
+		m_WatchHandle = LoadGraph("data/Watch.png");
+
+		for (auto& w : m_WayPointList) {
+			w = -1;
+		}
+		m_isMoving = false;
+		m_IsAlive = true;
+	}
+	void Update() noexcept {
+		auto* drawcontrol = DrawControl::Instance();
+
+		m_DrawAlpha = std::clamp(m_DrawAlpha + ((m_isDraw || !m_IsAlive) ? 1.f / 0.1f : -1.f) / BaseFrameRate, 0.f, 1.f);
+		m_MoveTimer = std::max(m_MoveTimer - 1.f / BaseFrameRate, 0.f);
+		m_MoveTimerWave = std::max(m_MoveTimerWave - 1.f / BaseFrameRate, 0.f);
+		if (!m_IsAlive) { return; }
+
+		if (m_isTargetChanged) {
+			m_isTargetChanged = false;
+			//経路探索しなおす
+			m_PathChecker.Dispose();
+			if (m_PathChecker.Init(m_Pos, m_TargetPos)) {	// 指定の２点の経路情報を探索する
+				TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
+			}
+		}
+		//経路に沿って移動
+		{
+			VECTOR2D Pos = m_PathChecker.GetNextPoint(m_Pos, &TargetPathPlanningIndex);
+			VECTOR2D Vec(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
+			float Length = std::hypotf(Vec.x, Vec.y);
+			if (Length > 0.5f) {
+				float speed = 0.1f;
+				Vec.x *= speed / Length;
+				Vec.y *= speed / Length;
+				m_Pos.x += Vec.x;
+				m_Pos.y += Vec.y;
+
+				m_Rad = std::atan2f(Vec.x, -Vec.y);
+
+				m_isMoving = true;
+			}
+			else {
+				m_Pos = Pos;
+				m_isMoving = false;
+			}
+			//
+			{
+				VECTOR2D Pos;
+				if (IsIntercept()) {
+					Pos = m_MoveAimPos;
+				}
+				else {
+					Pos = m_AimPos;
+				}
+
+				VECTOR2D AimVec(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
+				float AimLength = std::hypotf(AimVec.x, AimVec.y);
+				if (AimLength > 0.5f) {
+					m_Rad = std::atan2f(AimVec.x, -AimVec.y);
+				}
+			}
+		}
+		//近似
+		{
+			float Per = (1.f - 0.9f);
+			m_DrawPos.x = m_DrawPos.x + (m_Pos.x - m_DrawPos.x) * Per;
+			m_DrawPos.y = m_DrawPos.y + (m_Pos.y - m_DrawPos.y) * Per;
+
+			//m_isMoving = std::hypotf(m_Pos.x - m_DrawPos.x, m_Pos.y - m_DrawPos.y) >= 0.1f;
+
+			float Diff = m_DrawRad - m_Rad;
+			if (Diff > DX_PI_F) {
+				Diff -= DX_PI_F * 2;
+			}
+			if (Diff < -DX_PI_F) {
+				Diff += DX_PI_F * 2;
+			}
+			if (Diff > 1.f * DX_PI_F / 180.f) {
+				m_DrawRad -= 3.f * DX_PI_F / 180.f;
+			}
+			else if (Diff < -1.f * DX_PI_F / 180.f) {
+				m_DrawRad += 3.f * DX_PI_F / 180.f;
+			}
+
+			if (m_DrawRad > DX_PI_F) {
+				m_DrawRad -= DX_PI_F * 2;
+			}
+			if (m_DrawRad < -DX_PI_F) {
+				m_DrawRad += DX_PI_F * 2;
+			}
+		}
+		//
+		if (m_PointLightID != SIZE_MAX) {
+			VECTOR LightPos = drawcontrol->GetPointLight(m_PointLightID);
+			LightPos.x = m_DrawPos.x;
+			LightPos.y = m_DrawPos.y;
+			drawcontrol->SetPointLight(m_PointLightID, LightPos);
+		}
+		if (m_MoveTimer == 0.f) {
+			if (IsMoving()) {
+				m_MoveTimer = 0.5f;
+				auto* soundPool = SoundPool::Instance();
+				soundPool->Play(SoundEnum::Walk);
+			}
+		}
+		//ランダム形成
+		if (m_MoveTimerWave == 0.f) {
+			if (!m_isDraw && IsMoving()) {
+				m_MoveTimerWave = 0.5f;
+				m_FogMoveRandom.x = m_DrawPos.x + static_cast<float>(GetRand(200) - 100) / 100.f * 3.f;
+				m_FogMoveRandom.y = m_DrawPos.y + static_cast<float>(GetRand(200) - 100) / 100.f * 3.f;
+
+				m_FogMoveRandom.x = std::clamp(m_FogMoveRandom.x, 0.f, static_cast<float>(drawcontrol->GetMapXsize()));
+				m_FogMoveRandom.y = std::clamp(m_FogMoveRandom.y, 0.f, static_cast<float>(drawcontrol->GetMapYsize()));
+			}
+		}
+		//
+		m_IsShot = false;
+		m_ShotTimer += 1.f / BaseFrameRate;
+		if (m_ShotTimer > 0.1f) {
+			m_ShotTimer -= 0.1f;
+			m_IsShot = true;
+		}
+	}
+	void Draw() const noexcept {
+		auto* drawcontrol = DrawControl::Instance();
+		VECTOR EyeTargetPos = drawcontrol->GetCameraPos();
+		VECTOR Pos = drawcontrol->Get2DPos(m_DrawPos.x, m_DrawPos.y, 0.f);
+
+		if (m_IsAlive) {
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(128 * m_DrawAlpha));
+			SetDrawBright(150, 200, 255);
+			DrawCircleGauge((int)Pos.x, (int)Pos.y,
+				static_cast<double>(m_DrawRad * 100.f / (DX_PI_F * 2.f) + 70.f * 100.f / 360.f),
+				m_WatchHandle,
+				static_cast<double>(m_DrawRad * 100.f / (DX_PI_F * 2.f) - 70.f * 100.f / 360.f),
+				static_cast<double>(EyeTargetPos.z * 100.f / 128.f)
+			);
+			SetDrawBright(255, 255, 255);
+		}
+		if (!m_IsAlive) {
+			SetDrawBright(128, 128, 128);
+		}
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * m_DrawAlpha));
+		DrawRotaGraph((int)Pos.x, (int)Pos.y, static_cast<double>(EyeTargetPos.z), static_cast<double>(m_DrawRad), m_GraphHandle, TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		if (!m_IsAlive) {
+			SetDrawBright(255, 255, 255);
+		}
+		if (m_MoveTimerWave > 0.f) {
+			VECTOR Pos2 = drawcontrol->Get2DPos(m_FogMoveRandom.x, m_FogMoveRandom.y, 0.f);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(128 * m_MoveTimerWave / 0.5f));
+			DrawCircle((int)Pos2.x, (int)Pos2.y, (int)(32.f * (0.5f - m_MoveTimerWave) / 0.5f), GetColor(192, 192, 192), FALSE, 2);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		}
+	}
+	void Dispose() noexcept {
+		DeleteGraph(m_GraphHandle);
+		DeleteGraph(m_WatchHandle);
+		m_PathChecker.Dispose();
+	}
+};
+
+
+class AmmoEffectPool {
+	struct Ammo {
+		VECTOR2D m_Repos{};
+		VECTOR2D m_Pos{};
+		VECTOR2D m_Vec{};
+		float m_Timer{};
+		float m_HitFlash{};
+	public:
+		bool IsActive() const noexcept { return m_Timer > 0.f; }
+	};
+private:
+	std::vector<Ammo> m_Ammo;
+public:
+	void Add(VECTOR2D Pos, VECTOR2D Vec) noexcept {
+		//正規化
+		float Length = std::hypotf(Vec.x, Vec.y);
+		if (Length != 0.f) {
+			Vec.x = Vec.x / Length;
+			Vec.y = Vec.y / Length;
+		}
+		else {
+			Vec.x = 0.f;
+			Vec.y = 1.f;
+		}
+		for (auto& a : m_Ammo) {
+			if (a.IsActive() || a.m_HitFlash > 0.f) { continue; }
+			a.m_Pos = Pos;
+			a.m_Repos = Pos;
+			a.m_Vec = Vec;
+			a.m_Timer = 1.f;
+			return;
+		}
+		m_Ammo.emplace_back();
+		auto& a = m_Ammo.back();
+		a.m_Pos = Pos;
+		a.m_Repos = Pos;
+		a.m_Vec = Vec;
+		a.m_Timer = 1.f;
+	}
+public:
+	void Init() noexcept {
+		m_Ammo.resize(32);
+		for (auto& a : m_Ammo) {
+			a.m_Timer = 0.f;
+			a.m_HitFlash = 0.f;
+		}
+	}
+	void Update() noexcept {
+		auto* drawcontrol = DrawControl::Instance();
+		for (auto& a : m_Ammo) {
+			if (a.m_Timer > 0.f) {
+				a.m_Timer = std::max(a.m_Timer - 1.f / BaseFrameRate, 0.f);
+				a.m_Repos = a.m_Pos;
+				a.m_Pos.x += a.m_Vec.x * (25.f / BaseFrameRate);
+				a.m_Pos.y += a.m_Vec.y * (25.f / BaseFrameRate);
+				/*
+				if (!drawcontrol->CheckPolyMove(a.m_Repos, a.m_Pos)) {
+					a.m_Timer = 0.f;
+				}
+				//*/
+				if (a.m_Timer == 0.f) {
+					a.m_HitFlash = 0.3f;
+				}
+			}
+			if (a.m_HitFlash > 0.f) {
+				a.m_HitFlash = std::max(a.m_HitFlash - 1.f / BaseFrameRate, 0.f);
+			}
+		}
+	}
+	void Draw() noexcept {
+		auto* drawcontrol = DrawControl::Instance();
+		for (auto& a : m_Ammo) {
+			if (a.m_Timer > 0.f) {
+				VECTOR MP = drawcontrol->Get2DPos(a.m_Repos.x, a.m_Repos.y, 0.f);
+				VECTOR MP2 = drawcontrol->Get2DPos(a.m_Pos.x, a.m_Pos.y, 0.f);
+				DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, GetColor(192, 192, 0), 3);
+			}
+			if (a.m_HitFlash > 0.f) {
+				VECTOR MP = drawcontrol->Get2DPos(a.m_Pos.x, a.m_Pos.y, 0.f);
+				VECTOR MP2 = drawcontrol->Get2DPos(a.m_Pos.x, a.m_Pos.y + 1.f, 0.f);
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * a.m_HitFlash / 0.3f));
+				DrawCircle((int)MP.x, (int)MP.y, (int)((MP2.y - MP.y) * (0.3f - a.m_HitFlash) / 0.3f), GetColor(192, 192, 0), false, 3);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			}
+		}
+	}
+	void Dispose() noexcept {
+		m_Ammo.clear();
+	}
+};
+

@@ -1,221 +1,15 @@
 
 #include "Sub.hpp"
 
-constexpr float BaseFrameRate = 60.f;
-
-enum class CharaType {
-	Team,
-	TeamNPC,
-	Enemy,
-};
-
-class CharacterBase {
-private:
-	CharaType	m_CharaType{};
-	int			m_GraphHandle{};
-	int			m_WatchHandle{};
-
-	bool		m_CanAttack{ true };
-	bool		m_isDraw{ true };
-
-	bool		m_isMoving{ false };
-	float		m_DrawAlpha{ 1.f };
-
-	size_t		m_PointLightID{ SIZE_MAX };
-	VECTOR2D	m_Pos{};
-	VECTOR2D	m_DrawPos{};
-	VECTOR2D	m_AimPos{};
-	VECTOR2D	m_TargetPos{};
-	float		m_Rad{};
-	float		m_DrawRad{};
-	bool		m_isTargetChanged = false;
-
-	int										TargetPathPlanningIndex{ -1 };		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
-	PathChecker								m_PathChecker{};
-
-	VECTOR2D	m_FogMoveRandom{};
-	float		m_MoveTimer = 0.f;
-public:
-	std::array<int, 5>	m_WayPointList{};
-public:
-	const auto GetCharaType() const noexcept { return m_CharaType; }
-	const auto GetPos() const noexcept { return m_DrawPos; }
-	const auto GetRad() const noexcept { return m_DrawRad; }
-	const auto IsMoving() const noexcept { return m_isMoving; }
-
-	void SetCanAttack(bool CanAttack) noexcept {
-		m_CanAttack = CanAttack;
-	}
-	void SetDraw(bool isDraw) noexcept {
-		m_isDraw = isDraw;
-	}
-	void SetAimPos(VECTOR2D Pos) noexcept {
-		m_AimPos = Pos;
-	}
-	void SetTargetPos(VECTOR2D Pos) noexcept {
-		m_TargetPos = Pos;
-		m_isTargetChanged = true;
-	}
-public:
-	void Init(VECTOR2D Pos, float Yrad, CharaType Type) noexcept {
-		auto* drawcontrol = DrawControl::Instance();
-		m_Pos = Pos;
-		m_DrawPos = Pos;
-
-		m_Rad = Yrad;
-		m_DrawRad = Yrad;
-		SetAimPos(Pos);
-		SetTargetPos(Pos);
-		m_CharaType = Type;
-		switch (m_CharaType) {
-		case CharaType::Team:
-			m_PointLightID = drawcontrol->AddPointLight(VGet(Pos.x, Pos.y, 0.f));
-			m_GraphHandle = LoadGraph("data/TeamChara.bmp");
-			break;
-		case CharaType::TeamNPC:
-			m_GraphHandle = LoadGraph("data/TeamCharaNPC.bmp");
-			break;
-		case CharaType::Enemy:
-			m_GraphHandle = LoadGraph("data/EnemyChara.bmp");
-			break;
-		default:
-			break;
-		}
-		m_WatchHandle = LoadGraph("data/Watch.png");
-
-		for (auto& w : m_WayPointList) {
-			w = -1;
-		}
-		m_isMoving = false;
-	}
-	void Update() noexcept {
-		auto* drawcontrol = DrawControl::Instance();
-
-		m_DrawAlpha = std::clamp(m_DrawAlpha + (m_isDraw ? 1.f / 0.1f : -1.f) / BaseFrameRate, 0.f, 1.f);
-
-		if (m_isTargetChanged) {
-			m_isTargetChanged = false;
-			//経路探索しなおす
-			m_PathChecker.Dispose();
-			if (m_PathChecker.Init(m_Pos, m_TargetPos)) {	// 指定の２点の経路情報を探索する
-				TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
-			}
-		}
-		//経路に沿って移動
-		{
-			VECTOR2D Pos = m_PathChecker.GetNextPoint(m_Pos, &TargetPathPlanningIndex);
-			VECTOR2D Vec(Pos.x - m_Pos.x, Pos.y - m_Pos.y);
-			float Length = std::hypotf(Vec.x, Vec.y);
-			if (Length > 0.5f) {
-				float speed = 0.1f;
-				Vec.x *= speed / Length;
-				Vec.y *= speed / Length;
-				m_Pos.x += Vec.x;
-				m_Pos.y += Vec.y;
-
-				m_Rad = std::atan2f(Vec.x, -Vec.y);
-
-				m_isMoving = true;
-			}
-			else {
-				m_Pos = Pos;
-				m_isMoving = false;
-			}
-			//
-			{
-				VECTOR2D AimVec(m_AimPos.x - m_Pos.x, m_AimPos.y - m_Pos.y);
-				float AimLength = std::hypotf(AimVec.x, AimVec.y);
-				if (AimLength > 0.5f) {
-					m_Rad = std::atan2f(AimVec.x, -AimVec.y);
-				}
-			}
-		}
-		//近似
-		{
-			float Per = (1.f - 0.9f);
-			m_DrawPos.x = m_DrawPos.x + (m_Pos.x - m_DrawPos.x) * Per;
-			m_DrawPos.y = m_DrawPos.y + (m_Pos.y - m_DrawPos.y) * Per;
-
-			//m_isMoving = std::hypotf(m_Pos.x - m_DrawPos.x, m_Pos.y - m_DrawPos.y) >= 0.1f;
-
-			float Diff = m_DrawRad - m_Rad;
-			if (Diff > DX_PI_F) {
-				Diff -= DX_PI_F * 2;
-			}
-			if (Diff < -DX_PI_F) {
-				Diff += DX_PI_F * 2;
-			}
-			if (Diff > 1.f * DX_PI_F / 180.f) {
-				m_DrawRad -= 3.f * DX_PI_F / 180.f;
-			}
-			else if (Diff < -1.f * DX_PI_F / 180.f) {
-				m_DrawRad += 3.f * DX_PI_F / 180.f;
-			}
-
-			if (m_DrawRad > DX_PI_F) {
-				m_DrawRad -= DX_PI_F * 2;
-			}
-			if (m_DrawRad < -DX_PI_F) {
-				m_DrawRad += DX_PI_F * 2;
-			}
-		}
-		//
-		if (m_PointLightID != SIZE_MAX) {
-			VECTOR LightPos = drawcontrol->GetPointLight(m_PointLightID);
-			LightPos.x = m_DrawPos.x;
-			LightPos.y = m_DrawPos.y;
-			drawcontrol->SetPointLight(m_PointLightID, LightPos);
-		}
-		//ランダム形成
-		if (m_MoveTimer == 0.f) {
-			if (!m_isDraw && IsMoving()) {
-				m_MoveTimer = 0.5f;
-				m_FogMoveRandom.x = m_DrawPos.x + static_cast<float>(GetRand(200) - 100) / 100.f * 3.f;
-				m_FogMoveRandom.y = m_DrawPos.y + static_cast<float>(GetRand(200) - 100) / 100.f * 3.f;
-
-				m_FogMoveRandom.x = std::clamp(m_FogMoveRandom.x, 0.f, static_cast<float>(drawcontrol->GetMapXsize()));
-				m_FogMoveRandom.y = std::clamp(m_FogMoveRandom.y, 0.f, static_cast<float>(drawcontrol->GetMapYsize()));
-			}
-		}
-		else {
-			m_MoveTimer = std::max(m_MoveTimer - 1.f / BaseFrameRate, 0.f);
-		}
-	}
-	void Draw() const noexcept {
-		auto* drawcontrol = DrawControl::Instance();
-		VECTOR EyeTargetPos = drawcontrol->GetCameraPos();
-		VECTOR Pos = drawcontrol->Get2DPos(m_DrawPos.x, m_DrawPos.y, 0.f);
-
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(128 * m_DrawAlpha));
-		SetDrawBright(150, 200, 255);
-		DrawCircleGauge((int)Pos.x, (int)Pos.y,
-			static_cast<double>(m_DrawRad * 100.f / (DX_PI_F * 2.f) + 45.f * 100.f / 360.f),
-			m_WatchHandle,
-			static_cast<double>(m_DrawRad * 100.f / (DX_PI_F * 2.f) - 45.f * 100.f / 360.f),
-			static_cast<double>(EyeTargetPos.z * 100.f / 128.f)
-		);
-		SetDrawBright(255, 255, 255);
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * m_DrawAlpha));
-		DrawRotaGraph((int)Pos.x, (int)Pos.y, static_cast<double>(EyeTargetPos.z), static_cast<double>(m_DrawRad), m_GraphHandle, TRUE);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-		if (m_MoveTimer > 0.f) {
-			VECTOR Pos2 = drawcontrol->Get2DPos(m_FogMoveRandom.x, m_FogMoveRandom.y, 0.f);
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(128 * m_MoveTimer / 0.5f));
-			DrawCircle((int)Pos2.x, (int)Pos2.y, (int)(32.f * (0.5f - m_MoveTimer) / 0.5f), GetColor(192, 192, 192), FALSE, 2);
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-		}
-	}
-	void Dispose() noexcept {
-		DeleteGraph(m_GraphHandle);
-		DeleteGraph(m_WatchHandle);
-		m_PathChecker.Dispose();
-	}
-};
-
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto maincontrol = std::make_unique<DXDraw>();
 	DrawControl::Create(maincontrol->GetDispX(), maincontrol->GetDispY());
+	SoundPool::Create();
 	auto* drawcontrol = DrawControl::Instance();
+	auto* soundPool = SoundPool::Instance();
+	AmmoEffectPool AmmoEffect;
+
+	AmmoEffect.Init();
 	//設定
 	//マップデータ作成
 	int Width = 24;
@@ -288,10 +82,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	}
 
 	std::array<CharacterBase, 8> Chara;
-	Chara.at(0).Init(VECTOR2D(0.f, 0.f), DX_PI_F, CharaType::Team);
-	Chara.at(1).Init(VECTOR2D(1.f, 0.f), DX_PI_F, CharaType::Team);
-	Chara.at(2).Init(VECTOR2D(2.f, 0.f), DX_PI_F, CharaType::TeamNPC);
-	Chara.at(3).Init(VECTOR2D(3.f, 0.f), DX_PI_F, CharaType::TeamNPC);
+	Chara.at(0).Init(VECTOR2D(0.f, 0.f), DX_PI_F, CharaType::TeamNPC);
+	Chara.at(1).Init(VECTOR2D(1.f, 0.f), DX_PI_F, CharaType::TeamNPC);
+	Chara.at(2).Init(VECTOR2D(2.f, 0.f), DX_PI_F, CharaType::Team);
+	Chara.at(3).Init(VECTOR2D(3.f, 0.f), DX_PI_F, CharaType::Team);
 	Chara.at(4).Init(VECTOR2D(static_cast<float>(Width - 1 - 0), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
 	Chara.at(5).Init(VECTOR2D(static_cast<float>(Width - 1 - 1), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
 	Chara.at(6).Init(VECTOR2D(static_cast<float>(Width - 1 - 2), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
@@ -307,12 +101,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	bool PrevMouseLeftPress{};
 	VECTOR2D MouseLeftHoldPos{};
 	bool LeftPressCancel{};
+
+	float TotalTimer = 60.f;
+	float Timer = TotalTimer;
 	//メインループ開始
 	LONGLONG NowTime = GetNowHiPerformanceCount();//現時点の経過秒数を得る
 	while (ProcessMessage() == 0) {
 		LONGLONG WaitTime = GetNowHiPerformanceCount();//現時点の経過秒数を得る
 		if ((WaitTime - NowTime) > (1000 * 1000 / BaseFrameRate)) {
-			NowTime = WaitTime - ((WaitTime - NowTime) - (1000 * 1000 / BaseFrameRate));
+			NowTime = WaitTime - ((WaitTime - NowTime) - (1000LL * 1000 / static_cast<LONGLONG>(BaseFrameRate)));
+			if (m_MovingCharacter) {
+				Timer = std::max(Timer - 1.f / BaseFrameRate, 0.f);
+			}
 			//カメラの位置を設定
 			{
 				float speed = 0.08f;
@@ -329,7 +129,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					EyeTargetPos.x += speed;
 				}
 				if (GetWindowActiveFlag() && CheckHitKey(KEY_INPUT_LSHIFT) != 0) {
-					if (m_NowMoveCharacter == 0 || m_NowMoveCharacter == 1 || m_NowMoveCharacter == 2 || m_NowMoveCharacter == 3) {
+					if (!Chara.at(m_NowMoveCharacter).IsEnemy()) {
 						EyeTargetPos.x = Chara.at(m_NowMoveCharacter).GetPos().x;
 						EyeTargetPos.y = Chara.at(m_NowMoveCharacter).GetPos().y;
 					}
@@ -357,47 +157,104 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			}
 			for (auto& c : Chara) {
 				c.Update();
-			}
-
-			for (auto& en : Chara) {
-				if (en.GetCharaType() != CharaType::Enemy) { continue; }
-				bool CanAttack = false;
-				bool CanSee = false;
-				for (auto& tm : Chara) {
-					if (tm.GetCharaType() == CharaType::Enemy) { continue; }
-					bool ThroughWay = drawcontrol->CheckPolyMoveWidth(en.GetPos(), tm.GetPos(), 0.1f);
-					CanAttack |= ThroughWay;
-
-					VECTOR2D AimVec(en.GetPos().x - tm.GetPos().x, en.GetPos().y - tm.GetPos().y);
-					float AimLength = std::hypotf(AimVec.x, AimVec.y);
-					if (AimLength > 1.f) {
-						float Diff = tm.GetRad() - std::atan2f(AimVec.x, -AimVec.y);
-						if (Diff > DX_PI_F) {
-							Diff -= DX_PI_F * 2;
-						}
-						if (Diff < -DX_PI_F) {
-							Diff += DX_PI_F * 2;
-						}
-						CanSee |= (std::fabsf(Diff) <= 45.f * DX_PI_F / 180.f) && ThroughWay;
-					}
-					else {
-						CanSee |= ThroughWay;
-					}
-
-				}
-				en.SetCanAttack(CanAttack);
-				en.SetDraw(CanSee);
-				//en.SetDraw(true);
+				c.SetIntercept(false);
 			}
 			//
+			if (!Chara.at(m_NowMoveCharacter).IsAlive()) {
+				for (int loop = 0; loop < static_cast<int>(Chara.size()); ++loop) {
+					++m_NowMoveCharacter %= static_cast<int>(Chara.size());
+					if (Chara.at(m_NowMoveCharacter).IsAlive()) {
+						break;
+					}
+				}
+			}
 			if (m_MovingCharacter) {
 				if (!Chara.at(m_NowMoveCharacter).IsMoving()) {
-					++m_NowMoveCharacter %= static_cast<int>(Chara.size());
+					for (int loop = 0; loop < static_cast<int>(Chara.size()); ++loop) {
+						++m_NowMoveCharacter %= static_cast<int>(Chara.size());
+						if (Chara.at(m_NowMoveCharacter).IsAlive()) {
+							break;
+						}
+					}
 					m_MovingCharacter = false;
 				}
 			}
+			//射撃判定ついでに視認判定
+			if (m_MovingCharacter) {
+				for (auto& c : Chara) {
+					if (!c.IsAlive()) { continue; }
+					if (!c.IsEnemy()) { continue; }
+					c.SetDraw(false);
+					//c.SetDraw(true);
+				}
+				for (auto& c : Chara) {
+					if (!c.IsAlive()) { continue; }
+					int index = static_cast<int>(&c - &Chara.front());
+					bool IsPeeker = (m_NowMoveCharacter == static_cast<int>(&c - &Chara.front()));//移動中のキャラである
+					float Rad = 45.f * DX_PI_F / 180.f;
+					int TargetID = -1;
+					//見えている敵の中で自身が視線を通していて一番角度差が小さい敵を探す
+					for (auto& tgt : Chara) {
+						if (!tgt.IsAlive()) { continue; }
+						if (c.IsEnemy() == tgt.IsEnemy()) { continue; }
+						int indextgt = static_cast<int>(&tgt - &Chara.front());
+						if (!drawcontrol->CheckPolyMoveWidth(tgt.GetPos(), c.GetPos(), 0.1f)) { continue; }
+						VECTOR2D AimVec(tgt.GetPos().x - c.GetPos().x, tgt.GetPos().y - c.GetPos().y);
+						float AimLength = std::hypotf(AimVec.x, AimVec.y);
+						if (AimLength > 3.f) {
+							float Diff = c.GetRad() - std::atan2f(AimVec.x, -AimVec.y);
+							if (Diff > DX_PI_F) {
+								Diff -= DX_PI_F * 2;
+							}
+							if (Diff < -DX_PI_F) {
+								Diff += DX_PI_F * 2;
+							}
+							if (!(std::fabsf(Diff) <= 45.f * DX_PI_F / 180.f)) { continue; }
+							if (Rad > Diff) {
+								Rad = Diff;
+								TargetID = indextgt;
+							}
+							tgt.SetDraw(true);
+						}
+						else {
+							Rad = 0.f;
+							TargetID = indextgt;
+							tgt.SetDraw(true);
+						}
+					}
+					if (TargetID == -1) {
+						c.SetShotReset();
+						continue;
+					}
+					//その敵に向く
+					auto& tgt = Chara.at(TargetID);
+					c.SetMoveAimPos(tgt.GetPos());
+					c.SetIntercept(true);
+					//shot
+					if (c.IsShot()) {
+						//射撃エフェクトを出す
+						VECTOR2D Vec(tgt.GetPos().x - c.GetPos().x, tgt.GetPos().y - c.GetPos().y);
+						AmmoEffect.Add(c.GetPos(), Vec);
+						auto* soundPool = SoundPool::Instance();
+						soundPool->Play(SoundEnum::Shot);
+						//判定する
+						if (GetRand(100) < (IsPeeker ? 75 : 40)) {
+							//
+							tgt.Death(index);
+							soundPool->Play(SoundEnum::Hit);
+						}
+					}
+				}
+			}
+			//味方は強制表示
+			for (auto& c : Chara) {
+				if (!c.IsAlive()) { continue; }
+				if (c.IsEnemy()) { continue; }
+				c.SetDraw(true);
+			}
 			//敵行動
 			for (auto& en : Chara) {
+				if (!en.IsAlive()) { continue; }
 				if (en.GetCharaType() == CharaType::Team) { continue; }
 				bool CheckTarget = false;
 				/*
@@ -420,7 +277,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				}
 				if (!CheckTarget) { continue; }
 				int X{}, Y{};
-				float LengthReq = 12.f;
+				float LengthReq = 9.f;
 				for (int x = 0; x < Width; x++) {
 					for (int y = 0; y < Height; y++) {
 						if ((drawcontrol->SetTileData(x, y)->Height == 0) && (drawcontrol->SetTileData(x, y)->WayPointRad != -1)) {
@@ -434,6 +291,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 								}
 								//違うルートを通る
 								for (auto& en2 : Chara) {
+									if (!en2.IsAlive()) { continue; }
 									if (en2.GetCharaType() == CharaType::Team) { continue; }
 									if (&en == &en2) { continue; }
 									if (drawcontrol->SetTileData(x, y)->GetIndex() == en2.m_WayPointList.at(0)) {
@@ -453,14 +311,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 								if (Diff < -DX_PI_F) {
 									Diff += DX_PI_F * 2;
 								}
-								if (!(std::fabsf(Diff) <= 60.f * DX_PI_F / 180.f)) {
+								if (!(std::fabsf(Diff) <= 70.f * DX_PI_F / 180.f)) {
 									continue;
 								}
 							}
-							/*
+							//*
 							{
+								float NowRad = 
+									(en.m_WayPointList.at(0) == -1) ?
+									en.GetRad() :
+									static_cast<float>(drawcontrol->GetTileData(en.m_WayPointList.at(0)).WayPointRad) * DX_PI_F / 180.f;
+
 								float rad = static_cast<float>(drawcontrol->SetTileData(x, y)->WayPointRad) * DX_PI_F / 180.f;
-								float Diff = en.GetRad() - rad;
+								float Diff = NowRad - rad;
 								if (Diff > DX_PI_F) {
 									Diff -= DX_PI_F * 2;
 								}
@@ -481,9 +344,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 						}
 					}
 				}
-				if (LengthReq != 12.f) {
+				if (LengthReq != 9.f) {
 					for (int loop = static_cast<int>(en.m_WayPointList.size()) - 1; loop >= 1; --loop) {
-						en.m_WayPointList.at(loop) = en.m_WayPointList.at(loop - 1);
+						en.m_WayPointList.at(loop) = en.m_WayPointList.at(static_cast<size_t>(loop - 1));
 					}
 
 					en.m_WayPointList.at(0) = drawcontrol->SetTileData(X, Y)->GetIndex();
@@ -491,9 +354,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					float rad = static_cast<float>(drawcontrol->SetTileData(X, Y)->WayPointRad) * DX_PI_F / 180.f;
 					VECTOR2D Vec(std::sin(rad), std::cos(rad));
 					en.SetAimPos(VECTOR2D(static_cast<float>(X) + Vec.x, static_cast<float>(Y) + Vec.y));
+					en.SetMoveAimPos(VECTOR2D(static_cast<float>(X) + Vec.x, static_cast<float>(Y) + Vec.y));
 				}
 			}
-
 			//マウス座標を取得しておく
 			int MX = 0;
 			int MY = 0;
@@ -504,16 +367,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			VECTOR2D MousePos(static_cast<float>(MX), static_cast<float>(MY));
 			//操作
 			if (!m_MovingCharacter) {
-				if ((m_NowMoveCharacter == 0 || m_NowMoveCharacter == 1)) {
-					int NearCharaID = -1;
-					for (auto& c : Chara) {
-						if (std::fabsf(MousePos.x - c.GetPos().x) < 0.5f && std::fabsf(MousePos.y - c.GetPos().y) < 0.5f) {
-							NearCharaID = static_cast<int>(&c - &Chara.front());
-							break;
-						}
-					}
+				if (Chara.at(m_NowMoveCharacter).GetCharaType()==CharaType::Team) {
 					float Len = std::hypotf(MousePos.x - Chara.at(m_NowMoveCharacter).GetPos().x, MousePos.y - Chara.at(m_NowMoveCharacter).GetPos().y);
-					bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && (NearCharaID == -1 || NearCharaID == m_NowMoveCharacter));
+					bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0);
 
 					if (GetWindowActiveFlag() && (GetMouseInput() & MOUSE_INPUT_RIGHT) != 0) {
 						LeftPressCancel = true;
@@ -521,7 +377,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					bool LMP = (GetWindowActiveFlag() && (GetMouseInput() & MOUSE_INPUT_LEFT) != 0);
 					if (LMP && !LeftPressCancel) {
 						if (!PrevMouseLeftPress) {
-							if (!IsActivePlace || Len > 12.f) {
+							if (!IsActivePlace || Len > 9.f) {
 								LeftPressCancel = true;
 							}
 							MouseLeftHoldPos = MousePos;
@@ -532,6 +388,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 							if (!LeftPressCancel) {
 								if (IsActivePlace) {
 									Chara.at(m_NowMoveCharacter).SetAimPos(MousePos);
+									Chara.at(m_NowMoveCharacter).SetMoveAimPos(MousePos);
 									Chara.at(m_NowMoveCharacter).SetTargetPos(MouseLeftHoldPos);
 									m_MovingCharacter = true;
 								}
@@ -547,8 +404,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					PrevMouseLeftPress = false;
 				}
 			}
-			printfDx("[m_NowMoveCharacter]%d\n", m_NowMoveCharacter);
 			//
+			AmmoEffect.Update();
 			drawcontrol->Execute();
 			//描画
 			SetDrawScreen(DX_SCREEN_BACK);
@@ -556,22 +413,37 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			{
 				//背景
 				drawcontrol->Draw(maincontrol->GetDispX(), maincontrol->GetDispY());
+				//弾
+				AmmoEffect.Draw();
 				//キャラ
 				for (auto& c : Chara) {
 					c.Draw();
 				}
+				/*
+				for (int x = 0; x < Width; x++) {
+					for (int y = 0; y < Height; y++) {
+						if (drawcontrol->SetTileData(x, y)->WayPointRad != -1) {
+							VECTOR MP = drawcontrol->Get2DPos(x, y, 0.f);
+							DrawCircle((int)MP.x, (int)MP.y, 16, GetColor(0, 255, 0), false, 3);
+
+							float rad = static_cast<float>(drawcontrol->SetTileData(x, y)->WayPointRad) * DX_PI_F / 180.f;
+							VECTOR MP2{};
+							VECTOR2D Vec(std::sin(rad), std::cos(rad));
+							float Length = std::hypotf(Vec.x, Vec.y);
+							if (Length > 0.5f) {
+								MP2.x = MP.x + Vec.x / Length * 64.f;
+								MP2.y = MP.y + Vec.y / Length * 64.f;
+							}
+							DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, GetColor(0, 255, 0), 3);
+						}
+					}
+				}
+				//*/
 				//カーソル
 				if (!m_MovingCharacter) {
-					if ((m_NowMoveCharacter == 0 || m_NowMoveCharacter == 1)) {
-						int NearCharaID = -1;
-						for (auto& c : Chara) {
-							if (std::fabsf(MousePos.x - c.GetPos().x) < 0.5f && std::fabsf(MousePos.y - c.GetPos().y) < 0.5f) {
-								NearCharaID = static_cast<int>(&c - &Chara.front());
-								break;
-							}
-						}
+					if (Chara.at(m_NowMoveCharacter).GetCharaType() == CharaType::Team) {
 						float Len = std::hypotf(MousePos.x - Chara.at(m_NowMoveCharacter).GetPos().x, MousePos.y - Chara.at(m_NowMoveCharacter).GetPos().y);
-						bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && (NearCharaID == -1 || NearCharaID == m_NowMoveCharacter));
+						bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && Len < 9.f);
 
 
 						if (PrevMouseLeftPress && !LeftPressCancel) {
@@ -593,49 +465,77 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 							DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), 3);
 						}
 						else {
-							if (IsActivePlace && Len < 12.f) {
+							if (IsActivePlace) {
 								VECTOR MP = drawcontrol->Get2DPos(MousePos.x, MousePos.y, 0.f);
 								DrawCircle((int)MP.x, (int)MP.y, 16, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
 							}
 							{
 								VECTOR MP = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y, 0.f);
-								VECTOR MP2 = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y + 12.f, 0.f);
-								DrawCircle((int)MP.x, (int)MP.y, (MP2.y- MP.y), IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
+								VECTOR MP2 = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y + 9.f, 0.f);
+								DrawCircle((int)MP.x, (int)MP.y, (int)(MP2.y - MP.y), IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
 							}
 						}
-						/*
-						for (int x = 0; x < Width; x++) {
-							for (int y = 0; y < Height; y++) {
-								if (drawcontrol->SetTileData(x, y)->WayPointRad != -1) {
-									VECTOR MP = drawcontrol->Get2DPos(x, y, 0.f);
-									DrawCircle((int)MP.x, (int)MP.y, 16, GetColor(0, 255, 0), false, 3);
-
-									float rad = static_cast<float>(drawcontrol->SetTileData(x, y)->WayPointRad) * DX_PI_F / 180.f;
-									VECTOR MP2{};
-									VECTOR2D Vec(std::sin(rad), std::cos(rad));
-									float Length = std::hypotf(Vec.x, Vec.y);
-									if (Length > 0.5f) {
-										MP2.x = MP.x + Vec.x / Length * 64.f;
-										MP2.y = MP.y + Vec.y / Length * 64.f;
-									}
-									DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, GetColor(0, 255, 0), 3);
-								}
-							}
-						}
-						//*/
 					}
 				}
+				//操作キャラ
+				if (Chara.at(m_NowMoveCharacter).IsDraw()) {
+					VECTOR MP = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y, 0.f);
+					DrawCircle((int)MP.x, (int)MP.y, 32, GetColor(255, 2550, 0), false, 3);
+				}
+				//
+				//Timer
+				{
+					unsigned int Color = 0;
+					bool IsDraw = true;
+
+					Color = GetColor(0, 255, 0);
+					if (Timer < TotalTimer * 1.f / 3.f) {
+						Color = GetColor(255, 0, 0);
+					}
+					if (m_MovingCharacter) {
+						IsDraw = (static_cast<int>(Timer * 10.f) % 10 > 5);
+						Color = GetColor(255, 255, 0);
+					}
+					if (IsDraw) {
+						char Text[64] = "";
+						sprintfDx(Text, "%d:%5.2f", static_cast<int>(Timer / 60.f), Timer - static_cast<int>(Timer / 60.f) * 60.f);
+						DrawString(32, 32, Text, Color, GetColor(0, 0, 0));
+					}
+				}
+				//turn
+				switch (Chara.at(m_NowMoveCharacter).GetCharaType()) {
+				case CharaType::Team:
+					if (!m_MovingCharacter) {
+						DrawString(32, 32 + 32, "あなたの操作フェーズです", GetColor(255, 255, 0), GetColor(0, 0, 0));
+					}
+					break;
+				case CharaType::TeamNPC:
+					DrawString(32, 32 + 32, "味方の操作フェーズです", GetColor(0, 255, 0), GetColor(0, 0, 0));
+					break;
+				case CharaType::Enemy:
+					DrawString(32, 32 + 32, "敵のの操作フェーズです", GetColor(255, 0, 0), GetColor(0, 0, 0));
+					break;
+				default:
+					break;
+				}
+				//操作説明
+				DrawString(32, maincontrol->GetDispY() - 32 - 64, "移動操作 左クリック:移動指示 左クリック中に右クリック:キャンセル", GetColor(255, 255, 0), GetColor(0, 0, 0));
+				DrawString(32, maincontrol->GetDispY() - 32 - 32, "カメラ操作 左Shift:操作キャラをフォーカス　WASD:移動", GetColor(255, 255, 0), GetColor(0, 0, 0));
 				//デバッグ表示
+#if _DEBUG
 				printfDx("FPS:%4.1f\n", GetFPS());
 				printfDx("処理時間:%5.2fms\n", (float)(GetNowHiPerformanceCount() - WaitTime) / 1000.f);
+#endif
 			}
 		}
 		ScreenFlip();
 		clsDx();
 	}
+	AmmoEffect.Dispose();
 	for (auto& c : Chara) {
 		c.Dispose();
 	}
+	SoundPool::Release();
 	DrawControl::Release();
 
 	return 0;// ソフトの終了 
