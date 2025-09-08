@@ -946,7 +946,7 @@ private:
 
 	bool		m_IsAlive = true;
 public:
-	std::array<int, 5>	m_WayPointList{};
+	std::array<int, 7>	m_WayPointList{};
 public:
 	const auto GetCharaType() const noexcept { return m_CharaType; }
 	const auto IsEnemy() const noexcept { return m_CharaType == CharaType::Enemy; }
@@ -1225,8 +1225,8 @@ public:
 			if (a.m_Timer > 0.f) {
 				a.m_Timer = std::max(a.m_Timer - 1.f / BaseFrameRate, 0.f);
 				a.m_Repos = a.m_Pos;
-				a.m_Pos.x += a.m_Vec.x * (25.f / BaseFrameRate);
-				a.m_Pos.y += a.m_Vec.y * (25.f / BaseFrameRate);
+				a.m_Pos.x += a.m_Vec.x * (50.f / BaseFrameRate);
+				a.m_Pos.y += a.m_Vec.y * (50.f / BaseFrameRate);
 				/*
 				if (!drawcontrol->CheckPolyMove(a.m_Repos, a.m_Pos)) {
 					a.m_Timer = 0.f;
