@@ -946,7 +946,7 @@ private:
 
 	bool		m_IsAlive = true;
 public:
-	std::array<int, 7>	m_WayPointList{};
+	std::array<int, 10>	m_WayPointList{};
 public:
 	const auto GetCharaType() const noexcept { return m_CharaType; }
 	const auto IsEnemy() const noexcept { return m_CharaType == CharaType::Enemy; }
