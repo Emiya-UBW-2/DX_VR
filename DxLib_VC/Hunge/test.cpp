@@ -9,11 +9,27 @@ enum class EnumScene {
 class TitleScene {
 	int BufferHandle{ -1 };
 
+	int Image3Handle{ -1 };
+	int Image2Handle{ -1 };
+	int Image1Handle{ -1 };
+
+	int StartMX = -1;
+
 	int MX = 0;
 	int MY = 0;
+
+	float StartTimer = 0.f;
+	float EndTimer = 0.f;
+	bool isEnd = false;
 public:
 	void Init() noexcept {
 		BufferHandle = MakeScreen(1920, 1080, false);
+		Image3Handle = LoadGraph("data/title3.png");
+		Image2Handle = LoadGraph("data/title2.png");
+		Image1Handle = LoadGraph("data/title1.png");
+		StartTimer = 0.f;
+		EndTimer = 0.f;
+		StartMX = -1;
 	}
 	bool Update() noexcept {
 		auto* maincontrol = DXDraw::Instance();
@@ -21,6 +37,20 @@ public:
 		GetMousePoint(&MX, &MY);
 		MX = MX * 1920 / maincontrol->GetDispX();
 		MY = MY * 1080 / maincontrol->GetDispY();
+		if (StartMX == -1) {
+			StartMX = MX;
+		}
+		StartTimer = std::min(StartTimer + 1.f / BaseFrameRate, 1.f);
+		if (GetWindowActiveFlag() && CheckHitKeyAll()!=0) {
+			//start
+			isEnd = true;
+		}
+		if (isEnd) {
+			EndTimer = std::min(EndTimer + 1.f / BaseFrameRate, 2.f);
+			if (EndTimer >= 2.f) {
+				return false;
+			}
+		}
 
 		return true;
 	}
@@ -32,6 +62,27 @@ public:
 			SetDrawScreen(BufferHandle);
 			ClearDrawScreen();
 			{
+				int OffsetX = (MX- StartMX) * 100 / 1920;
+				DrawExtendGraph(OffsetX * 0, 0, 1920 + OffsetX * 0, 1080 + 0, Image3Handle, TRUE);
+				DrawExtendGraph(OffsetX * 1, 0, 1920 + OffsetX * 1, 1080 + 0, Image2Handle, TRUE);
+				DrawExtendGraph(OffsetX * 2, 0, 1920 + OffsetX * 2, 1080 + 0, Image1Handle, TRUE);
+
+				DrawBox(0, 0, OffsetX * 2, 1080, GetColor(0, 0, 0), TRUE);
+				DrawBox(1920 + OffsetX * 2, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+
+				char Text[64] = "Press Any Key";
+				DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 * 3 / 4, Text, GetColor(255, 0, 0), GetColor(0, 0, 0));
+			}
+
+			if (StartTimer < 1.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * std::clamp(1.f - StartTimer, 0.f, 1.f)));
+				DrawBox(0, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			}
+			if (EndTimer > 0.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * std::clamp(EndTimer, 0.f, 1.f)));
+				DrawBox(0, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 		}
 		SetDrawScreen(PrevScreen);
@@ -42,12 +93,16 @@ public:
 		}
 	}
 	void Dispose() noexcept {
+		DeleteGraph(BufferHandle);
+		DeleteGraph(Image3Handle);
+		DeleteGraph(Image2Handle);
+		DeleteGraph(Image1Handle);
 	}
 };
 
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
-	EnumScene NowScene = EnumScene::Main;
+	EnumScene NowScene = EnumScene::Title;
 
 	DXDraw::Create();
 	SetDefaultFontState("", 18, -1, -1, -1, 3);
