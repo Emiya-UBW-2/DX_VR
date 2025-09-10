@@ -37,11 +37,32 @@ private:
 public:
 	const auto GetDispX() const noexcept { return draw_x; }
 	const auto GetDispY() const noexcept { return draw_y; }
+public://シングルトン
+private:
+	static const DXDraw* m_Singleton;
 public:
+	static void Create() noexcept {
+		m_Singleton = new DXDraw();
+	}
+	static DXDraw* Instance(void) noexcept {
+		if (m_Singleton == nullptr) {
+			MessageBox(NULL, "Failed Instance Create", "", MB_OK);
+			exit(-1);
+		}
+		// if (m_Singleton == nullptr) { m_Singleton = new DXDraw(); }
+		return (DXDraw*)m_Singleton;
+	}
+	static void Release(void) noexcept {
+		delete m_Singleton;
+	}
+private:
 	//コンストラクタ
 	DXDraw(void) noexcept {
 		int DispXSize = GetSystemMetrics(SM_CXSCREEN);
 		int DispYSize = GetSystemMetrics(SM_CYSCREEN);
+
+		//DispXSize = 1280;
+		//DispYSize = 720;
 
 		SetOutApplicationLogValidFlag(false);           /*log*/
 		SetMainWindowText("game title");                /*タイトル*/
@@ -83,10 +104,50 @@ public:
 };
 
 
+class Rule {
+public://ゲッター
+	//タイルごとのデータポインタを取得
+	int GetPlayerAll() const noexcept { return 8; }
+	int GetPlayablePlayer() const noexcept { return 2; }
+public://シングルトン
+private:
+	static const Rule* m_Singleton;
+public:
+	static void Create() noexcept {
+		m_Singleton = new Rule();
+	}
+	static Rule* Instance(void) noexcept {
+		if (m_Singleton == nullptr) {
+			MessageBox(NULL, "Failed Instance Create", "", MB_OK);
+			exit(-1);
+		}
+		// if (m_Singleton == nullptr) { m_Singleton = new Rule(); }
+		return (Rule*)m_Singleton;
+	}
+	static void Release(void) noexcept {
+		delete m_Singleton;
+	}
+private:
+	//コンストラクタ
+	Rule() noexcept {
+	}
+	//デストラクタ
+	~Rule(void) noexcept {
+	}
+public:
+};
+
+
 enum class SoundEnum {
 	Walk,
 	Shot,
 	Hit,
+
+	Start,
+	End,
+
+	Env,
+
 	Max,
 };
 
@@ -94,6 +155,11 @@ static const char* SoundPath[static_cast<int>(SoundEnum::Max)] = {
 	"data/Sound/runfoot.wav",
 	"data/Sound/shot.wav",
 	"data/Sound/hit.wav",
+
+	"data/Sound/start.wav",
+	"data/Sound/end.wav",
+
+	"data/Sound/Envi.wav",
 };
 
 class SoundPool {
@@ -132,7 +198,7 @@ private:
 	//コンストラクタ
 	SoundPool(void) noexcept {
 		for (auto& b : m_Base) {
-			int index = &b - &m_Base.front();
+			int index = static_cast<int>(&b - &m_Base.front());
 			b = LoadSoundMem(SoundPath[index]);
 		}
 		m_Pool.resize(32);
@@ -151,6 +217,27 @@ private:
 		m_Pool.clear();
 	}
 public:
+	void PlayLoop(SoundEnum ID, int Pan = -256, int Size = -1) noexcept {
+		for (auto& p : m_Pool) {
+			if (p.m_DupricateID != -1) {
+				if (CheckSoundMem(p.m_DupricateID) == 1) { continue; }
+				p.Init();
+			}
+			p.m_DupricateID = DuplicateSoundMem(m_Base[static_cast<int>(ID)]);
+
+			ChangePanSoundMem((Pan == -256) ? 0 : Pan, p.m_DupricateID);
+			ChangeVolumeSoundMem((Size == -1) ? 255 : Size, p.m_DupricateID);
+			PlaySoundMem(p.m_DupricateID, DX_PLAYTYPE_LOOP, TRUE);
+			return;
+		}
+		m_Pool.emplace_back();
+		auto& p = m_Pool.back();
+		p.m_DupricateID = DuplicateSoundMem(m_Base[static_cast<int>(ID)]);
+
+		ChangePanSoundMem((Pan == -256) ? 0 : Pan, p.m_DupricateID);
+		ChangeVolumeSoundMem((Size == -1) ? 255 : Size, p.m_DupricateID);
+		PlaySoundMem(p.m_DupricateID, DX_PLAYTYPE_LOOP, TRUE);
+	}
 	void Play(SoundEnum ID, int Pan = -256, int Size = -1) noexcept {
 		for (auto& p : m_Pool) {
 			if (p.m_DupricateID != -1) {
@@ -1109,8 +1196,12 @@ public:
 		if (m_MoveTimer == 0.f) {
 			if (IsMoving()) {
 				m_MoveTimer = 0.5f;
+				auto* maincontrol = DXDraw::Instance();
 				auto* soundPool = SoundPool::Instance();
-				soundPool->Play(SoundEnum::Walk);
+				VECTOR MP = drawcontrol->Get2DPos(m_DrawPos.x, m_DrawPos.y, 0.f);
+				int Pan = 255 * (static_cast<int>(MP.x) - (1920 / 2)) / (1920 / 2);
+				int Scale = 255 - std::abs(255 * (static_cast<int>(std::hypotf(MP.x - static_cast<float>(1920 / 2), MP.y - static_cast<float> (1080 / 2)))) / (1920 / 2)) / 2;
+				soundPool->Play(SoundEnum::Walk, Pan, Scale);
 			}
 		}
 		//ランダム形成
@@ -1263,3 +1354,110 @@ public:
 	}
 };
 
+
+class SideLog {
+private://シングルトン
+	static const SideLog* m_Singleton;
+public:
+	static void Create(void) noexcept {
+		m_Singleton = new SideLog();
+	}
+	static SideLog* Instance(void) noexcept {
+		if (m_Singleton == nullptr) {
+			MessageBox(NULL, "Failed Instance Create", "", MB_OK);
+			exit(-1);
+		}
+		// if (m_Singleton == nullptr) { m_Singleton = new SideLog(); }
+		return (SideLog*)m_Singleton;
+	}
+	static void Release(void) noexcept {
+		delete m_Singleton;
+	}
+private:
+	struct Pool {
+		int kill = -1;
+		int death = -1;
+		float m_Timer{ -1.f };
+	public:
+		void Init() {
+			m_Timer = -1.f;
+		}
+	};
+private:
+	std::vector<Pool> m_Pool;
+private:
+	//コンストラクタ
+	SideLog(void) noexcept {
+		m_Pool.reserve(32);
+	}
+	//デストラクタ
+	~SideLog(void) noexcept {
+		m_Pool.clear();
+	}
+public:
+	void Add(int KillID, int DeathID) noexcept {
+		m_Pool.emplace_back();
+		auto& p = m_Pool.back();
+		p.m_Timer = 3.f;
+		p.kill = KillID;
+		p.death = DeathID;
+	}
+public:
+	void Update() noexcept {
+		for (int loop = 0; loop < m_Pool.size(); ++loop) {
+			auto& p = m_Pool.at(loop);
+			p.m_Timer = std::max(p.m_Timer - 1.f / BaseFrameRate, 0.f);
+			if (p.m_Timer == 0.f) {
+				m_Pool.erase(m_Pool.begin() + loop);
+				--loop;
+			}
+		}
+	}
+	void Draw(int X, int Y) noexcept {
+		auto* rule = Rule::Instance();
+
+		int Max = static_cast<int>(m_Pool.size());
+
+		int Xpos = X;
+		int Ypos = Y;
+
+		int Xsize = 320;
+		int Ysize = 32;
+
+		Ypos -= (Ysize + 6) * Max;
+
+		for (auto& p : m_Pool) {
+			bool TeamWin = (p.kill < rule->GetPlayerAll() / 2);
+			Xpos = X;
+			float Per = 0.f;
+			if (p.m_Timer > 2.75f) {
+				Per = (p.m_Timer - 2.75f) / (3.f - 2.75f);
+			}
+			if (p.m_Timer < 0.25f) {
+				Per = 1.f - (p.m_Timer - 0.f) / (0.25f - 0.f);
+			}
+			Xpos -= static_cast<int>((Per * Per) * Xsize);
+
+			DrawBox(Xpos, Ypos - 1, Xpos + Xsize, Ypos + Ysize + 1, GetColor(255, 255, 255), TRUE);
+			DrawBox(Xpos, Ypos, Xpos + Xsize / 2, Ypos + Ysize, TeamWin ? GetColor(0, 255, 0) : GetColor(255, 0, 0), TRUE);
+			DrawBox(Xpos + Xsize / 2, Ypos, Xpos + Xsize, Ypos + Ysize, TeamWin ? GetColor(255, 0, 0) : GetColor(0, 255, 0), TRUE);
+			char Text[64] = "";
+			if (TeamWin) {
+				sprintfDx(Text, "Team%d", p.kill);
+			}
+			else {
+				sprintfDx(Text, "Enemy%d", p.kill);
+			}
+			DrawString(Xpos + Xsize / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) - 8, Ypos + Ysize / 2 - 18 / 2, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+
+			if (TeamWin) {
+				sprintfDx(Text, "Enemy%d", p.death);
+			}
+			else {
+				sprintfDx(Text, "Team%d", p.death);
+			}
+			DrawString(Xpos + Xsize / 2 + 8, Ypos + Ysize / 2 - 18 / 2, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+			Ypos += Ysize + 6;
+		}
+	}
+};

@@ -10,12 +10,17 @@ enum class Match {
 };
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
-	auto maincontrol = std::make_unique<DXDraw>();
-	DrawControl::Create(maincontrol->GetDispX(), maincontrol->GetDispY());
+	DXDraw::Create();
+	auto* maincontrol = DXDraw::Instance();
+	DrawControl::Create(1920, 1080);
 	SetDefaultFontState("", 18, -1, -1, -1, 3);
 	SoundPool::Create();
+	SideLog::Create();
+	Rule::Create();
 	auto* drawcontrol = DrawControl::Instance();
 	auto* soundPool = SoundPool::Instance();
+	auto* sideLog = SideLog::Instance();
+	auto* rule = Rule::Instance();
 	AmmoEffectPool AmmoEffect;
 
 	AmmoEffect.Init();
@@ -90,15 +95,27 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		drawcontrol->SetupLink();
 	}
 
-	std::array<CharacterBase, 8> Chara;
-	Chara.at(0).Init(VECTOR2D(0.f, 0.f), DX_PI_F, CharaType::TeamNPC);
-	Chara.at(1).Init(VECTOR2D(1.f, 0.f), DX_PI_F, CharaType::TeamNPC);
-	Chara.at(2).Init(VECTOR2D(2.f, 0.f), DX_PI_F, CharaType::TeamNPC);
-	Chara.at(3).Init(VECTOR2D(3.f, 0.f), DX_PI_F, CharaType::Team);
-	Chara.at(4).Init(VECTOR2D(static_cast<float>(Width - 1 - 0), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
-	Chara.at(5).Init(VECTOR2D(static_cast<float>(Width - 1 - 1), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
-	Chara.at(6).Init(VECTOR2D(static_cast<float>(Width - 1 - 2), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
-	Chara.at(7).Init(VECTOR2D(static_cast<float>(Width - 1 - 3), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
+	int BGGraphHandle = LoadGraph("data/bg.png");
+
+	int BufferHandle = MakeScreen(1920, 1080, false);
+
+	std::vector<CharacterBase> Chara;
+	Chara.resize(rule->GetPlayerAll());
+	for (int loop = 0; loop < rule->GetPlayerAll(); ++loop) {
+		if (loop < rule->GetPlayerAll() / 2 - rule->GetPlayablePlayer()) {
+			int Index = loop;
+			Chara.at(loop).Init(VECTOR2D(static_cast<float>(Index), 0.f), DX_PI_F, CharaType::TeamNPC);
+		}
+		else if (loop < rule->GetPlayerAll() / 2) {
+			int Index = loop;
+			Chara.at(loop).Init(VECTOR2D(static_cast<float>(Index), 0.f), DX_PI_F, CharaType::Team);
+		}
+		else {
+			int Index = loop - (rule->GetPlayerAll() / 2);
+			Chara.at(loop).Init(VECTOR2D(static_cast<float>(Width - 1 - Index), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
+		}
+	}
+
 
 	int m_NowMoveCharacter = 0;
 	bool m_MovingCharacter = false;
@@ -132,6 +149,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	float TotalTimer = 90.f;
 	float Timer = TotalTimer;
+
+	soundPool->PlayLoop(SoundEnum::Env);
 	//メインループ開始
 	LONGLONG NowTime = GetNowHiPerformanceCount();//現時点の経過秒数を得る
 	while (ProcessMessage() == 0) {
@@ -185,6 +204,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			VECTOR2D MousePos{};
 			//マウス座標を取得しておく
 			GetMousePoint(&MX, &MY);
+			MX = MX * 1920 / maincontrol->GetDispX();
+			MY = MY * 1080 / maincontrol->GetDispY();
+
 			VECTOR MPos = drawcontrol->GetPos2D(static_cast<float>(MX), static_cast<float>(MY));
 			MX = std::clamp(static_cast<int>(MPos.x + 0.5f), 0, Width);
 			MY = std::clamp(static_cast<int>(MPos.y + 0.5f), 0, Height);
@@ -215,12 +237,15 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 						{
 							if (Timer == 0.f) {
 								m_MatchNow = Match::Draw;
+								soundPool->Play(SoundEnum::End);
 							}
 							if (TeamAlive != 0 && EnemyAlive == 0) {
 								m_MatchNow = Match::TeamWin;
+								soundPool->Play(SoundEnum::End);
 							}
 							if (TeamAlive == 0 && EnemyAlive != 0) {
 								m_MatchNow = Match::EnemyWin;
+								soundPool->Play(SoundEnum::End);
 							}
 						}
 						for (auto& c : Chara) {
@@ -303,13 +328,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 									//射撃エフェクトを出す
 									VECTOR2D Vec(tgt.GetPos().x - c.GetPos().x, tgt.GetPos().y - c.GetPos().y);
 									AmmoEffect.Add(c.GetPos(), Vec);
-									auto* soundPool = SoundPool::Instance();
-									soundPool->Play(SoundEnum::Shot);
+									VECTOR MP = drawcontrol->Get2DPos(c.GetPos().x, c.GetPos().y, 0.f);
+									int Pan = 255 * (static_cast<int>(MP.x) - (1920 / 2)) / (1920 / 2);
+									int Scale = 255 - std::abs(255 * (static_cast<int>(std::hypotf(MP.x - static_cast<float>(1920 / 2), MP.y - static_cast<float> (1080 / 2)))) / (1920 / 2)) / 2;
+									soundPool->Play(SoundEnum::Shot, Pan, Scale);
 									//判定する
 									if (GetRand(100) < (IsPeeker ? 55 : 30)) {
 										//
 										tgt.Death(index);
 										soundPool->Play(SoundEnum::Hit);
+
+										sideLog->Add(index, TargetID);
 									}
 								}
 							}
@@ -504,11 +533,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					TeamAliveR = TeamAliveR + (static_cast<float>(TeamAlive) - TeamAliveR) * 0.1f;
 					EnemyAliveR = EnemyAliveR + (static_cast<float>(EnemyAlive) - EnemyAliveR) * 0.1f;
 				}
+				ReadyTimer = std::max(ReadyTimer - 1.f / BaseFrameRate, 0.f);
+
 				switch (m_MatchNow) {
 				case Match::Ready:
-					ReadyTimer = std::max(ReadyTimer - 1.f / BaseFrameRate, 0.f);
-					if (ReadyTimer == 0.f) {
+					if (ReadyTimer <= 1.f) {
 						m_MatchNow = Match::Game;
+						soundPool->Play(SoundEnum::Start);
 					}
 					break;
 				case Match::Draw:
@@ -519,227 +550,234 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				default:
 					break;
 				}
-				{
-					bool PressUp = GetWindowActiveFlag() && CheckHitKey(KEY_INPUT_UP) != 0;
-					bool PressDown = GetWindowActiveFlag() && CheckHitKey(KEY_INPUT_DOWN) != 0;
+				sideLog->Update();
+			}
+			{
+				bool PressUp = GetWindowActiveFlag() && CheckHitKey(KEY_INPUT_UP) != 0;
+				bool PressDown = GetWindowActiveFlag() && CheckHitKey(KEY_INPUT_DOWN) != 0;
 
-					if (PressUp && !PrevPressUp) {
-						switch (SpeedRate) {
-						case 0: SpeedRate = 1; break;
-						case 1: SpeedRate = 2; break;
-						case 2: SpeedRate = 4; break;
-						case 4: SpeedRate = 4; break;
-						default: break;
-						}
+				if (PressUp && !PrevPressUp) {
+					switch (SpeedRate) {
+					case 0: SpeedRate = 1; break;
+					case 1: SpeedRate = 2; break;
+					case 2: SpeedRate = 4; break;
+					case 4: SpeedRate = 4; break;
+					default: break;
 					}
-					if (PressDown && !PrevPressDown) {
-						switch (SpeedRate) {
-						case 0: SpeedRate = 0; break;
-						case 1: SpeedRate = 0; break;
-						case 2: SpeedRate = 1; break;
-						case 4: SpeedRate = 2; break;
-						default: break;
-						}
-					}
-					PrevPressUp = PressUp;
-					PrevPressDown = PressDown;
 				}
+				if (PressDown && !PrevPressDown) {
+					switch (SpeedRate) {
+					case 0: SpeedRate = 0; break;
+					case 1: SpeedRate = 0; break;
+					case 2: SpeedRate = 1; break;
+					case 4: SpeedRate = 2; break;
+					default: break;
+					}
+				}
+				PrevPressUp = PressUp;
+				PrevPressDown = PressDown;
 			}
 			drawcontrol->Execute();
 			//描画
-			SetDrawScreen(DX_SCREEN_BACK);
+			SetDrawScreen(BufferHandle);
 			ClearDrawScreen();
 			{
-				//背景
-				drawcontrol->Draw(maincontrol->GetDispX(), maincontrol->GetDispY());
-				//弾
-				AmmoEffect.Draw();
-				//キャラ
-				for (auto& c : Chara) {
-					if (c.IsAlive()) { continue; }
-					c.Draw();
-				}
-				for (auto& c : Chara) {
-					if (!c.IsAlive()) { continue; }
-					int index = static_cast<int>(&c - &Chara.front());
-					if (m_NowMoveCharacter == index) { continue; }
-					c.Draw();
-				}
-				if (Chara.at(m_NowMoveCharacter).IsAlive()) {
-					Chara.at(m_NowMoveCharacter).Draw();
-				}
-				/*
-				for (int x = 0; x < Width; x++) {
-					for (int y = 0; y < Height; y++) {
-						if (drawcontrol->SetTileData(x, y)->WayPointRad != -1) {
-							VECTOR MP = drawcontrol->Get2DPos(x, y, 0.f);
-							DrawCircle((int)MP.x, (int)MP.y, 16, GetColor(0, 255, 0), false, 3);
-
-							float rad = static_cast<float>(drawcontrol->SetTileData(x, y)->WayPointRad) * DX_PI_F / 180.f;
-							VECTOR MP2{};
-							VECTOR2D Vec(std::sin(rad), std::cos(rad));
-							float Length = std::hypotf(Vec.x, Vec.y);
-							if (Length > 0.5f) {
-								MP2.x = MP.x + Vec.x / Length * 64.f;
-								MP2.y = MP.y + Vec.y / Length * 64.f;
-							}
-							DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, GetColor(0, 255, 0), 3);
-						}
+				{
+					//背景
+					drawcontrol->Draw(1920, 1080);
+					//弾
+					AmmoEffect.Draw();
+					//キャラ
+					for (auto& c : Chara) {
+						if (c.IsAlive()) { continue; }
+						c.Draw();
 					}
-				}
-				//*/
-				if (ReadyTimer > 1.f) {
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * (ReadyTimer - 1.f) / 3.f));
-					DrawBox(0, 0, maincontrol->GetDispX(), maincontrol->GetDispY(), GetColor(0, 0, 0), TRUE);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				}
-				if (EndTimer > 1.f) {
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * (EndTimer - 1.f)));
-					DrawBox(0, 0, maincontrol->GetDispX(), maincontrol->GetDispY(), GetColor(0, 0, 0), TRUE);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				}
-				if (m_MatchNow == Match::Game) {
-					//カーソル
-					if (!m_MovingCharacter) {
-						if (Chara.at(m_NowMoveCharacter).GetCharaType() == CharaType::Team) {
-							float Len = std::hypotf(MousePos.x - Chara.at(m_NowMoveCharacter).GetPos().x, MousePos.y - Chara.at(m_NowMoveCharacter).GetPos().y);
+					for (auto& c : Chara) {
+						if (!c.IsAlive()) { continue; }
+						int index = static_cast<int>(&c - &Chara.front());
+						if (m_NowMoveCharacter == index) { continue; }
+						c.Draw();
+					}
+					if (Chara.at(m_NowMoveCharacter).IsAlive()) {
+						Chara.at(m_NowMoveCharacter).Draw();
+					}
+					/*
+					for (int x = 0; x < Width; x++) {
+						for (int y = 0; y < Height; y++) {
+							if (drawcontrol->SetTileData(x, y)->WayPointRad != -1) {
+								VECTOR MP = drawcontrol->Get2DPos(x, y, 0.f);
+								DrawCircle((int)MP.x, (int)MP.y, 16, GetColor(0, 255, 0), false, 3);
 
-
-							if (PrevMouseLeftPress && !LeftPressCancel) {
-								bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0);
-								VECTOR MP = drawcontrol->Get2DPos(MouseLeftHoldPos.x, MouseLeftHoldPos.y, 0.f);
-								DrawCircle((int)MP.x, (int)MP.y, 16, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
-
-								VECTOR MP2 = drawcontrol->Get2DPos(MousePos.x, MousePos.y, 0.f);
-
-								if (IsActivePlace) {
-									DrawCircle((int)MP2.x, (int)MP2.y, 8, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
-								}
-
-								VECTOR2D Vec(MP2.x - MP.x, MP2.y - MP.y);
+								float rad = static_cast<float>(drawcontrol->SetTileData(x, y)->WayPointRad) * DX_PI_F / 180.f;
+								VECTOR MP2{};
+								VECTOR2D Vec(std::sin(rad), std::cos(rad));
 								float Length = std::hypotf(Vec.x, Vec.y);
 								if (Length > 0.5f) {
 									MP2.x = MP.x + Vec.x / Length * 64.f;
 									MP2.y = MP.y + Vec.y / Length * 64.f;
 								}
-								DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), 3);
-							}
-							else {
-								bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && Len < 9.f);
-								if (IsActivePlace) {
-									VECTOR MP = drawcontrol->Get2DPos(MousePos.x, MousePos.y, 0.f);
-									DrawCircle((int)MP.x, (int)MP.y, 16, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
-								}
-								{
-									VECTOR MP = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y, 0.f);
-									VECTOR MP2 = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y + 9.f, 0.f);
-									DrawCircle((int)MP.x, (int)MP.y, (int)(MP2.y - MP.y), IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
-								}
+								DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, GetColor(0, 255, 0), 3);
 							}
 						}
 					}
-					//操作キャラ
-					if (Chara.at(m_NowMoveCharacter).IsDraw()) {
-						VECTOR MP = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y, 0.f);
-						DrawCircle((int)MP.x, (int)MP.y, 32, GetColor(255, 2550, 0), false, 3);
+					//*/
+					if (ReadyTimer > 1.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * (ReadyTimer - 1.f) / 3.f));
+						DrawBox(0, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
-				}
-				//
-				//Timer
-				{
-					unsigned int Color = 0;
-					bool IsDraw = true;
+					if (EndTimer > 1.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255 * (EndTimer - 1.f)));
+						DrawBox(0, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					}
+					if (m_MatchNow == Match::Game) {
+						//カーソル
+						if (!m_MovingCharacter) {
+							if (Chara.at(m_NowMoveCharacter).GetCharaType() == CharaType::Team) {
+								float Len = std::hypotf(MousePos.x - Chara.at(m_NowMoveCharacter).GetPos().x, MousePos.y - Chara.at(m_NowMoveCharacter).GetPos().y);
 
-					Color = GetColor(0, 255, 0);
-					if (Timer < TotalTimer * 1.f / 3.f || Timer == 0.f) {
-						Color = GetColor(255, 0, 0);
-					}
-					if (m_MovingCharacter) {
-						IsDraw = (static_cast<int>(Timer * 10.f) % 10 > 5);
-						Color = GetColor(255, 255, 0);
-					}
-					if (IsDraw) {
-						char Text[64] = "";
-						sprintfDx(Text, "%d:%05.2f", static_cast<int>(Timer / 60.f), Timer - static_cast<int>(Timer / 60.f) * 60.f);
-						DrawString(maincontrol->GetDispX() / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 64, Text, Color, GetColor(0, 0, 0));
-					}
-					{
-						char Text[64] = "Stop";
-						if (SpeedRate > 0) {
-							sprintfDx(Text, "X %d", SpeedRate);
+
+								if (PrevMouseLeftPress && !LeftPressCancel) {
+									bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0);
+									VECTOR MP = drawcontrol->Get2DPos(MouseLeftHoldPos.x, MouseLeftHoldPos.y, 0.f);
+									DrawCircle((int)MP.x, (int)MP.y, 16, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
+
+									VECTOR MP2 = drawcontrol->Get2DPos(MousePos.x, MousePos.y, 0.f);
+
+									if (IsActivePlace) {
+										DrawCircle((int)MP2.x, (int)MP2.y, 8, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
+									}
+
+									VECTOR2D Vec(MP2.x - MP.x, MP2.y - MP.y);
+									float Length = std::hypotf(Vec.x, Vec.y);
+									if (Length > 0.5f) {
+										MP2.x = MP.x + Vec.x / Length * 64.f;
+										MP2.y = MP.y + Vec.y / Length * 64.f;
+									}
+									DrawLine((int)MP.x, (int)MP.y, (int)MP2.x, (int)MP2.y, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), 3);
+								}
+								else {
+									bool IsActivePlace = (drawcontrol->SetTileData(MX, MY)->Height == 0 && Len < 9.f);
+									if (IsActivePlace) {
+										VECTOR MP = drawcontrol->Get2DPos(MousePos.x, MousePos.y, 0.f);
+										DrawCircle((int)MP.x, (int)MP.y, 16, IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
+									}
+									{
+										VECTOR MP = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y, 0.f);
+										VECTOR MP2 = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y + 9.f, 0.f);
+										DrawCircle((int)MP.x, (int)MP.y, (int)(MP2.y - MP.y), IsActivePlace ? GetColor(0, 255, 0) : GetColor(255, 0, 0), false, 3);
+									}
+								}
+							}
 						}
-						DrawString(maincontrol->GetDispX() / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 64+24, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						//操作キャラ
+						if (Chara.at(m_NowMoveCharacter).IsDraw()) {
+							VECTOR MP = drawcontrol->Get2DPos(Chara.at(m_NowMoveCharacter).GetPos().x, Chara.at(m_NowMoveCharacter).GetPos().y, 0.f);
+							DrawCircle((int)MP.x, (int)MP.y, 32, GetColor(255, 2550, 0), false, 3);
+						}
 					}
-				}
-				//turn
-				switch (Chara.at(m_NowMoveCharacter).GetCharaType()) {
-				case CharaType::Team:
-					if (!m_MovingCharacter) {
-						DrawString(32, 32 + 32, "あなたの操作フェーズです", GetColor(255, 255, 0), GetColor(0, 0, 0));
-					}
-					break;
-				case CharaType::TeamNPC:
-					DrawString(32, 32 + 32, "味方の操作フェーズです", GetColor(0, 255, 0), GetColor(0, 0, 0));
-					break;
-				case CharaType::Enemy:
-					DrawString(32, 32 + 32, "敵の操作フェーズです", GetColor(255, 0, 0), GetColor(0, 0, 0));
-					break;
-				default:
-					break;
-				}
-				//
-				{
+					//
+					//Timer
 					{
-						int X = (TeamAliveR / 4.f) * (maincontrol->GetDispX() / 4);
-						DrawBox(maincontrol->GetDispX() / 2 - X - 1, 32 - 1, maincontrol->GetDispX() / 2, 32 + 18 + 1, GetColor(255, 255, 255), TRUE);
-						DrawBox(maincontrol->GetDispX() / 2 - X, 32, maincontrol->GetDispX() / 2, 32 + 18, GetColor(0, 255, 0), TRUE);
+						unsigned int Color = 0;
+						bool IsDraw = true;
+
+						Color = GetColor(0, 255, 0);
+						if (Timer < TotalTimer * 1.f / 3.f || Timer == 0.f) {
+							Color = GetColor(255, 0, 0);
+						}
+						if (m_MovingCharacter) {
+							IsDraw = (static_cast<int>(Timer * 10.f) % 10 > 5);
+							Color = GetColor(255, 255, 0);
+						}
+						if (IsDraw) {
+							char Text[64] = "";
+							sprintfDx(Text, "%d:%05.2f", static_cast<int>(Timer / 60.f), Timer - static_cast<int>(Timer / 60.f) * 60.f);
+							DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 92 + 32, Text, Color, GetColor(0, 0, 0));
+						}
+						{
+							char Text[64] = "Stop";
+							if (SpeedRate > 0) {
+								sprintfDx(Text, "X %d", SpeedRate);
+							}
+							DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 92 + 32 + 24, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						}
 					}
+					//turn
+					switch (Chara.at(m_NowMoveCharacter).GetCharaType()) {
+					case CharaType::Team:
+						if (!m_MovingCharacter) {
+							DrawString(128, 128, "あなたの操作フェーズです", GetColor(128, 255, 0), GetColor(0, 0, 0));
+						}
+						break;
+					case CharaType::TeamNPC:
+						DrawString(128, 128, "味方の操作フェーズです", GetColor(100, 100, 255), GetColor(0, 0, 0));
+						break;
+					case CharaType::Enemy:
+						DrawString(128, 128, "敵の操作フェーズです", GetColor(255, 0, 0), GetColor(0, 0, 0));
+						break;
+					default:
+						break;
+					}
+					//
 					{
-						int X = (EnemyAliveR / 4.f) * (maincontrol->GetDispX() / 4);
-						DrawBox(maincontrol->GetDispX() / 2, 32 - 1, maincontrol->GetDispX() / 2 + X + 1, 32 + 18 + 1, GetColor(255, 255, 255), TRUE);
-						DrawBox(maincontrol->GetDispX() / 2, 32, maincontrol->GetDispX() / 2 + X, 32 + 18, GetColor(255, 0, 0), TRUE);
+						{
+							int X = static_cast<int>((TeamAliveR / 4.f) * static_cast<float>(1920 / 4));
+							DrawBox(1920 / 2 - X - 1, 92 - 1, 1920 / 2, 92 + 18 + 1, GetColor(255, 255, 255), TRUE);
+							DrawBox(1920 / 2 - X, 92, 1920 / 2, 92 + 18, GetColor(0, 255, 0), TRUE);
+						}
+						{
+							int X = static_cast<int>((EnemyAliveR / 4.f) * static_cast<float>(1920 / 4));
+							DrawBox(1920 / 2, 92 - 1, 1920 / 2 + X + 1, 92 + 18 + 1, GetColor(255, 255, 255), TRUE);
+							DrawBox(1920 / 2, 92, 1920 / 2 + X, 92 + 18, GetColor(255, 0, 0), TRUE);
+						}
 					}
+					//
+					sideLog->Draw(128, 1080 / 2 - 64);
+
+					DrawExtendGraph(0, 0, 1920, 1080, BGGraphHandle, true);
 				}
 				//操作説明
-				DrawString(32, maincontrol->GetDispY() - 32 - 64, "移動操作 左クリック:移動指示 左クリック中に右クリック:キャンセル", GetColor(255, 255, 0), GetColor(0, 0, 0));
-				DrawString(32, maincontrol->GetDispY() - 32 - 32, "カメラ操作 左Shift:操作キャラをフォーカス　WASD:移動 ↑↓:速度切替", GetColor(255, 255, 0), GetColor(0, 0, 0));
+				DrawString(32, 1080 - 32 - 64, "移動操作 左クリック:移動指示 左クリック中に右クリック:キャンセル", GetColor(255, 255, 0), GetColor(0, 0, 0));
+				DrawString(32, 1080 - 32 - 32, "カメラ操作 左Shift:操作キャラをフォーカス　WASD:移動 ↑↓:速度切替", GetColor(255, 255, 0), GetColor(0, 0, 0));
 				//
 				if (ReadyTimer > 0.f) {
 					if (ReadyTimer - 1.f > 0.f) {
-						int X = ((ReadyTimer - 1.f) / 3.f) * (maincontrol->GetDispX() / 2);
-						DrawBox(maincontrol->GetDispX() / 2 - X, maincontrol->GetDispY() / 2 - 32 - 1, maincontrol->GetDispX() / 2 + X, maincontrol->GetDispY() / 2 + 32 + 1, GetColor(255, 255, 255), TRUE);
-						DrawBox(maincontrol->GetDispX() / 2 - X, maincontrol->GetDispY() / 2 - 32, maincontrol->GetDispX() / 2 + X, maincontrol->GetDispY() / 2 + 32, GetColor(64, 64, 64), TRUE);
+						int X = static_cast<int>(((ReadyTimer - 1.f) / 3.f) * static_cast<float>(1920 / 2));
+						DrawBox(1920 / 2 - X, 1080 / 2 - 32 - 1, 1920 / 2 + X, 1080 / 2 + 32 + 1, GetColor(255, 255, 255), TRUE);
+						DrawBox(1920 / 2 - X, 1080 / 2 - 32, 1920 / 2 + X, 1080 / 2 + 32, GetColor(64, 64, 64), TRUE);
 					}
 					if ((static_cast<int>(ReadyTimer * 20.f) % 10 > 5)) {
 						char Text[64] = "Go !";
 						if (ReadyTimer - 1.f > 0.f) {
 							sprintfDx(Text, "Ready...");
 						}
-						DrawString(maincontrol->GetDispX() / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, maincontrol->GetDispY() / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
 					}
 				}
 				//
 				if (m_MatchNow == Match::Draw || m_MatchNow == Match::TeamWin || m_MatchNow == Match::EnemyWin) {
-					int X = (1.f - std::powf(1.f - std::clamp(EndTimer / 0.5f, 0.f, 1.f), 2.f)) * (maincontrol->GetDispX() / 2);
-					DrawBox(maincontrol->GetDispX() / 2 - X, maincontrol->GetDispY() / 2 - 32 - 1, maincontrol->GetDispX() / 2 + X, maincontrol->GetDispY() / 2 + 32 + 1, GetColor(255, 255, 255), TRUE);
-					DrawBox(maincontrol->GetDispX() / 2 - X, maincontrol->GetDispY() / 2 - 32, maincontrol->GetDispX() / 2 + X, maincontrol->GetDispY() / 2 + 32, GetColor(64, 64, 64), TRUE);
+					int X = static_cast<int>((1.f - std::powf(1.f - std::clamp(EndTimer / 0.5f, 0.f, 1.f), 2.f)) * static_cast<float>(1920 / 2));
+					DrawBox(1920 / 2 - X, 1080 / 2 - 32 - 1, 1920 / 2 + X, 1080 / 2 + 32 + 1, GetColor(255, 255, 255), TRUE);
+					DrawBox(1920 / 2 - X, 1080 / 2 - 32, 1920 / 2 + X, 1080 / 2 + 32, GetColor(64, 64, 64), TRUE);
 					switch (m_MatchNow) {
 					case Match::Draw:
 					{
 						const char Text[] = "Draw";
-						DrawString(maincontrol->GetDispX() / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, maincontrol->GetDispY() / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
 					}
 					break;
 					case Match::TeamWin:
 					{
 						const char Text[] = "Team Win";
-						DrawString(maincontrol->GetDispX() / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, maincontrol->GetDispY() / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
 					}
 					break;
 					case Match::EnemyWin:
 					{
 						const char Text[] = "Enemy Win";
-						DrawString(maincontrol->GetDispX() / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, maincontrol->GetDispY() / 2 - 18 / 2, Text, GetColor(255, 0, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(255, 0, 0), GetColor(0, 0, 0));
 					}
 					break;
 					default:
@@ -753,6 +791,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif
 			}
 		}
+		SetDrawScreen(DX_SCREEN_BACK);
+		ClearDrawScreen();
+		{
+			DrawExtendGraph(0, 0, maincontrol->GetDispX(), maincontrol->GetDispY(), BufferHandle, FALSE);
+		}
 		ScreenFlip();
 		clsDx();
 	}
@@ -760,8 +803,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	for (auto& c : Chara) {
 		c.Dispose();
 	}
+	Rule::Release();
+	SideLog::Release();
 	SoundPool::Release();
 	DrawControl::Release();
-
+	DXDraw::Release();
 	return 0;// ソフトの終了 
 }
