@@ -308,6 +308,15 @@ DrawTriangle(X1, Y1, X1 + 64 / 2, Y1 + 48, X1 + 64, Y1, InMouse ? GetColor(255, 
 		DeleteGraph(Chara3Handle);
 		DeleteGraph(Chara2Handle);
 		DeleteGraph(Chara1Handle);
+
+		BufferHandle = -1;
+		Image3Handle = -1;
+		Image2Handle = -1;
+		Image1Handle = -1;
+
+		Chara3Handle = -1;
+		Chara2Handle = -1;
+		Chara1Handle = -1;
 	}
 };
 
