@@ -63,15 +63,18 @@ public:
 			ClearDrawScreen();
 			{
 				int OffsetX = (MX- StartMX) * 100 / 1920;
+				auto prev = GetDrawMode();
+				DxLib::SetDrawMode(DX_DRAWMODE_BILINEAR);
 				DrawExtendGraph(OffsetX * 0, 0, 1920 + OffsetX * 0, 1080 + 0, Image3Handle, TRUE);
 				DrawExtendGraph(OffsetX * 1, 0, 1920 + OffsetX * 1, 1080 + 0, Image2Handle, TRUE);
 				DrawExtendGraph(OffsetX * 2, 0, 1920 + OffsetX * 2, 1080 + 0, Image1Handle, TRUE);
+				DxLib::SetDrawMode(prev);
 
 				DrawBox(0, 0, OffsetX * 2, 1080, GetColor(0, 0, 0), TRUE);
 				DrawBox(1920 + OffsetX * 2, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
 
 				char Text[64] = "Press Any Key";
-				DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 * 3 / 4, Text, GetColor(255, 0, 0), GetColor(0, 0, 0));
+				DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 * 3 / 4, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
 			}
 
 			if (StartTimer < 1.f) {
