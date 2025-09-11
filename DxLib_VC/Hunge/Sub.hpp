@@ -105,10 +105,19 @@ public:
 
 
 class Rule {
+	int PlayerAll = 8;
+	int PlayablePlayer = 2;
 public://ゲッター
 	//タイルごとのデータポインタを取得
-	int GetPlayerAll() const noexcept { return 8; }
-	int GetPlayablePlayer() const noexcept { return 2; }
+	int GetPlayerAll() const noexcept { return PlayerAll; }
+	int GetPlayablePlayer() const noexcept { return PlayablePlayer; }
+
+	void SetPlayerAll(int value) noexcept {
+		PlayerAll = std::clamp(value, 2, 16);
+	}
+	void SetPlayablePlayer(int value) noexcept {
+		PlayablePlayer = std::clamp(value, 1, PlayerAll / 2);
+	}
 public://シングルトン
 private:
 	static const Rule* m_Singleton;
@@ -1448,7 +1457,7 @@ public:
 			else {
 				sprintfDx(Text, "Enemy%d", p.kill);
 			}
-			DrawString(Xpos + Xsize / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) - 8, Ypos + Ysize / 2 - 18 / 2, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+			DrawString(Xpos + Xsize / 2 - GetDrawStringWidth(Text, sizeof(Text)) - 8, Ypos + Ysize / 2 - 18 / 2, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
 
 			if (TeamWin) {
 				sprintfDx(Text, "Enemy%d", p.death);
@@ -1512,7 +1521,6 @@ public:
 	void Init() noexcept {
 		DrawControl::Create(1920, 1080);
 		SideLog::Create();
-		Rule::Create();
 		auto* drawcontrol = DrawControl::Instance();
 		auto* soundPool = SoundPool::Instance();
 		auto* sideLog = SideLog::Instance();
@@ -1596,15 +1604,15 @@ public:
 		for (int loop = 0; loop < rule->GetPlayerAll(); ++loop) {
 			if (loop < rule->GetPlayerAll() / 2 - rule->GetPlayablePlayer()) {
 				int Index = loop;
-				Chara.at(loop).Init(VECTOR2D(static_cast<float>(Index), 0.f), DX_PI_F, CharaType::TeamNPC);
+				Chara.at(loop).Init(VECTOR2D(static_cast<float>(Index % 4), static_cast<float>(Index / 4)), DX_PI_F, CharaType::TeamNPC);
 			}
 			else if (loop < rule->GetPlayerAll() / 2) {
 				int Index = loop;
-				Chara.at(loop).Init(VECTOR2D(static_cast<float>(Index), 0.f), DX_PI_F, CharaType::Team);
+				Chara.at(loop).Init(VECTOR2D(static_cast<float>(Index % 4), static_cast<float>(Index / 4)), DX_PI_F, CharaType::Team);
 			}
 			else {
 				int Index = loop - (rule->GetPlayerAll() / 2);
-				Chara.at(loop).Init(VECTOR2D(static_cast<float>(Width - 1 - Index), static_cast<float>(Height - 1)), 0.f, CharaType::Enemy);
+				Chara.at(loop).Init(VECTOR2D(static_cast<float>(Width - 1 - Index % 4), static_cast<float>(Height - 1 - Index / 4)), 0.f, CharaType::Enemy);
 			}
 		}
 
@@ -1638,6 +1646,9 @@ public:
 		EndTimer = 0.f;
 
 		TotalTimer = 90.f;
+		if (rule->GetPlayerAll() > 8) {
+			TotalTimer = 90.f + static_cast<float>(rule->GetPlayerAll() - 8) * 30.f;
+		}
 		Timer = TotalTimer;
 	}
 	bool Update() noexcept {
@@ -2191,28 +2202,28 @@ public:
 						if (IsDraw) {
 							char Text[64] = "";
 							sprintfDx(Text, "%d:%05.2f", static_cast<int>(Timer / 60.f), Timer - static_cast<int>(Timer / 60.f) * 60.f);
-							DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 92 + 32, Text, Color, GetColor(0, 0, 0));
+							DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 92 + 32, Text, Color, GetColor(0, 0, 0));
 						}
 						{
 							char Text[64] = "Stop";
 							if (SpeedRate > 0) {
 								sprintfDx(Text, "X %d", SpeedRate);
 							}
-							DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 92 + 32 + 24, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+							DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 92 + 32 + 24, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
 						}
 					}
 					//turn
 					switch (Chara.at(m_NowMoveCharacter).GetCharaType()) {
 					case CharaType::Team:
 						if (!m_MovingCharacter) {
-							DrawString(128, 128, "あなたの操作フェーズです", GetColor(128, 255, 0), GetColor(0, 0, 0));
+							DrawString(128, 128, "あなたの操作フェーズです", GetColor(181, 230, 29), GetColor(0, 0, 0));
 						}
 						break;
 					case CharaType::TeamNPC:
-						DrawString(128, 128, "味方の操作フェーズです", GetColor(100, 100, 255), GetColor(0, 0, 0));
+						DrawString(128, 128, "味方の操作フェーズです", GetColor(0, 162, 232), GetColor(0, 0, 0));
 						break;
 					case CharaType::Enemy:
-						DrawString(128, 128, "敵の操作フェーズです", GetColor(255, 0, 0), GetColor(0, 0, 0));
+						DrawString(128, 128, "敵の操作フェーズです", GetColor(237, 28, 36), GetColor(0, 0, 0));
 						break;
 					default:
 						break;
@@ -2250,7 +2261,7 @@ public:
 						if (ReadyTimer - 1.f > 0.f) {
 							sprintfDx(Text, "Ready...");
 						}
-						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
 					}
 				}
 				//
@@ -2262,19 +2273,19 @@ public:
 					case Match::Draw:
 					{
 						const char Text[] = "Draw";
-						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
 					}
 					break;
 					case Match::TeamWin:
 					{
 						const char Text[] = "Team Win";
-						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(0, 255, 0), GetColor(0, 0, 0));
 					}
 					break;
 					case Match::EnemyWin:
 					{
 						const char Text[] = "Enemy Win";
-						DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(255, 0, 0), GetColor(0, 0, 0));
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 1080 / 2 - 18 / 2, Text, GetColor(255, 0, 0), GetColor(0, 0, 0));
 					}
 					break;
 					default:
@@ -2301,7 +2312,6 @@ public:
 		for (auto& c : Chara) {
 			c.Dispose();
 		}
-		Rule::Release();
 		SideLog::Release();
 		DrawControl::Release();
 	}

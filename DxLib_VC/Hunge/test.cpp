@@ -13,6 +13,10 @@ class TitleScene {
 	int Image2Handle{ -1 };
 	int Image1Handle{ -1 };
 
+	int Chara3Handle{ -1 };
+	int Chara2Handle{ -1 };
+	int Chara1Handle{ -1 };
+
 	int StartMX = -1;
 
 	int MX = 0;
@@ -21,18 +25,31 @@ class TitleScene {
 	float StartTimer = 0.f;
 	float EndTimer = 0.f;
 	bool isEnd = false;
+
+	bool isDrawHint = false;
+	float DrawHint = 0.f;
+
+	bool PrevF1 = false;
+
+	bool PrevMouseLeftPress{};
 public:
 	void Init() noexcept {
 		BufferHandle = MakeScreen(1920, 1080, false);
 		Image3Handle = LoadGraph("data/title3.png");
 		Image2Handle = LoadGraph("data/title2.png");
 		Image1Handle = LoadGraph("data/title1.png");
+
+		Chara3Handle = LoadGraph("data/TeamChara.bmp");
+		Chara2Handle = LoadGraph("data/TeamCharaNPC.bmp");
+		Chara1Handle = LoadGraph("data/EnemyChara.bmp");
+
 		StartTimer = 0.f;
 		EndTimer = 0.f;
 		StartMX = -1;
 	}
 	bool Update() noexcept {
 		auto* maincontrol = DXDraw::Instance();
+		auto* rule = Rule::Instance();
 		//マウス座標を取得しておく
 		GetMousePoint(&MX, &MY);
 		MX = MX * 1920 / maincontrol->GetDispX();
@@ -41,9 +58,61 @@ public:
 			StartMX = MX;
 		}
 		StartTimer = std::min(StartTimer + 1.f / BaseFrameRate, 1.f);
-		if (GetWindowActiveFlag() && CheckHitKeyAll()!=0) {
-			//start
-			isEnd = true;
+
+		DrawHint = std::clamp(DrawHint + (isDrawHint ? 1.f : -1.f) * 1.f / BaseFrameRate/0.1f, 0.f, 1.f);
+		if (GetWindowActiveFlag()) {
+			bool F1 = CheckHitKey(KEY_INPUT_F1) != 0;
+			if (F1 && !PrevF1) {
+				isDrawHint ^= 1;
+			}
+			PrevF1 = F1;
+			if (!F1 && CheckHitKeyAll(DX_CHECKINPUT_KEY) != 0) {
+				//start
+				isEnd = true;
+			}
+			if (!isEnd) {
+				bool LMP = (GetMouseInput() & MOUSE_INPUT_LEFT) != 0;
+				if (LMP && !PrevMouseLeftPress) {
+					{
+						{
+							int X1 = 1920 / 2 + 700;
+							int Y1 = 1080 * 3 / 4;
+							bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+							if (InMouse) {
+								rule->SetPlayerAll(rule->GetPlayerAll() + 2);
+								rule->SetPlayablePlayer(rule->GetPlayablePlayer());
+							}
+						}
+						{
+							int X1 = 1920 / 2 + 700;
+							int Y1 = 1080 * 3 / 4 + 128;
+							bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+							if (InMouse) {
+								rule->SetPlayerAll(rule->GetPlayerAll() - 2);
+								rule->SetPlayablePlayer(rule->GetPlayablePlayer());
+							}
+						}
+
+						{
+							int X1 = 1920 / 2 + 800;
+							int Y1 = 1080 * 3 / 4;
+							bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+							if (InMouse) {
+								rule->SetPlayablePlayer(rule->GetPlayablePlayer() + 1);
+							}
+						}
+						{
+							int X1 = 1920 / 2 + 800;
+							int Y1 = 1080 * 3 / 4 + 128;
+							bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+							if (InMouse) {
+								rule->SetPlayablePlayer(rule->GetPlayablePlayer() - 1);
+							}
+						}
+					}
+				}
+				PrevMouseLeftPress = LMP;
+			}
 		}
 		if (isEnd) {
 			EndTimer = std::min(EndTimer + 1.f / BaseFrameRate, 2.f);
@@ -55,6 +124,7 @@ public:
 		return true;
 	}
 	void Draw() noexcept {
+		auto* rule = Rule::Instance();
 		auto* maincontrol = DXDraw::Instance();
 		int PrevScreen = GetDrawScreen();
 		{
@@ -72,9 +142,143 @@ public:
 
 				DrawBox(0, 0, OffsetX * 2, 1080, GetColor(0, 0, 0), TRUE);
 				DrawBox(1920 + OffsetX * 2, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+				{
+					char Text[64] = "Press Any Key";
+					DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 1080 * 3 / 4, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+				}
+				{
+					char Text[64] = "Press F1 Key Information";
+					DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, 1080 * 3 / 4 + 24, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+				}
+				{
+					bool InPlayerAll = false;
+					bool InPlayablePlayer = false;
+					{
+						int X1 = 1920 / 2 + 700;
+						int Y1 = 1080 * 3 / 4;
+						bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+						InPlayerAll |= InMouse;
+						DrawTriangle(X1, Y1 + 48, X1 + 64 / 2, Y1, X1 + 64, Y1 + 48, InMouse ? GetColor(255, 255, 255) : GetColor(0, 0, 0), TRUE);
+					}
+					{
+						int X1 = 1920 / 2 + 700 + 64 / 2;
+						int Y1 = 1080 * 3 / 4 + 128 / 2 - 18 / 2 + 48 / 2;
+						char Text[64] = "";
+						sprintfDx(Text, "%d", rule->GetPlayerAll());
+						DrawString(X1 - GetDrawStringWidth(Text, sizeof(Text)) / 2, Y1, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+					}
+					{
+						int X1 = 1920 / 2 + 700;
+						int Y1 = 1080 * 3 / 4 + 128;
+						bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+						InPlayerAll |= InMouse;
+DrawTriangle(X1, Y1, X1 + 64 / 2, Y1 + 48, X1 + 64, Y1, InMouse ? GetColor(255, 255, 255) : GetColor(0, 0, 0), TRUE);
+					}
 
-				char Text[64] = "Press Any Key";
-				DrawString(1920 / 2 - GetDrawStringWidth(Text, GetStringLength(Text)) / 2, 1080 * 3 / 4, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+					{
+						int X1 = 1920 / 2 + 800;
+						int Y1 = 1080 * 3 / 4;
+						bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+						InPlayablePlayer |= InMouse;
+						DrawTriangle(X1, Y1 + 48, X1 + 64 / 2, Y1, X1 + 64, Y1 + 48, InMouse ? GetColor(255, 255, 255) : GetColor(0, 0, 0), TRUE);
+					}
+					{
+						int X1 = 1920 / 2 + 800 + 64 / 2;
+						int Y1 = 1080 * 3 / 4 + 128 / 2 - 18 / 2 + 48 / 2;
+						char Text[64] = "";
+						sprintfDx(Text, "%d", rule->GetPlayablePlayer());
+						DrawString(X1 - GetDrawStringWidth(Text, sizeof(Text)) / 2, Y1, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+					}
+					{
+						int X1 = 1920 / 2 + 800;
+						int Y1 = 1080 * 3 / 4 + 128;
+						bool InMouse = (X1 <= MX && MX <= X1 + 64 && Y1 <= MY && MY <= Y1 + 48);
+						InPlayablePlayer |= InMouse;
+						DrawTriangle(X1, Y1, X1 + 64 / 2, Y1 + 48, X1 + 64, Y1, InMouse ? GetColor(255, 255, 255) : GetColor(0, 0, 0), TRUE);
+					}
+
+					if (InPlayerAll) {
+						int X1 = 1920 - 64;
+						int Y1 = 1080 * 3 / 4 + 192;
+						char Text[64] = "総プレイヤー数を変更する";
+						DrawString(X1 - GetDrawStringWidth(Text, sizeof(Text)), Y1, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+					}
+					if (InPlayablePlayer) {
+						int X1 = 1920 - 64;
+						int Y1 = 1080 * 3 / 4 + 192;
+						char Text[64] = "操作可能なプレイヤー数を変更する";
+						DrawString(X1 - GetDrawStringWidth(Text, sizeof(Text)), Y1, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+					}
+				}
+			}
+			if (DrawHint > 0.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(64 * std::clamp(DrawHint, 0.f, 1.f)));
+				DrawBox(0, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				if (DrawHint >= 0.95f) {
+					int YPos = 1080 * 1 / 3;
+					{
+						char Text[256] = "このゲームはエアソフトガンで撃ち合うサバイバルゲームをモチーフにしたゲームです。";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+						YPos += 24;
+					}
+					{
+						char Text[256] = "4対4で敵チームをせん滅すれば勝利となります。";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+						YPos += 24;
+					}
+					YPos += 24;
+					{
+						char Text[256] = "プレイヤーはマウスクリックで味方の移動を指示し、勝利を目指します。";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+						YPos += 24;
+					}
+					{
+						char Text[256] = "左クリックを押すとその地点に進みます。";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+						YPos += 24;
+					}
+					{
+						char Text[256] = "左クリックを押し続けている間、移動中に向く方向を指定することができます。";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+						YPos += 24;
+					}
+					{
+						char Text[256] = "方向を指定することで平行移動したり後方を警戒しながら進行することができます。";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+						YPos += 24;
+					}
+					{
+						char Text[256] = "左クリック中に右クリックを押すと指示をキャンセルできます。";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(255, 255, 255), GetColor(0, 0, 0));
+						YPos += 24;
+					}
+					YPos += 24;
+					{
+						char Text[256] = "操作できるキャラはこの色です。→";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(181, 230, 29), GetColor(0, 0, 0));
+
+						DrawRotaGraph(1920 / 2 + GetDrawStringWidth(Text, sizeof(Text)) / 2 + 64, YPos + 18 / 2, 1.0, 0.0, Chara3Handle, true);
+						YPos += 24;
+					}
+					YPos += 24;
+					{
+						char Text[256] = "自立移動する味方はこの色です。→";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(0, 162, 232), GetColor(0, 0, 0));
+
+						DrawRotaGraph(1920 / 2 + GetDrawStringWidth(Text, sizeof(Text)) / 2 + 64, YPos + 18 / 2, 1.0, 0.0, Chara2Handle, true);
+						YPos += 24;
+					}
+					YPos += 24;
+					{
+						char Text[256] = "敵対するキャラはこの色です。→";
+						DrawString(1920 / 2 - GetDrawStringWidth(Text, sizeof(Text)) / 2, YPos, Text, GetColor(237, 28, 36), GetColor(0, 0, 0));
+
+						DrawRotaGraph(1920 / 2 + GetDrawStringWidth(Text, sizeof(Text)) / 2 + 64, YPos + 18 / 2, 1.0, 0.0, Chara1Handle, true);
+						YPos += 24;
+					}
+					YPos += 24;
+				}
 			}
 
 			if (StartTimer < 1.f) {
@@ -100,6 +304,10 @@ public:
 		DeleteGraph(Image3Handle);
 		DeleteGraph(Image2Handle);
 		DeleteGraph(Image1Handle);
+
+		DeleteGraph(Chara3Handle);
+		DeleteGraph(Chara2Handle);
+		DeleteGraph(Chara1Handle);
 	}
 };
 
@@ -110,6 +318,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXDraw::Create();
 	SetDefaultFontState("", 18, -1, -1, -1, 3);
 	SoundPool::Create();
+	Rule::Create();
 
 	std::unique_ptr<TitleScene> m_TitleScene;
 	std::unique_ptr<MainScene> m_MainScene;
@@ -187,6 +396,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			break;
 		}
 	}
+	Rule::Release();
 	SoundPool::Release();
 	DXDraw::Release();
 	return 0;// ソフトの終了 
